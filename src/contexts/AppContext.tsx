@@ -89,10 +89,14 @@ type AppAction =
   | { type: 'DELETE_POST'; postId: string }
   | { type: 'INIT_DATA'; products: Product[]; recipes: Recipe[]; users: User[]; posts: CommunityPost[] };
 
+
+// نقرأ المستخدم من localStorage
+const savedUser = localStorage.getItem("user");
+
 const initialState: AppState = {
   cart: [],
-  user: null,
-  isAuthenticated: false,
+  user: savedUser ? JSON.parse(savedUser) : null,
+  isAuthenticated: savedUser ? true : false,
   products: [],
   recipes: [],
   users: [],
@@ -100,7 +104,9 @@ const initialState: AppState = {
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
+
   switch (action.type) {
+
     case 'INIT_DATA':
       return {
         ...state,
@@ -112,6 +118,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'ADD_TO_CART':
       const existingItem = state.cart.find(item => item.product.id === action.product.id);
+
       if (existingItem) {
         return {
           ...state,
@@ -122,6 +129,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
           ),
         };
       }
+
       return {
         ...state,
         cart: [...state.cart, { product: action.product, quantity: action.quantity }],
@@ -150,6 +158,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case 'LOGIN':
+
+      // حفظ المستخدم
+      localStorage.setItem("user", JSON.stringify(action.user));
+
       return {
         ...state,
         user: action.user,
@@ -157,6 +169,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case 'LOGOUT':
+
+      // مسح المستخدم
+      localStorage.removeItem("user");
+
       return {
         ...state,
         user: null,
@@ -164,7 +180,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case 'SAVE_RECIPE':
+
       if (!state.user) return state;
+
       return {
         ...state,
         user: {
@@ -174,7 +192,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     case 'UNSAVE_RECIPE':
+
       if (!state.user) return state;
+
       return {
         ...state,
         user: {
@@ -254,6 +274,7 @@ const AppContext = createContext<{
 } | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
+
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   return (
@@ -264,9 +285,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 }
 
 export function useApp() {
+
   const context = useContext(AppContext);
+
   if (!context) {
     throw new Error('useApp must be used within an AppProvider');
   }
+
   return context;
 }

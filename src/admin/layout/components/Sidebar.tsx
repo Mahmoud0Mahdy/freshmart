@@ -17,10 +17,9 @@ export function Sidebar() {
   return (
     <aside 
       className="fixed top-0 left-0 bottom-0 bg-white border-r border-gray-200 flex flex-col z-50 shadow-sm"
-      style={{ width: '256px' }} // عرض ثابت إجباري
+      style={{ width: '256px' }}
     >
       
-      {/* 1. اللوجو */}
       <div className="h-16 flex items-center px-6 border-b border-gray-50 shrink-0">
         <div className="flex items-center gap-3">
           <div className="bg-green-600 p-2 rounded-xl shadow-sm">
@@ -30,7 +29,6 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* 2. اللينكات */}
       <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
         <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-3 mb-4">Administration</p>
         {navItems.map(({ to, end, label, icon: Icon }) => (
@@ -52,7 +50,6 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* 3. الفوتر (زرار الرجوع) */}
       <div className="p-4 border-t border-gray-50 bg-gray-50/50 shrink-0 mt-auto">
         <div className="flex items-center gap-3 mb-4 px-2">
           <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold border border-green-200">
