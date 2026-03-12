@@ -1,0 +1,29 @@
+import { Card } from '../../../components/ui/card';
+import type { Recipe } from '../../../contexts/AppContext';
+
+interface RecipeStatsProps {
+  recipes: Recipe[];
+}
+
+export function RecipeStats({ recipes }: RecipeStatsProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <Card className="p-4">
+        <p className="text-gray-600 text-sm mb-1">Total Recipes</p>
+        <p className="text-2xl">{recipes.length}</p>
+      </Card>
+      <Card className="p-4">
+        <p className="text-gray-600 text-sm mb-1">Easy</p>
+        <p className="text-2xl text-green-600">{recipes.filter(r => r.difficulty === 'Easy').length}</p>
+      </Card>
+      <Card className="p-4">
+        <p className="text-gray-600 text-sm mb-1">Medium</p>
+        <p className="text-2xl text-orange-600">{recipes.filter(r => r.difficulty === 'Medium').length}</p>
+      </Card>
+      <Card className="p-4">
+        <p className="text-gray-600 text-sm mb-1">Hard</p>
+        <p className="text-2xl text-red-600">{recipes.filter(r => r.difficulty === 'Hard').length}</p>
+      </Card>
+    </div>
+  );
+}

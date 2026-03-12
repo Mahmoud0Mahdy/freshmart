@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* 1. الحاوية الرئيسية للصفحات لتوحيد المسافات */
+  .admin-page-container {
+    @apply max-w-7xl mx-auto space-y-6 p-4 lg:p-8;
+  }
+
+  /* 2. تنسيق الكروت الموحد (Dashboard & Stats) */
+  .admin-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm transition-all duration-300;
+  }
+
+  .admin-stat-card {
+    @apply admin-card p-6 hover:shadow-md hover:border-green-100;
+  }
+
+  /* 3. حل مشكلة الـ Inline Styles لشريط التقدم */
+  /* نستخدم متغير CSS مخصص للقيمة الديناميكية */
+  .progress-bar-container {
+    @apply w-full bg-gray-100 rounded-full h-3 overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply bg-green-500 h-full rounded-full transition-all duration-700 ease-out shadow-sm;
+    /* قراءة العرض من المتغير الممرر من React */
+    width: var(--progress-width, 0%);
+  }
+
+  /* 4. تنسيق القائمة الجانبية (Sidebar) */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 text-gray-500 hover:bg-gray-50 hover:text-green-600;
+  }
+
+  .sidebar-link-active {
+    @apply bg-green-600 text-white shadow-lg shadow-green-100 hover:bg-green-700 hover:text-white;
+  }
+
+  /* 5. تنسيق الجداول (Users Table) */
+  .admin-table-wrapper {
+    @apply admin-card overflow-hidden;
+  }
+
+  .admin-table {
+    @apply w-full text-left;
+  }
+
+  .admin-table-thead {
+    @apply bg-gray-50 border-b border-gray-100;
+  }
+
+  .admin-table-th {
+    @apply px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest;
+  }
+
+  .admin-table-tr {
+    @apply border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors;
+  }
+}
+
+/* تحسينات إضافية للمتصفح */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 rounded-full hover:bg-gray-300 transition-colors;
+}
