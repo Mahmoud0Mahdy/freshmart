@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Separator } from '../components/ui/separator';
-import { Checkbox } from '../components/ui/checkbox';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { useApp } from '../contexts/AppContext';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
+import { Checkbox } from '../../components/ui/checkbox';
+import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { useApp } from '../../contexts/AppContext';
 import { ArrowLeft, Clock, Users, ChefHat, Heart, ShoppingCart, Star, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 
