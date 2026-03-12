@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Separator } from '../components/ui/separator';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { useApp } from '../contexts/AppContext';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Separator } from '../../components/ui/separator';
+import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { useApp } from '../../contexts/AppContext';
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag, CreditCard } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 
