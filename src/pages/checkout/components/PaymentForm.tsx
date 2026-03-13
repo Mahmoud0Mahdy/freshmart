@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Checkbox } from "../../../components/ui/checkbox";
-import { CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+import { CreditCard } from "lucide-react";
+
 import { validatePaymentField } from "../vakidation/paymentValidation";
+import { FormField } from "../components/form/PaymentForm";
 
 export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: any) {
 
@@ -17,9 +18,7 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
   const handleChange = (field: string, value: string) => {
 
     if (field === "cardNumber") {
-
       value = value.replace(/\D/g, "").slice(0, 16);
-
       value = value.replace(/(.{4})/g, "$1 ").trim();
     }
 
@@ -28,7 +27,6 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
     }
 
     if (field === "expiryDate") {
-
       value = value.replace(/[^\d]/g, "").slice(0, 4);
 
       if (value.length >= 3) {
@@ -37,14 +35,12 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
     }
 
     if (field === "cardName") {
-
       value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
     }
 
     handleInputChange(field, value);
 
     if (touched[field]) {
-
       const valid = validatePaymentField(field, value);
 
       setErrors((prev: any) => ({
@@ -70,10 +66,7 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
   const fieldValid = (f: string) => touched[f] && !errors[f] && formData[f];
 
   const inputStyle = (f: string) => {
-
-    if (fieldError(f))
-      return "border-red-500 focus-visible:ring-red-500";
-
+    if (fieldError(f)) return "border-red-500 focus-visible:ring-red-500";
     return "focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500";
   };
 
@@ -94,7 +87,7 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
 
       <CardContent className="space-y-4">
 
-        <Field
+        <FormField
           label="Card Number"
           name="cardNumber"
           value={formData.cardNumber}
@@ -109,7 +102,7 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
 
         <div className="grid grid-cols-2 gap-4">
 
-          <Field
+          <FormField
             label="Expiry Date"
             name="expiryDate"
             value={formData.expiryDate}
@@ -122,7 +115,7 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
             fieldValid={fieldValid}
           />
 
-          <Field
+          <FormField
             label="CVV"
             name="cvv"
             value={formData.cvv}
@@ -137,7 +130,7 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
 
         </div>
 
-        <Field
+        <FormField
           label="Name on Card"
           name="cardName"
           value={formData.cardName}
@@ -186,72 +179,5 @@ export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: 
       </CardContent>
 
     </Card>
-  );
-}
-
-/* ---------- FIELD COMPONENT ---------- */
-
-function Field({
-  label,
-  name,
-  value,
-  placeholder,
-  error,
-  handleChange,
-  handleBlur,
-  inputStyle,
-  fieldError,
-  fieldValid
-}: any) {
-
-  return (
-
-    <div className="space-y-1 relative">
-
-      <Label className="text-sm font-medium text-gray-700">
-        {label} *
-      </Label>
-
-      <div className="relative">
-
-        <Input
-          value={value}
-          placeholder={placeholder}
-          maxLength={
-            name === "cardNumber"
-              ? 19
-              : name === "expiryDate"
-              ? 5
-              : name === "cvv"
-              ? 4
-              : 50
-          }
-          onChange={(e) => handleChange(name, e.target.value)}
-          onBlur={() => handleBlur(name)}
-          className={`${inputStyle(name)} pr-10`}
-        />
-
-        {fieldValid(name) && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-600 w-5 h-5 flex items-center justify-center rounded-full">
-            <CheckCircle2 size={14} strokeWidth={3} />
-          </div>
-        )}
-
-        {fieldError(name) && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-red-100 text-red-600 w-5 h-5 flex items-center justify-center rounded-full">
-            <AlertCircle size={14} strokeWidth={3} />
-          </div>
-        )}
-
-      </div>
-
-      {fieldError(name) && (
-        <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
-          <AlertCircle size={12} />
-          {error}
-        </p>
-      )}
-
-    </div>
   );
 }
