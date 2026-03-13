@@ -4,13 +4,13 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
+} from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import { MapPin, CheckCircle2, AlertCircle } from "lucide-react";
-import { validateField } from "./checkoutValidation";
+import { validateField } from "../vakidation/shippingValidation";
 
 export function ShippingForm({
   formData,
@@ -32,6 +32,29 @@ export function ShippingForm({
   ];
 
   const handleChange = (field: string, value: string) => {
+
+    /* -------- INPUT LIMITS + CLEANING -------- */
+
+    if (field === "firstName" || field === "lastName") {
+      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 30);
+    }
+
+    if (field === "city" || field === "state") {
+      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
+    }
+
+    if (field === "phone") {
+      value = value.replace(/[^\d+()\-\s]/g, "").slice(0, 20);
+    }
+
+    if (field === "zipCode") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    if (field === "address") {
+      value = value.slice(0, 100);
+    }
+
     handleInputChange(field, value);
 
     if (touched[field]) {
@@ -77,6 +100,7 @@ export function ShippingForm({
       </CardHeader>
 
       <CardContent className="space-y-6">
+
         {/* FIRST / LAST */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +151,7 @@ export function ShippingForm({
             label="Phone"
             name="phone"
             value={formData.phone}
-            placeholder="(555) 123-4567"
+            placeholder="+20 100 123 4567"
             error="Invalid phone number"
             handleChange={handleChange}
             handleBlur={handleBlur}
@@ -194,8 +218,6 @@ export function ShippingForm({
 
         {/* DELIVERY */}
 
-        {/* DELIVERY */}
-
         <div className="space-y-3">
           <Label className="font-medium">Delivery Method</Label>
 
@@ -232,6 +254,7 @@ export function ShippingForm({
         >
           Continue to Payment
         </Button>
+
       </CardContent>
     </Card>
   );
@@ -251,6 +274,35 @@ function Field({
   fieldError,
   fieldValid,
 }: any) {
+
+  const getMaxLength = () => {
+
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        return 30;
+
+      case "email":
+        return 100;
+
+      case "phone":
+        return 20;
+
+      case "address":
+        return 100;
+
+      case "city":
+      case "state":
+        return 50;
+
+      case "zipCode":
+        return 10;
+
+      default:
+        return 100;
+    }
+  };
+
   return (
     <div className="space-y-1 relative">
       <Label className="text-sm font-medium text-gray-700">{label}</Label>
@@ -259,6 +311,7 @@ function Field({
         <Input
           value={value}
           placeholder={placeholder}
+          maxLength={getMaxLength()}
           onChange={(e) => handleChange(name, e.target.value)}
           onBlur={() => handleBlur(name)}
           className={`${inputStyle(name)} pr-10`}

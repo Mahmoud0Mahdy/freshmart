@@ -5,11 +5,11 @@ import { useApp } from '../../contexts/AppContext';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 
-import { CheckoutSteps } from './CheckoutSteps';
-import { ShippingForm } from './ShippingForm';
-import { PaymentForm } from './PaymentForm';
-import { ReviewOrder } from './ReviewOrder';
-import { CheckoutSummary } from './CheckoutSummary';
+import { CheckoutSteps } from './components/CheckoutSteps';
+import { ShippingForm } from '././components/ShippingForm';
+import { PaymentForm } from './components/PaymentForm';
+import { ReviewOrder } from './components/ReviewOrder';
+import { CheckoutSummary } from './components/CheckoutSummary';
 
 export function CheckoutPage() {
 
