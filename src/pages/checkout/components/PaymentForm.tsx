@@ -5,7 +5,7 @@ import { Label } from "../../../components/ui/label";
 import { Checkbox } from "../../../components/ui/checkbox";
 import { CreditCard } from "lucide-react";
 
-import { validatePaymentField } from "../vakidation/paymentValidation";
+import { validatePaymentField } from "../validation/paymentValidation";
 import { FormField } from "../components/form/PaymentForm";
 
 export function PaymentForm({ formData, handleInputChange, nextStep, setStep }: any) {

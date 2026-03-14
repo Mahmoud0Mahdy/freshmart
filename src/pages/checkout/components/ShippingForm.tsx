@@ -10,7 +10,7 @@ import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import { MapPin } from "lucide-react";
 
-import { validateField } from "../vakidation/shippingValidation";
+import { validateField } from "../validation/shippingValidation";
 import { FormField } from "../components/form/PaymentForm";
 
 export function ShippingForm({
