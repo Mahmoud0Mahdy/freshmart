@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { useApp } from '../../contexts/AppContext';
 import { ArrowLeft } from 'lucide-react';
@@ -14,8 +14,18 @@ import { CheckoutSummary } from './components/CheckoutSummary';
 export function CheckoutPage() {
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { state, dispatch } = useApp();
   const [step, setStep] = useState(1);
+
+  // 🔥 بيانات Buy Now
+  const quickProduct = location.state?.quickProduct;
+  const quickQuantity = location.state?.quickQuantity;
+
+  // السلة المستخدمة في الصفحة
+  const cartItems = quickProduct
+    ? [{ product: quickProduct, quantity: quickQuantity }]
+    : state.cart;
 
   const [formData, setFormData] = useState({
     firstName:'',
@@ -35,7 +45,7 @@ export function CheckoutPage() {
     deliveryMethod:'standard'
   });
 
-  const subtotal = state.cart.reduce(
+  const subtotal = cartItems.reduce(
     (total,item)=> total + (item.product.price * item.quantity),0
   );
 
@@ -79,7 +89,9 @@ export function CheckoutPage() {
 
   const placeOrder = ()=>{
     if(validateStep(2)){
-      dispatch({type:'CLEAR_CART'});
+      if(!quickProduct){
+        dispatch({type:'CLEAR_CART'});
+      }
       toast.success('Order placed successfully!');
       navigate('/');
     }else{
@@ -87,7 +99,8 @@ export function CheckoutPage() {
     }
   };
 
-  if(state.cart.length === 0){
+  // لو مش Buy Now والسلة فاضية
+  if(!quickProduct && state.cart.length === 0){
     return <Navigate to="/cart" replace />;
   }
 
@@ -137,7 +150,7 @@ export function CheckoutPage() {
             {step === 3 && (
               <ReviewOrder
                 formData={formData}
-                cart={state.cart}
+                cart={cartItems}
                 setStep={setStep}
                 placeOrder={placeOrder}
               />

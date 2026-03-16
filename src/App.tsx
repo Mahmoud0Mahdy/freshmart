@@ -8,7 +8,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
-import { ProductDetailPage } from './pages/ProductDetailPage';
+import { ProductDetailPage } from './pages/product/ProductDetailPage';
 import { CartPage } from './pages/cart/CartPage';
 import { CheckoutPage } from './pages/checkout/CheckoutPage';
 import { RecipesPage } from './pages/recipe/RecipesPage';
