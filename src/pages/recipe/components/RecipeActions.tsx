@@ -1,5 +1,5 @@
 import { Button } from '../../../components/ui/button';
-import { Heart, Share2 } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 interface Props {
   isFavorite: boolean;
@@ -8,15 +8,22 @@ interface Props {
 
 export function RecipeActions({ isFavorite, onSave }: Props) {
   return (
-    <div className="flex space-x-4 mb-6">
-      <Button onClick={onSave} variant="outline">
-        <Heart size={16} className={`mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-        {isFavorite ? 'Saved' : 'Save Recipe'}
-      </Button>
-
-      <Button variant="outline">
-        <Share2 className="mr-2" size={16} />
-        Share
+    <div className="mb-8">
+      <Button 
+        onClick={onSave} 
+        variant={isFavorite ? "default" : "outline"}
+        size="lg"
+        className={`w-full sm:w-auto rounded-xl font-bold transition-all ${
+          isFavorite 
+            ? 'bg-red-50 hover:bg-red-100 text-red-600 border-0 shadow-none' 
+            : 'hover:bg-gray-50'
+        }`}
+      >
+        <Heart 
+          size={20} 
+          className={`mr-2 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} 
+        />
+        {isFavorite ? 'Saved to Favorites' : 'Save Recipe'}
       </Button>
     </div>
   );

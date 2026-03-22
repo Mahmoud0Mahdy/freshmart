@@ -7,31 +7,34 @@ import { Recipe } from '../types';
 export function RecipeDetailHeader({ recipe }: { recipe: Recipe }) {
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden border-0 shadow-lg">
-        <div className="aspect-[4/3] relative">
+      {/* تصغير الصورة وجعل الحواف دائرية بشكل عصري */}
+      <Card className="overflow-hidden border-0 shadow-sm rounded-2xl">
+        <div className="h-64 md:h-80 relative w-full">
           <ImageWithFallback
             src={recipe.image}
             alt={recipe.title}
             className="w-full h-full object-cover"
           />
           <div className="absolute top-4 left-4">
-            <Badge className="bg-green-600 text-white">
+            <Badge className="bg-green-600 text-white px-3 py-1 shadow-md">
               {recipe.difficulty}
             </Badge>
           </div>
         </div>
       </Card>
 
-      <Card className="border-0 shadow-lg">
-        <CardContent className="p-8">
-          <Badge variant="outline" className="mb-2 capitalize">
+      <Card className="border-0 shadow-sm rounded-2xl">
+        <CardContent className="p-6 md:p-8">
+          <Badge variant="outline" className="mb-4 capitalize text-green-700 border-green-200 bg-green-50">
             {recipe.category}
           </Badge>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{recipe.title}</h1>
-          <div className="flex items-center space-x-6 text-gray-600">
-            <div className="flex items-center"><Clock size={18} className="mr-2" />{recipe.time}</div>
-            <div className="flex items-center"><Users size={18} className="mr-2" />{recipe.servings}</div>
-            <div className="flex items-center"><ChefHat size={18} className="mr-2" />{recipe.difficulty}</div>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            {recipe.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-6 text-gray-600 font-medium">
+            <div className="flex items-center"><Clock size={20} className="mr-2 text-gray-400" />{recipe.time}</div>
+            <div className="flex items-center"><Users size={20} className="mr-2 text-gray-400" />{recipe.servings}</div>
+            <div className="flex items-center"><ChefHat size={20} className="mr-2 text-gray-400" />{recipe.difficulty}</div>
           </div>
         </CardContent>
       </Card>
