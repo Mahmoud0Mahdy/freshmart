@@ -54,7 +54,7 @@ export function RecipeDetailPage() {
           <div className="lg:col-span-2 space-y-8">
             <RecipeDetailHeader recipe={recipe} />
             
-            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100 mt-6">
               <RecipeActions isFavorite={isFavorite} onSave={handleSave} />
               <InstructionsList instructions={recipe.instructions} />
             </div>
