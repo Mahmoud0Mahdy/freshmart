@@ -1,0 +1,23 @@
+src/pages/recipes/
+├── components/
+│   ├── EmptyState.tsx
+│   ├── IngredientsList.tsx
+│   ├── InstructionsList.tsx
+│   ├── QuickActions.tsx
+│   ├── RecipeActions.tsx
+│   ├── RecipeCard.tsx
+│   ├── RecipeDetailHeader.tsx
+│   ├── RecipesFilters.tsx
+│   ├── RecipesGrid.tsx
+│   ├── RecipesHeader.tsx
+│   └── SimilarRecipes.tsx
+├── hooks/
+│   ├── useRecipeDetail.ts
+│   └── useRecipes.ts
+├── services/
+│   ├── cartService.ts
+│   └── recipeService.ts
+├── types/
+│   └── index.ts
+├── RecipeDetailPage.tsx
+└── RecipesPage.tsx
