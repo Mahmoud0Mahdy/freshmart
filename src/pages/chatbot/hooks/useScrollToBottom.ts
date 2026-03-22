@@ -1,11 +1,21 @@
 import { useEffect, useRef } from 'react';
 
 export const useScrollToBottom = (dependency: any) => {
-  const ref = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+    
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   }, [dependency]);
 
-  return ref;
+  return scrollRef;
 };

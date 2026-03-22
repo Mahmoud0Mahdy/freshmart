@@ -10,7 +10,8 @@ interface Props {
 
 export function MessageList({ messages, isLoading, scrollRef }: Props) {
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+      
       {messages.map((message) => (
         <MessageItem key={message.id} message={message} />
       ))}
@@ -30,7 +31,8 @@ export function MessageList({ messages, isLoading, scrollRef }: Props) {
           </div>
         </div>
       )}
-      <div ref={scrollRef} />
+      
+      
     </div>
   );
 }
