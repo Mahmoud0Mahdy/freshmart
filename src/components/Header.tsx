@@ -30,12 +30,13 @@ export function Header() {
   const isAdminActive = location.pathname.startsWith('/admin');
 
   return (
+    // التعديل هنا: تحسين شكل الـ Header الثابت
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-            <span className="text-2xl font-bold text-green-600">FreshMart</span>
+            <span className="text-2xl font-bold text-green-600 tracking-tight">FreshMart</span>
           </div>
 
           {/* Navigation */}
@@ -45,18 +46,18 @@ export function Header() {
                 key={item.path}
                 to={item.path}
                 className={() =>
-                  `transition-colors ${isActive(item.path) ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`
+                  `transition-colors font-medium text-sm ${isActive(item.path) ? 'text-green-600 font-bold' : 'text-gray-600 hover:text-green-600'}`
                 }
               >
                 {item.name}
               </NavLink>
             ))}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 pl-4 border-l border-gray-100">
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin')}
                   className={`p-2 rounded-lg transition-colors ${
-                    isAdminActive ? 'text-green-600 bg-green-50' : 'text-gray-700 hover:text-green-600 hover:bg-gray-50'
+                    isAdminActive ? 'text-green-600 bg-green-50' : 'text-gray-500 hover:text-green-600 hover:bg-gray-50'
                   }`}
                   title="Admin Dashboard"
                 >
@@ -65,18 +66,18 @@ export function Header() {
               )}
               <button
                 onClick={() => navigate('/cart')}
-                className="relative p-2 text-gray-700 hover:text-green-600 transition-colors"
+                className="relative p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <ShoppingCart size={20} />
                 {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                     {cartItemsCount}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => navigate(state.isAuthenticated ? '/profile' : '/login')}
-                className="p-2 text-gray-700 hover:text-green-600 transition-colors"
+                className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <User size={20} />
               </button>
@@ -84,25 +85,25 @@ export function Header() {
           </nav>
 
           {/* Mobile menu button and icons */}
-          <div className="md:hidden flex items-center space-x-3">
-            <button onClick={() => navigate('/cart')} className="relative p-2 text-gray-700">
-              <ShoppingCart size={20} />
+          <div className="md:hidden flex items-center space-x-2">
+            <button onClick={() => navigate('/cart')} className="relative p-2 text-gray-600">
+              <ShoppingCart size={22} />
               {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                   {cartItemsCount}
                 </span>
               )}
             </button>
             <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {mobileMenuOpen ? <X className="h-6 w-6 text-gray-600" /> : <Menu className="h-6 w-6 text-gray-600" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white">
-            <div className="px-4 py-3 space-y-2">
+          <div className="md:hidden border-t border-gray-100 bg-white py-2 absolute w-full left-0 shadow-lg">
+            <div className="px-4 py-3 space-y-1">
               {navItems.map((item) => (
                 <button
                   key={item.path}
@@ -110,8 +111,8 @@ export function Header() {
                     navigate(item.path);
                     setMobileMenuOpen(false);
                   }}
-                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                    isActive(item.path) ? 'bg-green-50 text-green-600' : 'text-gray-700 hover:bg-gray-50'
+                  className={`block w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
+                    isActive(item.path) ? 'bg-green-50 text-green-600' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {item.name}
@@ -123,25 +124,16 @@ export function Header() {
                     navigate('/admin');
                     setMobileMenuOpen(false);
                   }}
-                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors ${
-                    isAdminActive ? 'bg-green-50 text-green-600' : 'text-gray-700 hover:bg-gray-50'
+                  className={`block w-full text-left px-4 py-3 rounded-xl transition-colors font-medium mt-2 border-t border-gray-50 ${
+                    isAdminActive ? 'bg-green-50 text-green-600' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Shield size={18} />
+                  <div className="flex items-center gap-3">
+                    <Shield size={18} className="text-gray-400" />
                     Admin Dashboard
                   </div>
                 </button>
               )}
-              <button
-                onClick={() => {
-                  navigate(state.isAuthenticated ? '/profile' : '/login');
-                  setMobileMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                {state.isAuthenticated ? 'Profile' : 'Login'}
-              </button>
             </div>
           </div>
         )}
