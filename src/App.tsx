@@ -18,6 +18,8 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { CommunityPage } from './pages/CommunityPage';
 import { GhostCraftPage } from './pages/GhostCraftPage';
+import { SavedRecipesPage } from './pages/SavedRecipesPage';
+import { SavedProductsPage } from './pages/SavedProductsPage';
 
 import { DashboardPage } from './admin/dashboard/DashboardPage';
 import { ProductsPage } from './admin/products/ProductsPage';
@@ -41,6 +43,8 @@ export default function App() {
           <Route path="chatbot" element={<ChatbotPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="saved-recipes" element={<SavedRecipesPage />} />
+          <Route path="saved-products" element={<SavedProductsPage />} />
           <Route path="community" element={<CommunityPage />} />
           <Route path="ghost-craft" element={<GhostCraftPage />} />
         </Route>

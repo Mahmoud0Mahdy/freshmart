@@ -1,8 +1,14 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Shield } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Shield, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { useApp } from '../contexts/AppContext';
 import { useState } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 const navItems = [
   { name: 'Home', path: '/' },
@@ -21,6 +27,7 @@ export function Header() {
 
   const cartItemsCount = state.cart.reduce((total, item) => total + item.quantity, 0);
   const isAdmin = state.user?.role === 'admin';
+  const favoritesCount = (state.user?.savedRecipes?.length || 0) + (state.user?.savedProducts?.length || 0);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -75,6 +82,24 @@ export function Header() {
                   </span>
                 )}
               </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
+                    aria-label="Favorites"
+                  >
+                    <Heart size={20} className={favoritesCount > 0 ? 'fill-red-500 text-red-500' : ''} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate('/saved-recipes')}>
+                    Saved Recipes
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/saved-products')}>
+                    Saved Products
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <button
                 onClick={() => navigate(state.isAuthenticated ? '/profile' : '/login')}
                 className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
@@ -93,6 +118,9 @@ export function Header() {
                   {cartItemsCount}
                 </span>
               )}
+            </button>
+            <button onClick={() => navigate('/saved-products')} className="p-2 text-gray-600">
+              <Heart size={22} className={favoritesCount > 0 ? 'fill-red-500 text-red-500' : ''} />
             </button>
             <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-6 w-6 text-gray-600" /> : <Menu className="h-6 w-6 text-gray-600" />}

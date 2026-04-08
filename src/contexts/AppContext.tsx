@@ -41,6 +41,7 @@ export interface User {
   email: string;
   role: 'user' | 'admin';
   savedRecipes: string[];
+  savedProducts: string[];
   orderHistory: any[];
   createdAt: string;
   isActive: boolean;
@@ -78,6 +79,8 @@ type AppAction =
   | { type: 'LOGOUT' }
   | { type: 'SAVE_RECIPE'; recipeId: string }
   | { type: 'UNSAVE_RECIPE'; recipeId: string }
+  | { type: 'SAVE_PRODUCT'; productId: string }
+  | { type: 'UNSAVE_PRODUCT'; productId: string }
   | { type: 'ADD_PRODUCT'; product: Product }
   | { type: 'UPDATE_PRODUCT'; product: Product }
   | { type: 'DELETE_PRODUCT'; productId: string }
@@ -92,11 +95,19 @@ type AppAction =
 
 // نقرأ المستخدم من localStorage
 const savedUser = localStorage.getItem("user");
+const rawUser = savedUser ? JSON.parse(savedUser) : null;
+const parsedUser: User | null = rawUser
+  ? {
+      ...rawUser,
+      savedRecipes: rawUser.savedRecipes ?? [],
+      savedProducts: rawUser.savedProducts ?? [],
+    }
+  : null;
 
 const initialState: AppState = {
   cart: [],
-  user: savedUser ? JSON.parse(savedUser) : null,
-  isAuthenticated: savedUser ? true : false,
+  user: parsedUser,
+  isAuthenticated: !!parsedUser,
   products: [],
   recipes: [],
   users: [],
@@ -182,6 +193,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SAVE_RECIPE':
 
       if (!state.user) return state;
+      if (state.user.savedRecipes.includes(action.recipeId)) return state;
 
       return {
         ...state,
@@ -200,6 +212,31 @@ function appReducer(state: AppState, action: AppAction): AppState {
         user: {
           ...state.user,
           savedRecipes: state.user.savedRecipes.filter(id => id !== action.recipeId),
+        },
+      };
+
+    case 'SAVE_PRODUCT':
+
+      if (!state.user) return state;
+      if (state.user.savedProducts.includes(action.productId)) return state;
+
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          savedProducts: [...state.user.savedProducts, action.productId],
+        },
+      };
+
+    case 'UNSAVE_PRODUCT':
+
+      if (!state.user) return state;
+
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          savedProducts: state.user.savedProducts.filter(id => id !== action.productId),
         },
       };
 
