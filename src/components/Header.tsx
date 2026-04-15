@@ -72,8 +72,10 @@ export function Header() {
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => navigate('/cart')}
                 className="relative p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
+                title="Shopping Cart"
               >
                 <ShoppingCart size={20} />
                 {cartItemsCount > 0 && (
@@ -85,8 +87,10 @@ export function Header() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
+                    type="button"
                     className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
                     aria-label="Favorites"
+                    title="Favorites"
                   >
                     <Heart size={20} className={favoritesCount > 0 ? 'fill-red-500 text-red-500' : ''} />
                   </button>
@@ -111,7 +115,7 @@ export function Header() {
 
           {/* Mobile menu button and icons */}
           <div className="md:hidden flex items-center space-x-2">
-            <button onClick={() => navigate('/cart')} className="relative p-2 text-gray-600">
+            <button type="button" onClick={() => navigate('/cart')} className="relative p-2 text-gray-600" title="Shopping Cart">
               <ShoppingCart size={22} />
               {cartItemsCount > 0 && (
                 <span className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">

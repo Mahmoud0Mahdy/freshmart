@@ -3,11 +3,13 @@ import { ChatHeader } from './components/ChatHeader';
 import { MessageList } from './components/MessageList';
 import { ChatInput } from './components/ChatInput';
 import { SuggestedPrompts } from './components/SuggestedPrompts';
-import { useChat } from './hooks/useChat';
 import { useScrollToBottom } from './hooks/useScrollToBottom';
+// هنستورد الـ Context بدل useChat
+import { useChatbotContext } from '../../contexts/ChatbotContext';
 
 export function ChatbotPage() {
-  const { messages, isLoading, sendMessage } = useChat();
+  // سحبنا البيانات من الـ Context
+  const { messages, isLoading, sendMessage } = useChatbotContext(); 
   const scrollRef = useScrollToBottom(messages);
 
   return (
@@ -30,10 +32,13 @@ export function ChatbotPage() {
           </CardContent>
         </Card>
 
-        <SuggestedPrompts 
-          onSelect={sendMessage} 
-          disabled={isLoading} 
-        />
+        {/* إخفاء الاقتراحات لو فيه رسايل زي ما عملنا في الشات العائم (اختياري بس بيحسن الشكل) */}
+        {messages.length === 1 && (
+          <SuggestedPrompts 
+            onSelect={sendMessage} 
+            disabled={isLoading} 
+          />
+        )}
         
       </div>
     </div>

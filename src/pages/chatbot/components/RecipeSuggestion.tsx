@@ -4,9 +4,11 @@ import { Badge } from '../../../components/ui/badge';
 import { ImageWithFallback } from '../../../components/figma/ImageWithFallback';
 import { Clock, Users } from 'lucide-react';
 import { recipes } from '../../../data/mockData';
+import { useChatbotContext } from '../../../contexts/ChatbotContext';
 
 export function RecipeSuggestion({ recipeId }: { recipeId: string }) {
   const navigate = useNavigate();
+  const { setFloatingOpen } = useChatbotContext();
   const recipe = recipes.find(r => r.id === recipeId);
 
   if (!recipe) return null;
@@ -14,7 +16,10 @@ export function RecipeSuggestion({ recipeId }: { recipeId: string }) {
   return (
     <Card 
       className="cursor-pointer hover:shadow-md transition-shadow border border-gray-200 mt-3"
-      onClick={() => navigate(`/recipe/${recipe.id}`)}
+      onClick={() => {
+        navigate(`/recipe/${recipe.id}`);
+        setFloatingOpen(false); 
+      }}
     >
       <CardContent className="p-3">
         <div className="flex items-center space-x-3">
@@ -29,8 +34,7 @@ export function RecipeSuggestion({ recipeId }: { recipeId: string }) {
               <Badge variant="outline" className="text-[10px] py-0">{recipe.difficulty}</Badge>
             </div>
           </div>
-        </div>
-      </CardContent>
+        </div>      </CardContent>
     </Card>
   );
 }

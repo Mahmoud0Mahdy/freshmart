@@ -26,12 +26,14 @@ import { ProductsPage } from './admin/products/ProductsPage';
 import { RecipesPage as AdminRecipesPage } from './admin/recipes/RecipesPage';
 import { UsersPage } from './admin/users/UsersPage';
 import { PostsPage } from './admin/posts/PostsPage';
+import { ChatbotProvider } from './contexts/ChatbotContext';
 
 export default function App() {
   return (
     <AppProvider>
-      <AdminInitializer />
-      <Routes>
+      <ChatbotProvider> {/* <--- ضفنا دي هنا */}
+        <AdminInitializer />
+        <Routes>
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<HomePage />} />
           <Route path="shop" element={<ShopPage />} />
@@ -66,7 +68,8 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Toaster position="top-right" />
+        <Toaster position="top-right" />
+      </ChatbotProvider>
     </AppProvider>
   );
 }
