@@ -7,7 +7,8 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
   const navigate = useNavigate();
 
   const subtotal = state.cart.reduce(
-    (total: number, item: any) => total + item.product.price * item.quantity,
+    (total: number, item: any) =>
+      total + item.product.price * item.quantity,
     0,
   );
 
@@ -48,22 +49,22 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
         <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
       )}
 
-<div
-  className={`fixed right-0 w-[420px] bg-white z-[100000] flex flex-col shadow-2xl transition-transform duration-300 ${
-    isOpen ? "translate-x-0" : "translate-x-full"
-  }`}
-  style={{ height: "calc(-64px + 100vh)", top: "64px" }}
->
-{/* Header */}
-<div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
-  <h2 className="font-semibold text-lg">
-    Your Cart ({state.cart.length})
-  </h2>
+      <div
+        className={`fixed right-0 w-[420px] bg-white z-[100000] flex flex-col shadow-2xl transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        style={{ height: "calc(-64px + 100vh)", top: "64px" }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
+          <h2 className="font-semibold text-lg">
+            Your Cart ({state.cart.length})
+          </h2>
 
-  <button onClick={onClose} className="cursor-pointer">
-    <X size={20} />
-  </button>
-</div>
+          <button onClick={onClose} className="cursor-pointer">
+            <X size={20} />
+          </button>
+        </div>
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -74,13 +75,15 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
             >
               {/* صورة المنتج */}
               <img
-                src={item.product.image}
+                src={item.product.imageUrl}
                 className="w-20 h-20 rounded object-cover"
               />
 
               {/* المعلومات */}
               <div className="flex flex-col justify-center flex-1">
-                <h3 className="text-sm font-medium">{item.product.name}</h3>
+                <h3 className="text-sm font-medium">
+                  {item.product.name}
+                </h3>
 
                 <span className="text-green-600 font-semibold text-base mt-1">
                   ${item.product.price}
@@ -94,7 +97,9 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
                     <Minus size={16} />
                   </button>
 
-                  <span className="px-3 text-sm">{item.quantity}</span>
+                  <span className="px-3 text-sm">
+                    {item.quantity}
+                  </span>
 
                   <button
                     className="px-3 py-1"

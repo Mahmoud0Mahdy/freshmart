@@ -1,13 +1,21 @@
 export interface Recipe {
   id: string | number;
+
   title: string;
-  category: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  time: string;
-  servings: number | string;
-  image: string;
-  ingredients: string[];
-  instructions: string[];
+  imageUrl: string;
+  difficultyLevel: 'Easy' | 'Medium' | 'Hard';
+  prepTime: number;
+  categoryName: string;
+
+  servings?: number | string;
+  ingredients?: string[];
+  instructions?: string[];
+
+  
+  image?: string;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  time?: string;
+  category?: string;
 }
 
 export interface FilterState {

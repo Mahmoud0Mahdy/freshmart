@@ -6,6 +6,7 @@ import { Clock, Users, ChefHat, Heart } from "lucide-react";
 import { Recipe } from "../types";
 import { useApp } from "../../../contexts/AppContext";
 import { toast } from "sonner";
+import { toggleRecipeFavorite } from "../../../api/favoriteApi"; // 🔥 مهم
 
 interface Props {
   recipe: Recipe;
@@ -14,8 +15,11 @@ interface Props {
 
 export function RecipeCard({ recipe, onClick }: Props) {
   const { state, dispatch } = useApp();
-  const isFavorite = state.user?.savedRecipes?.includes(String(recipe.id));
-  const toggleFavorite = (e: React.MouseEvent) => {
+
+  // ✅ الصح
+  const isFavorite = state.favoriteRecipes.includes(String(recipe.id));
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!state.isAuthenticated) {
@@ -25,28 +29,37 @@ export function RecipeCard({ recipe, onClick }: Props) {
       return;
     }
 
-    toast.dismiss();
+    // 👇 الحالة الجديدة
+    const willBeFavorite = !isFavorite;
 
-    dispatch({
-      type: isFavorite ? "UNSAVE_RECIPE" : "SAVE_RECIPE",
-      recipeId: String(recipe.id),
-    });
+    try {
+      // 🔥 API CALL
+      await toggleRecipeFavorite(recipe.id);
 
-    const t = toast.success(
-      isFavorite
-        ? "Recipe removed from favorites"
-        : "Recipe saved to favorites",
-    );
+      // 🔥 update state
+      dispatch({
+        type: "TOGGLE_RECIPE_FAVORITE",
+        recipeId: String(recipe.id),
+      });
 
-    setTimeout(() => toast.dismiss(t), 1200);
+      const t = toast.success(
+        willBeFavorite
+          ? "Recipe saved to favorites"
+          : "Recipe removed from favorites"
+      );
+
+      setTimeout(() => toast.dismiss(t), 1200);
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
   };
 
   const difficultyColor =
-    recipe.difficulty === "Easy"
+    recipe.difficultyLevel === "Easy"
       ? "bg-green-500"
-      : recipe.difficulty === "Medium"
-        ? "bg-yellow-500"
-        : "bg-red-500";
+      : recipe.difficultyLevel === "Medium"
+      ? "bg-yellow-500"
+      : "bg-red-500";
 
   return (
     <Card
@@ -56,15 +69,17 @@ export function RecipeCard({ recipe, onClick }: Props) {
       <CardContent className="p-0">
         <div className="aspect-[4/3] overflow-hidden rounded-t-lg relative">
           <ImageWithFallback
-            src={recipe.image}
+            src={recipe.imageUrl}
             alt={recipe.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+
           <div className="absolute top-2 left-2">
             <Badge className={`${difficultyColor} text-white`}>
-              {recipe.difficulty}
+              {recipe.difficultyLevel}
             </Badge>
           </div>
+
           <div className="absolute top-2 right-2">
             <Button
               variant="ghost"
@@ -75,39 +90,48 @@ export function RecipeCard({ recipe, onClick }: Props) {
               <Heart
                 size={16}
                 className={
-                  isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"
+                  isFavorite
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-600"
                 }
               />
             </Button>
           </div>
         </div>
+
         <div className="p-6">
           <div className="mb-2">
             <Badge variant="outline" className="capitalize">
-              {recipe.category}
+              {recipe.categoryName}
             </Badge>
           </div>
+
           <h3 className="font-semibold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
             {recipe.title}
           </h3>
+
           <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
             <div className="flex items-center">
               <Clock size={16} className="mr-1" />
-              <span>{recipe.time}</span>
+              <span>{recipe.prepTime} min</span>
             </div>
+
             <div className="flex items-center">
               <Users size={16} className="mr-1" />
-              <span>{recipe.servings}</span>
+              <span>{recipe.servings || "N/A"}</span>
             </div>
+
             <div className="flex items-center">
               <ChefHat size={16} className="mr-1" />
-              <span>{recipe.difficulty}</span>
+              <span>{recipe.difficultyLevel}</span>
             </div>
           </div>
+
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {recipe.ingredients.slice(0, 3).join(", ")}
-            {recipe.ingredients.length > 3 && "..."}
+            {recipe.ingredients?.slice(0, 3).join(", ") ||
+              "No ingredients available"}
           </p>
+
           <Button
             variant="outline"
             size="sm"

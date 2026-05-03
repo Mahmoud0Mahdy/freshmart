@@ -1,13 +1,28 @@
-import { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import type { Product } from '../../../contexts/AppContext';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Textarea } from '../../../components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useApp } from "../../../contexts/AppContext";
+import type { Product } from "../../../contexts/AppContext";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Textarea } from "../../../components/ui/textarea";
+import { DialogClose } from "../../../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
+import { toast } from "sonner";
+
+import axiosInstance from "../../../api/axiosInstance";
+import { getCategories } from "../../../api/adminApi";
 
 interface ProductFormDialogProps {
   isOpen: boolean;
@@ -16,30 +31,65 @@ interface ProductFormDialogProps {
 }
 
 const defaultFormData = {
-  name: '', price: '', category: 'fruits', image: '', description: '',
-  calories: '', protein: '', carbs: '', fat: '', fiber: '', inStock: true,
+  name: "",
+  price: "",
+  category: "",
+  categoryId: 0,
+  image: "",
+  description: "",
+  calories: "",
+  protein: "",
+  carbs: "",
+  fat: "",
+  fiber: "",
+  inStock: true,
 };
 
-const categories = ['fruits', 'vegetables', 'dairy', 'snacks', 'bakery', 'meat', 'beverages'];
-
-export function ProductFormDialog({ isOpen, onClose, editingProduct }: ProductFormDialogProps) {
+export function ProductFormDialog({
+  isOpen,
+  onClose,
+  editingProduct,
+}: ProductFormDialogProps) {
   const { dispatch } = useApp();
-  const [formData, setFormData] = useState(defaultFormData);
 
+  const [formData, setFormData] = useState(defaultFormData);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // ================= FETCH CATEGORIES =================
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getCategories(2);
+        setCategories(res);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // ================= EDIT =================
   useEffect(() => {
     if (editingProduct) {
       setFormData({
         name: editingProduct.name,
         price: editingProduct.price.toString(),
         category: editingProduct.category,
+        categoryId: editingProduct.categoryId || 0,
         image: editingProduct.image,
-        description: editingProduct.description,
-        calories: editingProduct.nutrition.calories.toString(),
-        // بنشيل أي حروف (زي الـ g) عشان نعرض الرقم بس في الـ Input
-        protein: editingProduct.nutrition.protein.replace(/[^0-9.]/g, ''),
-        carbs: editingProduct.nutrition.carbs.replace(/[^0-9.]/g, ''),
-        fat: editingProduct.nutrition.fat.replace(/[^0-9.]/g, ''),
-        fiber: editingProduct.nutrition.fiber.replace(/[^0-9.]/g, ''),
+        description: editingProduct.description || "",
+        calories:
+          editingProduct.nutrition?.calories?.toString() || "",
+        protein:
+          editingProduct.nutrition?.protein?.replace(/[^0-9.]/g, "") || "",
+        carbs:
+          editingProduct.nutrition?.carbs?.replace(/[^0-9.]/g, "") || "",
+        fat:
+          editingProduct.nutrition?.fat?.replace(/[^0-9.]/g, "") || "",
+        fiber:
+          editingProduct.nutrition?.fiber?.replace(/[^0-9.]/g, "") || "",
         inStock: editingProduct.inStock,
       });
     } else {
@@ -47,162 +97,247 @@ export function ProductFormDialog({ isOpen, onClose, editingProduct }: ProductFo
     }
   }, [editingProduct, isOpen]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please upload a valid image file');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+useEffect(() => {
+  if (editingProduct && categories.length > 0) {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: editingProduct.categoryId,
+    }));
+  }
+}, [categories, editingProduct]);
+  // ================= SUBMIT =================
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // تأكيد إضافي إن مفيش قيم سالبة بتعدي
-    if (parseFloat(formData.price) < 0) {
-      toast.error('Price cannot be negative');
+    if (loading) return;
+
+    if (!formData.categoryId) {
+      toast.error("Select category");
       return;
     }
 
-    const productData: Product = {
-      id: editingProduct?.id || `product-${Date.now()}`,
+    setLoading(true);
+
+    const payload = {
       name: formData.name,
-      price: parseFloat(formData.price),
-      category: formData.category,
-      image: formData.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800',
       description: formData.description,
+      price: parseFloat(formData.price),
+      inStock: formData.inStock,
+      imageUrl: formData.image,
+      categoryId: formData.categoryId,
       nutrition: {
         calories: parseInt(formData.calories) || 0,
-        // بنزود حرف الـ g هنا عشان الداتا تتسيف صح زي ما باقي التطبيق متوقع
-        protein: `${formData.protein}g`,
-        carbs: `${formData.carbs}g`,
-        fat: `${formData.fat}g`,
-        fiber: `${formData.fiber}g`,
+        protein: parseFloat(formData.protein) || 0,
+        carbs: parseFloat(formData.carbs) || 0,
+        fat: parseFloat(formData.fat) || 0,
+        fiber: parseFloat(formData.fiber) || 0,
       },
-      inStock: formData.inStock,
     };
 
-    if (editingProduct) {
-      dispatch({ type: 'UPDATE_PRODUCT', product: productData });
-      toast.success('Product updated successfully');
-    } else {
-      dispatch({ type: 'ADD_PRODUCT', product: productData });
-      toast.success('Product added successfully');
+    try {
+      if (editingProduct) {
+        await axiosInstance.put(`/Products/${editingProduct.id}`, payload);
+
+        dispatch({
+          type: "UPDATE_PRODUCT",
+          product: {
+            ...payload,
+            id: editingProduct.id,
+            category: formData.category,
+            image: formData.image,
+            imageUrl: formData.image,
+            nutrition: {
+              calories: payload.nutrition.calories,
+              protein: `${formData.protein}g`,
+              carbs: `${formData.carbs}g`,
+              fat: `${formData.fat}g`,
+              fiber: `${formData.fiber}g`,
+            },
+          },
+        });
+
+        toast.success("Updated successfully");
+      } else {
+        const res = await axiosInstance.post(`/Products`, payload);
+
+        dispatch({
+          type: "ADD_PRODUCT",
+          product: {
+            ...payload,
+            id: res.data.id.toString(),
+            category: formData.category,
+            image: formData.image,
+            imageUrl: formData.image,
+            nutrition: {
+              calories: payload.nutrition.calories,
+              protein: `${formData.protein}g`,
+              carbs: `${formData.carbs}g`,
+              fat: `${formData.fat}g`,
+              fiber: `${formData.fiber}g`,
+            },
+          },
+        });
+
+        toast.success("Added successfully");
+      }
+
+      onClose();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error");
+    } finally {
+      setLoading(false);
     }
-    onClose();
   };
 
+  // ================= UI =================
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+          <DialogTitle>
+            {editingProduct ? "Edit Product" : "Add New Product"}
+          </DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-           
-           <div className="grid grid-cols-2 gap-4">
-             <div>
-               <Label htmlFor="name">Product Name *</Label>
-               <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-             </div>
-             <div>
-               <Label htmlFor="price">Price ($) *</Label>
-               <Input 
-                 id="price" 
-                 type="number" 
-                 step="0.01" 
-                 min="0" // تمنع الأرقام السالبة
-                 value={formData.price} 
-                 onChange={(e) => setFormData({ ...formData, price: e.target.value })} 
-                 required 
-               />
-             </div>
-           </div>
-           
-           <div className="grid grid-cols-2 gap-4">
-             <div>
-               <Label htmlFor="category">Category *</Label>
-               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                 <SelectTrigger><SelectValue /></SelectTrigger>
-                 <SelectContent>
-                   {categories.map((cat) => (
-                     <SelectItem key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</SelectItem>
-                   ))}
-                 </SelectContent>
-               </Select>
-             </div>
-             <div className="flex items-center gap-2 pt-6">
-               <input type="checkbox" id="inStock" title="In Stock" checked={formData.inStock} onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })} className="w-4 h-4" />
-               <Label htmlFor="inStock">In Stock</Label>
-             </div>
-           </div>
 
-           <div>
-             <Label htmlFor="image">Product Image</Label>
-             <div className="mt-2 flex items-center gap-4">
-               {formData.image && (
-                 <div className="relative w-16 h-16 rounded-md overflow-hidden border">
-                   <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                 </div>
-               )}
-               <div className="flex-1">
-                 <Input 
-                   id="image" 
-                   type="file" 
-                   accept="image/*" 
-                   onChange={handleImageUpload} 
-                   className="cursor-pointer file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium" 
-                 />
-                 <p className="text-xs text-gray-500 mt-1">PNG, JPG or WEBP</p>
-               </div>
-             </div>
-           </div>
+          {/* NAME + PRICE */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Product Name *</Label>
+              <Input
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </div>
 
-           <div>
-             <Label htmlFor="description">Description *</Label>
-             <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} required />
-           </div>
+            <div>
+              <Label>Price *</Label>
+              <Input
+                type="number"
+                value={formData.price}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: e.target.value })
+                }
+              />
+            </div>
+          </div>
 
-           <div className="border-t pt-4">
-             <h3 className="font-medium mb-3">Nutrition Information</h3>
-             <div className="grid grid-cols-2 gap-4">
-               <div>
-                 <Label htmlFor="calories">Calories *</Label>
-                 <Input id="calories" type="number" min="0" value={formData.calories} onChange={(e) => setFormData({ ...formData, calories: e.target.value })} required />
-               </div>
-               <div>
-                 {/* غيرنا الـ Label عشان نوضح إنها بالجرام */}
-                 <Label htmlFor="protein">Protein (g) *</Label>
-                 <Input id="protein" type="number" min="0" step="0.1" value={formData.protein} onChange={(e) => setFormData({ ...formData, protein: e.target.value })} placeholder="e.g., 5" required />
-               </div>
-               <div>
-                 <Label htmlFor="carbs">Carbs (g) *</Label>
-                 <Input id="carbs" type="number" min="0" step="0.1" value={formData.carbs} onChange={(e) => setFormData({ ...formData, carbs: e.target.value })} placeholder="e.g., 20" required />
-               </div>
-               <div>
-                 <Label htmlFor="fat">Fat (g) *</Label>
-                 <Input id="fat" type="number" min="0" step="0.1" value={formData.fat} onChange={(e) => setFormData({ ...formData, fat: e.target.value })} placeholder="e.g., 2" required />
-               </div>
-               <div>
-                 <Label htmlFor="fiber">Fiber (g) *</Label>
-                 <Input id="fiber" type="number" min="0" step="0.1" value={formData.fiber} onChange={(e) => setFormData({ ...formData, fiber: e.target.value })} placeholder="e.g., 3" required />
-               </div>
-             </div>
-           </div>
+          {/* CATEGORY + STOCK */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Category *</Label>
 
-           <div className="flex gap-2 justify-end pt-4">
-             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-             <Button type="submit" className="bg-green-600 hover:bg-green-700">
-               {editingProduct ? 'Update Product' : 'Add Product'}
-             </Button>
-           </div>
+              {/* 🔥🔥🔥 الحل هنا */}
+              <Select
+                value={formData.categoryId ? formData.categoryId.toString() : ""}
+                onValueChange={(value) => {
+                  const selected = categories.find(
+                    (c) => c.id.toString() === value
+                  );
+
+                  setFormData({
+                    ...formData,
+                    category: selected?.name || "",
+                    categoryId: selected?.id || 0,
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2 pt-6">
+              <input
+                type="checkbox"
+                checked={formData.inStock}
+                onChange={(e) =>
+                  setFormData({ ...formData, inStock: e.target.checked })
+                }
+              />
+              <Label>In Stock</Label>
+            </div>
+          </div>
+
+          {/* IMAGE */}
+          <div>
+            <Label>Image URL *</Label>
+            <Input
+              value={formData.image}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
+            />
+
+            {formData.image && (
+              <img
+                src={formData.image}
+                className="w-24 h-24 mt-3 rounded object-cover border"
+              />
+            )}
+          </div>
+
+          {/* DESCRIPTION */}
+          <div>
+            <Label>Description *</Label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+            />
+          </div>
+
+          {/* NUTRITION */}
+          <div className="border-t pt-4">
+            <h3 className="font-medium mb-3">Nutrition</h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input type="number" placeholder="Calories" value={formData.calories}
+                onChange={(e) => setFormData({ ...formData, calories: e.target.value })} />
+
+              <Input type="number" placeholder="Protein" value={formData.protein}
+                onChange={(e) => setFormData({ ...formData, protein: e.target.value })} />
+
+              <Input type="number" placeholder="Carbs" value={formData.carbs}
+                onChange={(e) => setFormData({ ...formData, carbs: e.target.value })} />
+
+              <Input type="number" placeholder="Fat" value={formData.fat}
+                onChange={(e) => setFormData({ ...formData, fat: e.target.value })} />
+
+              <Input type="number" placeholder="Fiber" value={formData.fiber}
+                onChange={(e) => setFormData({ ...formData, fiber: e.target.value })} />
+            </div>
+          </div>
+
+          {/* ACTIONS */}
+          <div className="flex justify-end gap-2">
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+
+            <Button disabled={loading}>
+              {loading
+                ? "Loading..."
+                : editingProduct
+                ? "Update Product"
+                : "Add Product"}
+            </Button>
+          </div>
+
         </form>
       </DialogContent>
     </Dialog>

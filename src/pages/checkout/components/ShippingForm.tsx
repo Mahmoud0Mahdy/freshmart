@@ -23,9 +23,9 @@ export function ShippingForm({
   const [errors, setErrors] = useState<any>({});
   const [touched, setTouched] = useState<any>({});
 
+  // ✅ عدلنا هنا
   const requiredFields = [
-    "firstName",
-    "lastName",
+    "fullName",
     "email",
     "address",
     "city",
@@ -35,8 +35,9 @@ export function ShippingForm({
 
   const handleChange = (field: string, value: string) => {
 
-    if (field === "firstName" || field === "lastName") {
-      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 30);
+    // ✅ fullName validation
+    if (field === "fullName") {
+      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
     }
 
     if (field === "city" || field === "state") {
@@ -58,7 +59,6 @@ export function ShippingForm({
     handleInputChange(field, value);
 
     if (touched[field]) {
-
       const valid = validateField(field, value);
 
       setErrors((prev: any) => ({
@@ -105,37 +105,20 @@ export function ShippingForm({
 
       <CardContent className="space-y-6">
 
-        {/* FIRST / LAST */}
+        {/* 🔥 FULL NAME بدل first/last */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <FormField
-            label="First Name"
-            name="firstName"
-            value={formData.firstName}
-            placeholder="John"
-            error="Enter valid first name"
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            inputStyle={inputStyle}
-            fieldError={fieldError}
-            fieldValid={fieldValid}
-          />
-
-          <FormField
-            label="Last Name"
-            name="lastName"
-            value={formData.lastName}
-            placeholder="Doe"
-            error="Enter valid last name"
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            inputStyle={inputStyle}
-            fieldError={fieldError}
-            fieldValid={fieldValid}
-          />
-
-        </div>
+        <FormField
+          label="Full Name"
+          name="fullName"
+          value={formData.fullName}
+          placeholder="John Doe"
+          error="Enter valid name"
+          handleChange={handleChange}
+          handleBlur={handleBlur}
+          inputStyle={inputStyle}
+          fieldError={fieldError}
+          fieldValid={fieldValid}
+        />
 
         {/* EMAIL / PHONE */}
 

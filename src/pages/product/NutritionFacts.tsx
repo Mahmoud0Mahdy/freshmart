@@ -2,11 +2,11 @@ import { Card, CardContent } from '../../components/ui/card';
 
 export default function NutritionFacts({ nutrition }: any) {
 
+  if (!nutrition) return null;
+
   return (
     <div className="mt-12">
-
       <Card className="border-0 shadow-lg">
-
         <CardContent className="p-8">
 
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -32,9 +32,7 @@ export default function NutritionFacts({ nutrition }: any) {
           </div>
 
         </CardContent>
-
       </Card>
-
     </div>
   );
 }

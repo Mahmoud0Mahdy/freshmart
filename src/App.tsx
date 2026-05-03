@@ -5,70 +5,91 @@ import { AdminInitializer } from './components/AdminInitializer';
 import { PublicLayout } from './layouts/PublicLayout';
 import { AdminLayout } from './admin/layout/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ChatbotProvider } from './contexts/ChatbotContext';
 
-import { HomePage } from './pages/HomePage';
+// 🌐 Public Pages
+import { HomePage } from './pages/home/HomePage';
 import { ShopPage } from './pages/ShopPage';
 import { ProductDetailPage } from './pages/product/ProductDetailPage';
 import { CartPage } from './pages/cart/CartPage';
 import { CheckoutPage } from './pages/checkout/CheckoutPage';
 import { RecipesPage } from './pages/recipe/RecipesPage';
 import { RecipeDetailPage } from './pages/recipe/RecipeDetailPage';
-import { ChatbotPage } from '././pages/chatbot/ChatbotPage';
+import { ChatbotPage } from './pages/chatbot/ChatbotPage';
 import { LoginPage } from './pages/auth/LoginPage';
-import { ProfilePage } from './pages/ProfilePage';
+import ProfilePage from "./pages/profile/ProfilePage";
 import { CommunityPage } from './pages/CommunityPage';
 import { GhostCraftPage } from './pages/GhostCraftPage';
 import { SavedRecipesPage } from './pages/SavedRecipesPage';
 import { SavedProductsPage } from './pages/SavedProductsPage';
 
+// 🔐 Admin Pages
 import { DashboardPage } from './admin/dashboard/DashboardPage';
 import { ProductsPage } from './admin/products/ProductsPage';
 import { RecipesPage as AdminRecipesPage } from './admin/recipes/RecipesPage';
 import { UsersPage } from './admin/users/UsersPage';
 import { PostsPage } from './admin/posts/PostsPage';
-import { ChatbotProvider } from './contexts/ChatbotContext';
+
+// ✅ الجديد
+import { CategoriesPage } from './admin/categories/CategoriesPage';
 
 export default function App() {
   return (
     <AppProvider>
-      <ChatbotProvider> {/* <--- ضفنا دي هنا */}
+      <ChatbotProvider>
         <AdminInitializer />
+
+        {/* 🔥 Toaster global */}
+        <Toaster richColors position="top-right" />
+
         <Routes>
-        <Route path="/" element={<PublicLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="shop" element={<ShopPage />} />
-          <Route path="product/:id" element={<ProductDetailPage />} />
-          <Route path="cart" element={<CartPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="recipes" element={<RecipesPage />} />
-          <Route path="recipe/:id" element={<RecipeDetailPage />} />
-          <Route path="chatbot" element={<ChatbotPage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="saved-recipes" element={<SavedRecipesPage />} />
-          <Route path="saved-products" element={<SavedProductsPage />} />
-          <Route path="community" element={<CommunityPage />} />
-          <Route path="ghost-craft" element={<GhostCraftPage />} />
-        </Route>
 
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="recipes" element={<AdminRecipesPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="posts" element={<PostsPage />} />
-        </Route>
+          {/* 🌐 Public Layout */}
+          <Route path="/" element={<PublicLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="shop" element={<ShopPage />} />
+            <Route path="product/:id" element={<ProductDetailPage />} />
+            <Route path="cart" element={<CartPage />} />
+            <Route path="checkout" element={<CheckoutPage />} />
+            <Route path="recipes" element={<RecipesPage />} />
+            <Route path="recipe/:id" element={<RecipeDetailPage />} />
+            <Route path="chatbot" element={<ChatbotPage />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-        <Toaster position="top-right" />
+            {/* 🔐 Auth */}
+            <Route path="login" element={<LoginPage />} />
+
+            {/* 👤 User */}
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="saved-recipes" element={<SavedRecipesPage />} />
+            <Route path="saved-products" element={<SavedProductsPage />} />
+            <Route path="community" element={<CommunityPage />} />
+            <Route path="ghost-craft" element={<GhostCraftPage />} />
+          </Route>
+
+          {/* 🔐 Admin Protected */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="recipes" element={<AdminRecipesPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="posts" element={<PostsPage />} />
+
+            {/* ✅ الجديد */}
+            <Route path="categories" element={<CategoriesPage />} />
+
+          </Route>
+
+          {/* ❌ 404 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+
+        </Routes>
       </ChatbotProvider>
     </AppProvider>
   );

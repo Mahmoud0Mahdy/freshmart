@@ -65,22 +65,6 @@ export default function LoginForm({
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-
-        <Checkbox
-          checked={loginData.rememberMe}
-          onCheckedChange={(checked) =>
-            setLoginData((prev: any) => ({
-              ...prev,
-              rememberMe: checked as boolean,
-            }))
-          }
-        />
-
-        <Label className="text-sm">Remember me</Label>
-
-      </div>
-
       <Button
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"

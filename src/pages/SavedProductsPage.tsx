@@ -11,37 +11,54 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { toast } from "sonner";
+import { toggleProductFavorite, getFavoriteProducts } from "../api/favoriteApi";
+import { useEffect, useState } from "react";
 
 export function SavedProductsPage() {
   const { state, dispatch } = useApp();
   const navigate = useNavigate();
 
-  if (!state.isAuthenticated || !state.user) {
+  const [favorites, setFavorites] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      fetchFavorites();
+    }
+  }, [state.isAuthenticated]);
+
+  const fetchFavorites = async () => {
+    try {
+      const data = await getFavoriteProducts();
+      setFavorites(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (!state.isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  const savedProducts = state.products.filter((p) =>
-    state.user!.savedProducts.includes(p.id),
-  );
-
-  // ✅ toggle + toast سريع
-  const toggleProduct = (productId: string, e: React.MouseEvent) => {
+  const toggleProduct = async (productId: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
-    toast.dismiss(); // يقفل أي toast قديم
+    const isSaved = favorites.some((p) => String(p.productId) === productId);
 
-    const isSaved = state.user?.savedProducts.includes(productId);
+    try {
+      await toggleProductFavorite(productId);
 
-    dispatch({
-      type: isSaved ? "UNSAVE_PRODUCT" : "SAVE_PRODUCT",
-      productId,
-    });
+      toast.success(
+        isSaved
+          ? "Product removed from favorites"
+          : "Product saved to favorites"
+      );
 
-    const t = toast.success(
-      isSaved ? "Product removed from favorites" : "Product saved to favorites",
-    );
+      // 🔥 refresh بعد التعديل
+      fetchFavorites();
 
-    setTimeout(() => toast.dismiss(t), 1000);
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
   };
 
   return (
@@ -49,71 +66,60 @@ export function SavedProductsPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle>Saved Products ({savedProducts.length})</CardTitle>
+            <CardTitle>
+              Saved Products ({favorites.length})
+            </CardTitle>
           </CardHeader>
 
           <CardContent>
-            {savedProducts.length > 0 ? (
+            {favorites.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedProducts.map((product) => {
-                  const isSaved = state.user?.savedProducts.includes(
-                    product.id,
-                  );
+                {favorites.map((product) => {
+                  const productId = String(product.productId);
 
                   return (
                     <Card
-                      key={product.id}
+                      key={product.productId}
                       className="group cursor-pointer hover:shadow-lg transition-shadow border border-gray-200"
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      onClick={() => navigate(`/product/${product.productId}`)}
                     >
                       <CardContent className="p-0">
-                        {/* الصورة */}
                         <div className="aspect-[4/3] overflow-hidden rounded-t-lg relative">
                           <ImageWithFallback
-                            src={product.image}
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            src={product.imageUrl}
+                            alt={product.productName}
+                            className="w-full h-full object-cover"
                           />
 
-                          {/* ❤️ زرار الفيفورت */}
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="absolute top-2 right-2 bg-white/90 hover:bg-white p-1 h-8 w-8"
-                            onClick={(e) => toggleProduct(product.id, e)}
+                            className="absolute top-2 right-2 bg-white/90 p-1 h-8 w-8"
+                            onClick={(e) => toggleProduct(productId, e)}
                           >
                             <Heart
                               size={16}
-                              className={`${
-                                isSaved
-                                  ? "fill-red-500 text-red-500"
-                                  : "text-gray-600"
-                              }`}
+                              className="fill-red-500 text-red-500"
                             />
                           </Button>
                         </div>
 
-                        {/* المحتوى */}
                         <div className="p-4 space-y-3">
                           <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="capitalize">
-                              {product.category}
+                            <Badge variant="outline">
+                              {product.categoryName}
                             </Badge>
 
                             <span className="font-semibold text-green-600">
-                              ${product.price.toFixed(2)}
+                              ${product.price}
                             </span>
                           </div>
 
                           <h3 className="font-semibold text-gray-900">
-                            {product.name}
+                            {product.productName}
                           </h3>
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                          >
+                          <Button size="sm" variant="outline" className="w-full">
                             <ShoppingCart size={16} className="mr-2" />
                             View Product
                           </Button>

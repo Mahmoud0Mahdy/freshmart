@@ -32,7 +32,7 @@ export default function RelatedProducts({ products, product }: any) {
               <div className="aspect-square overflow-hidden rounded-t-lg">
 
                 <ImageWithFallback
-                  src={item.image}
+                  src={item.imageUrl} 
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

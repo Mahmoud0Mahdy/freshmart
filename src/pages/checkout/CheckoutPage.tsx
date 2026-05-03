@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { useApp } from '../../contexts/AppContext';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 import { CheckoutSteps } from './components/CheckoutSteps';
-import { ShippingForm } from '././components/ShippingForm';
+import { ShippingForm } from './components/ShippingForm';
 import { PaymentForm } from './components/PaymentForm';
 import { ReviewOrder } from './components/ReviewOrder';
 import { CheckoutSummary } from './components/CheckoutSummary';
+
+import { getUserProfile } from '../../api/userProfileApi'; // 🔥 مهم
 
 export function CheckoutPage() {
 
@@ -18,32 +20,54 @@ export function CheckoutPage() {
   const { state, dispatch } = useApp();
   const [step, setStep] = useState(1);
 
-  // 🔥 بيانات Buy Now
   const quickProduct = location.state?.quickProduct;
   const quickQuantity = location.state?.quickQuantity;
 
-  // السلة المستخدمة في الصفحة
   const cartItems = quickProduct
     ? [{ product: quickProduct, quantity: quickQuantity }]
     : state.cart;
 
   const [formData, setFormData] = useState({
-    firstName:'',
-    lastName:'',
-    email:'',
-    phone:'',
-    address:'',
-    city:'',
-    state:'',
-    zipCode:'',
-    cardNumber:'',
-    expiryDate:'',
-    cvv:'',
-    cardName:'',
-    saveInfo:false,
-    sameAddress:true,
-    deliveryMethod:'standard'
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardName: '',
+    saveInfo: false,
+    sameAddress: true,
+    deliveryMethod: 'standard'
   });
+
+  // 🔥 Prefill من Profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getUserProfile();
+
+        setFormData(prev => ({
+          ...prev,
+          fullName: data.fullName || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          address: data.address || '',
+          city: data.city || '',
+          state: data.state || '',
+          zipCode: data.zipCode || '',
+        }));
+
+      } catch {
+        console.log("Failed to load profile");
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const subtotal = cartItems.reduce(
     (total,item)=> total + (item.product.price * item.quantity),0
@@ -60,14 +84,24 @@ export function CheckoutPage() {
 
   const total = subtotal + tax + shipping;
 
+  // 🔥 مهم: نخزن في Context
   const handleInputChange = (field:string,value:any)=>{
-    setFormData(prev=>({...prev,[field]:value}));
+    setFormData(prev=>{
+      const updated = {...prev,[field]:value};
+
+      dispatch({
+        type:'SET_CHECKOUT_DATA',
+        data: updated
+      });
+
+      return updated;
+    });
   };
 
   const validateStep = (stepNumber:number)=>{
 
     if(stepNumber===1){
-      return formData.firstName && formData.lastName && formData.email &&
+      return formData.fullName && formData.email &&
       formData.address && formData.city && formData.state && formData.zipCode;
     }
 
@@ -89,9 +123,13 @@ export function CheckoutPage() {
 
   const placeOrder = ()=>{
     if(validateStep(2)){
+
+      console.log("ORDER DATA:", state.checkoutData); 
+
       if(!quickProduct){
         dispatch({type:'CLEAR_CART'});
       }
+
       toast.success('Order placed successfully!');
       navigate('/');
     }else{
@@ -99,7 +137,6 @@ export function CheckoutPage() {
     }
   };
 
-  // لو مش Buy Now والسلة فاضية
   if(!quickProduct && state.cart.length === 0){
     return <Navigate to="/cart" replace />;
   }

@@ -11,7 +11,7 @@ export default function ProductGallery({ product }: any) {
       >
 
         <ImageWithFallback
-          src={product.image}
+          src={product.imageUrl}
           alt={product.name}
           className="w-full h-full object-cover block"
         />

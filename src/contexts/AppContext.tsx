@@ -1,12 +1,30 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  ReactNode,
+  useEffect,
+} from "react";
+import {
+  getAllRecipes,
+  getRecipeById,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+} from "../api/recipeApi";
 
-// Types
+import { getFavoriteProducts, getSavedRecipes } from "../api/favoriteApi";
+
+// ================= TYPES =================
+
 export interface Product {
   id: string;
   name: string;
   price: number;
   category: string;
+  categoryId: number;
   image: string;
+  imageUrl: string;
   description: string;
   nutrition: {
     calories: number;
@@ -32,19 +50,14 @@ export interface Recipe {
   category: string;
   ingredients: string[];
   instructions: string[];
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  difficulty: "Easy" | "Medium" | "Hard";
 }
 
 export interface User {
   id: string;
-  name: string;
   email: string;
-  role: 'user' | 'admin';
-  savedRecipes: string[];
-  savedProducts: string[];
-  orderHistory: any[];
-  createdAt: string;
-  isActive: boolean;
+  role: "user" | "admin";
+  isActive?: boolean;
 }
 
 export interface CommunityPost {
@@ -60,273 +73,266 @@ export interface CommunityPost {
   createdAt: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  type: "product" | "recipe";
+}
+
+export interface CheckoutData {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  cardNumber?: string;
+  expiryDate?: string;
+  cvv?: string;
+  cardName?: string;
+  deliveryMethod?: string;
+}
+
+// ================= STATE =================
+
 interface AppState {
   cart: CartItem[];
   user: User | null;
   isAuthenticated: boolean;
+
   products: Product[];
   recipes: Recipe[];
   users: User[];
   communityPosts: CommunityPost[];
+
+  categories: Category[];
+
+  checkoutData: CheckoutData;
+
+  favoriteProducts: string[];
+  favoriteRecipes: string[];
 }
 
+// ================= ACTIONS =================
+
 type AppAction =
-  | { type: 'ADD_TO_CART'; product: Product; quantity: number }
-  | { type: 'REMOVE_FROM_CART'; productId: string }
-  | { type: 'UPDATE_QUANTITY'; productId: string; quantity: number }
-  | { type: 'CLEAR_CART' }
-  | { type: 'LOGIN'; user: User }
-  | { type: 'LOGOUT' }
-  | { type: 'SAVE_RECIPE'; recipeId: string }
-  | { type: 'UNSAVE_RECIPE'; recipeId: string }
-  | { type: 'SAVE_PRODUCT'; productId: string }
-  | { type: 'UNSAVE_PRODUCT'; productId: string }
-  | { type: 'ADD_PRODUCT'; product: Product }
-  | { type: 'UPDATE_PRODUCT'; product: Product }
-  | { type: 'DELETE_PRODUCT'; productId: string }
-  | { type: 'ADD_RECIPE'; recipe: Recipe }
-  | { type: 'UPDATE_RECIPE'; recipe: Recipe }
-  | { type: 'DELETE_RECIPE'; recipeId: string }
-  | { type: 'DELETE_USER'; userId: string }
-  | { type: 'TOGGLE_USER_STATUS'; userId: string }
-  | { type: 'DELETE_POST'; postId: string }
-  | { type: 'INIT_DATA'; products: Product[]; recipes: Recipe[]; users: User[]; posts: CommunityPost[] };
+  | { type: "ADD_TO_CART"; product: Product; quantity: number }
+  | { type: "REMOVE_FROM_CART"; productId: string }
+  | { type: "UPDATE_QUANTITY"; productId: string; quantity: number }
+  | { type: "CLEAR_CART" }
+  | { type: "LOGIN"; user: User }
+  | { type: "LOGOUT" }
+  | { type: "SET_CHECKOUT_DATA"; data: CheckoutData }
 
+  // 🔥 PRODUCTS CRUD (رجعتهم)
+  | { type: "ADD_PRODUCT"; product: Product }
+  | { type: "UPDATE_PRODUCT"; product: Product }
+  | { type: "DELETE_PRODUCT"; productId: string }
+  | { type: "SET_PRODUCTS"; products: Product[] }
 
-// نقرأ المستخدم من localStorage
+  // 🔥 RECIPES CRUD (رجعتهم)
+  | { type: "SET_RECIPES"; recipes: Recipe[] }
+  | { type: "ADD_RECIPE"; recipe: Recipe }
+  | { type: "UPDATE_RECIPE"; recipe: Recipe }
+  | { type: "DELETE_RECIPE"; recipeId: string }
+
+  // 🔥 FAVORITES
+  | { type: "SET_FAVORITE_PRODUCTS"; productIds: string[] }
+  | { type: "SET_FAVORITE_RECIPES"; recipeIds: string[] }
+  | { type: "TOGGLE_PRODUCT_FAVORITE"; productId: string }
+  | { type: "TOGGLE_RECIPE_FAVORITE"; recipeId: string };
+
+// ================= INIT =================
+
 const savedUser = localStorage.getItem("user");
-const rawUser = savedUser ? JSON.parse(savedUser) : null;
-const parsedUser: User | null = rawUser
-  ? {
-      ...rawUser,
-      savedRecipes: rawUser.savedRecipes ?? [],
-      savedProducts: rawUser.savedProducts ?? [],
-    }
-  : null;
+const parsedUser: User | null = savedUser ? JSON.parse(savedUser) : null;
 
 const initialState: AppState = {
   cart: [],
   user: parsedUser,
   isAuthenticated: !!parsedUser,
+
   products: [],
   recipes: [],
   users: [],
   communityPosts: [],
+  categories: [],
+  checkoutData: {},
+
+  favoriteProducts: [],
+  favoriteRecipes: [],
 };
 
+// ================= REDUCER =================
+
 function appReducer(state: AppState, action: AppAction): AppState {
-
   switch (action.type) {
+    // 🔥 PRODUCTS
+    case "SET_PRODUCTS":
+      return { ...state, products: action.products };
 
-    case 'INIT_DATA':
+    case "ADD_PRODUCT":
+      return { ...state, products: [action.product, ...state.products] };
+
+    case "UPDATE_PRODUCT":
       return {
         ...state,
-        products: action.products,
-        recipes: action.recipes,
-        users: action.users,
-        communityPosts: action.posts,
-      };
-
-    case 'ADD_TO_CART':
-      const existingItem = state.cart.find(item => item.product.id === action.product.id);
-
-      if (existingItem) {
-        return {
-          ...state,
-          cart: state.cart.map(item =>
-            item.product.id === action.product.id
-              ? { ...item, quantity: item.quantity + action.quantity }
-              : item
-          ),
-        };
-      }
-
-      return {
-        ...state,
-        cart: [...state.cart, { product: action.product, quantity: action.quantity }],
-      };
-
-    case 'REMOVE_FROM_CART':
-      return {
-        ...state,
-        cart: state.cart.filter(item => item.product.id !== action.productId),
-      };
-
-    case 'UPDATE_QUANTITY':
-      return {
-        ...state,
-        cart: state.cart.map(item =>
-          item.product.id === action.productId
-            ? { ...item, quantity: action.quantity }
-            : item
-        ),
-      };
-
-    case 'CLEAR_CART':
-      return {
-        ...state,
-        cart: [],
-      };
-
-    case 'LOGIN':
-
-      // حفظ المستخدم
-      localStorage.setItem("user", JSON.stringify(action.user));
-
-      return {
-        ...state,
-        user: action.user,
-        isAuthenticated: true,
-      };
-
-    case 'LOGOUT':
-
-      // مسح المستخدم
-      localStorage.removeItem("user");
-
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-      };
-
-    case 'SAVE_RECIPE':
-
-      if (!state.user) return state;
-      if (state.user.savedRecipes.includes(action.recipeId)) return state;
-
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          savedRecipes: [...state.user.savedRecipes, action.recipeId],
-        },
-      };
-
-    case 'UNSAVE_RECIPE':
-
-      if (!state.user) return state;
-
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          savedRecipes: state.user.savedRecipes.filter(id => id !== action.recipeId),
-        },
-      };
-
-    case 'SAVE_PRODUCT':
-
-      if (!state.user) return state;
-      if (state.user.savedProducts.includes(action.productId)) return state;
-
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          savedProducts: [...state.user.savedProducts, action.productId],
-        },
-      };
-
-    case 'UNSAVE_PRODUCT':
-
-      if (!state.user) return state;
-
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          savedProducts: state.user.savedProducts.filter(id => id !== action.productId),
-        },
-      };
-
-    case 'ADD_PRODUCT':
-      return {
-        ...state,
-        products: [...state.products, action.product],
-      };
-
-    case 'UPDATE_PRODUCT':
-      return {
-        ...state,
-        products: state.products.map(p =>
+        products: state.products.map((p) =>
           p.id === action.product.id ? action.product : p
         ),
       };
 
-    case 'DELETE_PRODUCT':
+    case "DELETE_PRODUCT":
       return {
         ...state,
-        products: state.products.filter(p => p.id !== action.productId),
+        products: state.products.filter((p) => p.id !== action.productId),
       };
 
-    case 'ADD_RECIPE':
-      return {
-        ...state,
-        recipes: [...state.recipes, action.recipe],
-      };
+    // 🔥 RECIPES
+    case "SET_RECIPES":
+      return { ...state, recipes: action.recipes };
 
-    case 'UPDATE_RECIPE':
+    case "ADD_RECIPE":
+      return { ...state, recipes: [action.recipe, ...state.recipes] };
+
+    case "UPDATE_RECIPE":
       return {
         ...state,
-        recipes: state.recipes.map(r =>
+        recipes: state.recipes.map((r) =>
           r.id === action.recipe.id ? action.recipe : r
         ),
       };
 
-    case 'DELETE_RECIPE':
+    case "DELETE_RECIPE":
       return {
         ...state,
-        recipes: state.recipes.filter(r => r.id !== action.recipeId),
+        recipes: state.recipes.filter((r) => r.id !== action.recipeId),
       };
 
-    case 'DELETE_USER':
-      return {
-        ...state,
-        users: state.users.filter(u => u.id !== action.userId),
-      };
+    // 🔥 FAVORITES
+    case "SET_FAVORITE_PRODUCTS":
+      return { ...state, favoriteProducts: action.productIds };
 
-    case 'TOGGLE_USER_STATUS':
-      return {
-        ...state,
-        users: state.users.map(u =>
-          u.id === action.userId ? { ...u, isActive: !u.isActive } : u
-        ),
-      };
+    case "SET_FAVORITE_RECIPES":
+      return { ...state, favoriteRecipes: action.recipeIds };
 
-    case 'DELETE_POST':
+    case "TOGGLE_PRODUCT_FAVORITE": {
+      const exists = state.favoriteProducts.includes(action.productId);
       return {
         ...state,
-        communityPosts: state.communityPosts.filter(p => p.id !== action.postId),
+        favoriteProducts: exists
+          ? state.favoriteProducts.filter((id) => id !== action.productId)
+          : [...state.favoriteProducts, action.productId],
       };
+    }
+
+    case "TOGGLE_RECIPE_FAVORITE": {
+      const exists = state.favoriteRecipes.includes(action.recipeId);
+      return {
+        ...state,
+        favoriteRecipes: exists
+          ? state.favoriteRecipes.filter((id) => id !== action.recipeId)
+          : [...state.favoriteRecipes, action.recipeId],
+      };
+    }
+
+    case "LOGIN":
+      localStorage.setItem("user", JSON.stringify(action.user));
+      return { ...state, user: action.user, isAuthenticated: true };
+
+    case "LOGOUT":
+      localStorage.clear();
+      return { ...state, user: null, isAuthenticated: false };
 
     default:
       return state;
   }
 }
 
-const AppContext = createContext<{
-  state: AppState;
-  dispatch: React.Dispatch<AppAction>;
-} | null>(null);
+// ================= CONTEXT =================
+
+const AppContext = createContext<any>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  const fetchRecipes = async () => {
+    const data = await getAllRecipes();
+    dispatch({ type: "SET_RECIPES", recipes: data });
+  };
+
+  const fetchFavorites = async () => {
+    try {
+      const products = (await getFavoriteProducts()) || [];
+      const recipes = (await getSavedRecipes()) || [];
+
+      dispatch({
+        type: "SET_FAVORITE_PRODUCTS",
+        productIds: products.map((p: any) => String(p.productId)),
+      });
+
+      dispatch({
+        type: "SET_FAVORITE_RECIPES",
+        recipeIds: recipes.map((r: any) =>
+          String(r.recipeId ?? r.id)
+        ),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      fetchRecipes();
+      fetchFavorites();
+    }
+  }, [state.isAuthenticated]);
+
+  const addRecipe = async (data: any) => {
+    await createRecipe(data);
+
+    await fetchRecipes();
+  };
+
+  const editRecipe = async (id: string, data: any) => {
+    await updateRecipe(id, data);
+    await fetchRecipes();
+  };
+
+  const removeRecipe = async (id: string) => {
+    await deleteRecipe(id);
+    dispatch({ type: "DELETE_RECIPE", recipeId: id });
+  };
+
+  const fetchRecipeById = async (id: string) => {
+    return await getRecipeById(id);
+  };
+
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider
+      value={{
+        state,
+        dispatch,
+        fetchRecipes,
+        addRecipe,
+        editRecipe,
+        removeRecipe,
+        fetchRecipeById,
+        fetchFavorites,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
 }
 
 export function useApp() {
-
   const context = useContext(AppContext);
 
   if (!context) {
-    throw new Error('useApp must be used within an AppProvider');
+    throw new Error("useApp must be used within an AppProvider");
   }
 
   return context;

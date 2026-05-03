@@ -1,5 +1,4 @@
 import { Input } from "../../components/ui/input";
-import { Checkbox } from "../../components/ui/checkbox";
 import { Button } from "../../components/ui/button";
 import PasswordInput from "../../components/PasswordInput";
 
@@ -18,7 +17,6 @@ export default function SignupForm({
     <form onSubmit={handleSignup} className="space-y-4">
 
       <div className="grid grid-cols-2 gap-4">
-
         <Input
           placeholder="First Name"
           value={signupData.firstName}
@@ -40,7 +38,6 @@ export default function SignupForm({
             }))
           }
         />
-
       </div>
 
       <Input
@@ -76,24 +73,6 @@ export default function SignupForm({
           }))
         }
       />
-
-      <div className="flex items-center space-x-2">
-
-        <Checkbox
-          checked={signupData.agreeToTerms}
-          onCheckedChange={(checked) =>
-            setSignupData((prev: any) => ({
-              ...prev,
-              agreeToTerms: checked as boolean,
-            }))
-          }
-        />
-
-        <span className="text-sm">
-          I agree to the Terms & Conditions
-        </span>
-
-      </div>
 
       <Button className="w-full bg-green-600 hover:bg-green-700">
         Create Account

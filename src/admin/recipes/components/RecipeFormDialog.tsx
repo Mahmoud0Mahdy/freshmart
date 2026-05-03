@@ -5,6 +5,9 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
+import { getCategories } from "../../../api/adminApi";
+import { getRecipeById } from "../../../api/recipeApi"; // 🔥 الجديد
+
 import {
   Select,
   SelectContent,
@@ -12,12 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "../../../components/ui/dialog";
+
 import { toast } from "sonner";
 
 interface RecipeFormDialogProps {
@@ -31,136 +36,133 @@ const defaultFormData = {
   image: "",
   time: "",
   servings: "",
-  category: "main",
+  category: "",
   difficulty: "Easy" as "Easy" | "Medium" | "Hard",
   ingredients: "",
   instructions: "",
 };
 
-const categories = [
-  "breakfast",
-  "lunch",
-  "dinner",
-  "main",
-  "salad",
-  "dessert",
-  "snack",
-];
 const difficulties: ("Easy" | "Medium" | "Hard")[] = ["Easy", "Medium", "Hard"];
-const getCategoryId = (category: string): number => {
-  const map: Record<string, number> = {
-    breakfast: 1,
-    lunch: 2,
-    dinner: 3,
-    main: 4,
-    salad: 5,
-    dessert: 6,
-    snack: 7,
-  };
-
-  return map[category] || 4;
-};
 
 export function RecipeFormDialog({
   isOpen,
   onClose,
   editingRecipe,
 }: RecipeFormDialogProps) {
-  const { dispatch } = useApp();
+  const { addRecipe, editRecipe } = useApp();
+
   const [formData, setFormData] = useState(defaultFormData);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
 
+  // ================= LOAD CATEGORIES =================
   useEffect(() => {
-    if (editingRecipe) {
-      setFormData({
-        title: editingRecipe.title,
-        image: editingRecipe.image,
-        // بنشيل أي حروف ونخلي الرقم بس عشان الـ Input من نوع Number
-        time: editingRecipe.time.replace(/[^0-9]/g, ""),
-        servings: editingRecipe.servings.replace(/[^0-9]/g, ""),
-        category: editingRecipe.category,
-        difficulty: editingRecipe.difficulty,
-        ingredients: editingRecipe.ingredients.join("\n"),
-        instructions: editingRecipe.instructions.join("\n"),
-      });
-    } else {
-      setFormData(defaultFormData);
-    }
-  }, [editingRecipe, isOpen]);
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories(1);
+        setCategories(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load categories");
+      }
+    };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please upload a valid image file");
+    if (isOpen) fetchCategories();
+  }, [isOpen]);
+
+  // ================= LOAD EDIT DATA (🔥 FIXED) =================
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      if (!editingRecipe) {
+        setFormData(defaultFormData);
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+      try {
+        const data = await getRecipeById(editingRecipe.id); // 🔥 هنا الحل
+
+        const matchedCategory = categories.find(
+          (c) =>
+            c.name.toLowerCase() === data.categoryName?.toLowerCase()
+        );
+
+        setFormData({
+          title: data.title || "",
+          image: data.imageUrl || "",
+          time: data.prepTime?.toString() || "",
+          servings: data.servings?.toString() || "",
+          category: matchedCategory ? matchedCategory.id.toString() : "",
+          difficulty: data.difficultyLevel || "Easy",
+          ingredients:
+            data.ingredients?.map((i: any) => i.quantityDescription).join("\n") || "",
+          instructions:
+            data.instructions?.map((i: any) => i.step).join("\n") || "",
+        });
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load recipe data");
+      }
+    };
+
+    if (isOpen && categories.length > 0) {
+      fetchRecipe();
+    }
+  }, [editingRecipe, isOpen, categories]);
+
+  // ================= SUBMIT =================
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const servingsNumber = parseInt(formData.servings) || 1;
+    if (loading) return;
 
-    // 🔥 نفس شكل الـ API بالظبط
-    const apiRecipeData = {
-      title: formData.title,
-      imageUrl:
-        formData.image ||
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",
-      difficultyLevel: formData.difficulty,
-      prepTime: Number(formData.time),
-      servings: servingsNumber,
-      categoryId: getCategoryId(formData.category),
+    setLoading(true);
 
-      ingredients: formData.ingredients
-        .split("\n")
-        .filter((i) => i.trim())
-        .map((item) => ({
-          quantityDescription: item,
-        })),
+    try {
+      const servingsNumber = parseInt(formData.servings) || 1;
 
-      instructions: formData.instructions
-        .split("\n")
-        .filter((i) => i.trim())
-        .map((step) => ({
-          step: step,
-        })),
-    };
+      const apiRecipeData = {
+        title: formData.title,
+        imageUrl:
+          formData.image ||
+          "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",
+        difficultyLevel: formData.difficulty,
+        prepTime: Number(formData.time),
+        servings: servingsNumber,
+        categoryId: Number(formData.category),
 
-    // 🔥 ده الشكل اللي UI محتاجه (زي ما كان)
-    const uiRecipeData: Recipe = {
-      id: editingRecipe?.id || `recipe-${Date.now()}`,
-      title: apiRecipeData.title,
-      image: apiRecipeData.imageUrl,
-      time: `${apiRecipeData.prepTime} min`,
-      servings: `${servingsNumber} ${
-        servingsNumber === 1 ? "person" : "people"
-      }`,
-      category: formData.category,
-      difficulty: formData.difficulty,
-      ingredients: formData.ingredients.split("\n").filter((i) => i.trim()),
-      instructions: formData.instructions.split("\n").filter((i) => i.trim()),
-    };
+        ingredients: formData.ingredients
+          .split("\n")
+          .filter((i) => i.trim())
+          .map((item) => ({
+            quantityDescription: item,
+          })),
 
-    if (editingRecipe) {
-      dispatch({ type: "UPDATE_RECIPE", recipe: uiRecipeData });
-      toast.success("Recipe updated successfully");
-    } else {
-      dispatch({ type: "ADD_RECIPE", recipe: uiRecipeData });
-      toast.success("Recipe added successfully");
+        instructions: formData.instructions
+          .split("\n")
+          .filter((i) => i.trim())
+          .map((step) => ({
+            step: step,
+          })),
+      };
+
+      if (editingRecipe) {
+        await editRecipe(Number(editingRecipe.id), apiRecipeData);
+        toast.success("Recipe updated successfully");
+      } else {
+        await addRecipe(apiRecipeData);
+        toast.success("Recipe added successfully");
+      }
+
+      onClose();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    console.log("🚀 API READY DATA:", apiRecipeData); // مهم جدًا للتست
-
-    onClose();
   };
 
+  // ================= UI =================
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -169,11 +171,11 @@ export function RecipeFormDialog({
             {editingRecipe ? "Edit Recipe" : "Add New Recipe"}
           </DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">Recipe Title *</Label>
+            <Label>Recipe Title *</Label>
             <Input
-              id="title"
               value={formData.title}
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
@@ -183,56 +185,51 @@ export function RecipeFormDialog({
           </div>
 
           <div>
-            <Label htmlFor="image">Recipe Image</Label>
-            <div className="mt-2 flex items-center gap-4">
-              {formData.image && (
-                <div className="relative w-16 h-16 rounded-md overflow-hidden border">
-                  <img
-                    src={formData.image}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <div className="flex-1">
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="cursor-pointer file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                />
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG or WEBP</p>
-              </div>
-            </div>
+            <Label>Image URL *</Label>
+            <Input
+              placeholder="https://example.com/image.jpg"
+              value={formData.image}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.value })
+              }
+            />
+
+            {formData.image && (
+              <img
+                src={formData.image}
+                alt="Preview"
+                className="w-24 h-24 mt-3 rounded object-cover border"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = "/no-image.png";
+                }}
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="time">Cooking Time (min) *</Label>
+              <Label>Cooking Time *</Label>
               <Input
-                id="time"
                 type="number"
                 min="1"
                 value={formData.time}
                 onChange={(e) =>
                   setFormData({ ...formData, time: e.target.value })
                 }
-                placeholder="e.g., 30"
                 required
               />
             </div>
+
             <div>
-              <Label htmlFor="servings">Servings (people) *</Label>
+              <Label>Servings *</Label>
               <Input
-                id="servings"
                 type="number"
                 min="1"
                 value={formData.servings}
                 onChange={(e) =>
                   setFormData({ ...formData, servings: e.target.value })
                 }
-                placeholder="e.g., 4"
                 required
               />
             </div>
@@ -240,7 +237,7 @@ export function RecipeFormDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="category">Category *</Label>
+              <Label>Category *</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) =>
@@ -248,28 +245,31 @@ export function RecipeFormDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
+
                 <SelectContent>
                   {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      {cat.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div>
-              <Label htmlFor="difficulty">Difficulty *</Label>
+              <Label>Difficulty *</Label>
               <Select
                 value={formData.difficulty}
-                onValueChange={(value: "Easy" | "Medium" | "Hard") =>
+                onValueChange={(value: any) =>
                   setFormData({ ...formData, difficulty: value })
                 }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
+
                 <SelectContent>
                   {difficulties.map((diff) => (
                     <SelectItem key={diff} value={diff}>
@@ -282,31 +282,25 @@ export function RecipeFormDialog({
           </div>
 
           <div>
-            <Label htmlFor="ingredients">Ingredients (one per line) *</Label>
+            <Label>Ingredients *</Label>
             <Textarea
-              id="ingredients"
               value={formData.ingredients}
               onChange={(e) =>
                 setFormData({ ...formData, ingredients: e.target.value })
               }
               rows={4}
-              placeholder="2 cups flour&#10;1 cup sugar"
               required
             />
           </div>
 
           <div>
-            <Label htmlFor="instructions">
-              Instructions (one step per line) *
-            </Label>
+            <Label>Instructions *</Label>
             <Textarea
-              id="instructions"
               value={formData.instructions}
               onChange={(e) =>
                 setFormData({ ...formData, instructions: e.target.value })
               }
               rows={4}
-              placeholder="Preheat oven to 350°F&#10;Mix ingredients"
               required
             />
           </div>
@@ -315,8 +309,16 @@ export function RecipeFormDialog({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
-              {editingRecipe ? "Update Recipe" : "Add Recipe"}
+
+            <Button
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {loading
+                ? "Loading..."
+                : editingRecipe
+                  ? "Update Recipe"
+                  : "Add Recipe"}
             </Button>
           </div>
         </form>
