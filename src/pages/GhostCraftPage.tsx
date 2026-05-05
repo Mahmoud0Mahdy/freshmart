@@ -1,24 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChefHat, Plus, Minus, ShoppingCart, Sparkles, Edit2, Check } from 'lucide-react';
+import { ChefHat, ShoppingCart, Sparkles, Edit2, Check } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
-import { Switch } from '../components/ui/switch';
 import { Slider } from '../components/ui/slider';
 import { Textarea } from '../components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
 import { Card } from '../components/ui/card';
 import { useApp } from '../contexts/AppContext';
 import { Product } from '../contexts/AppContext';
 import { toast } from 'sonner@2.0.3';
+import { createGhostCraftOrder } from '../api/ghostCraftApi';
 
 export function GhostCraftPage() {
   const navigate = useNavigate();
@@ -33,7 +26,6 @@ export function GhostCraftPage() {
   const [spiciness, setSpiciness] = useState(3);
   const [saltiness, setSaltiness] = useState(3);
   const [portionSize, setPortionSize] = useState('medium');
-  const [cookingMethod, setCookingMethod] = useState('');
   const [specialInstructions, setSpecialInstructions] = useState('');
   
   // Order preview
@@ -69,17 +61,6 @@ export function GhostCraftPage() {
     { value: 'family', label: 'Family (7-8 servings)', price: 32.99 },
   ];
   
-  const cookingMethods = [
-    'Grilled',
-    'Baked',
-    'Fried',
-    'Steamed',
-    'Roasted',
-    'Sautéed',
-    'Raw',
-    'Slow-Cooked',
-  ];
-
   const toggleAllergy = (allergy: string) => {
     setAllergies(prev =>
       prev.includes(allergy)
@@ -101,13 +82,30 @@ export function GhostCraftPage() {
     return portion?.price || 18.99;
   };
 
-  const handlePreviewOrder = () => {
+  const handlePreviewOrder = async () => {
     if (!foodName.trim()) {
       toast.error('Please enter what food you want to order');
       return;
     }
-    setShowPreview(true);
-    setIsEditing(false);
+
+    const payload = {
+      dishDescription: foodName,
+      allergies,
+      dietaryPreferences: dietary,
+      spicinessLevel: spiciness,
+      saltinessLevel: saltiness,
+      portionSize,
+      specialInstructions,
+    };
+
+    try {
+      await createGhostCraftOrder(payload);
+      setShowPreview(true);
+      setIsEditing(false);
+      toast.success('Order preview generated successfully!');
+    } catch (error) {
+      toast.error('Failed to generate order preview. Please try again.');
+    }
   };
 
   const handleEditOrder = () => {
@@ -148,7 +146,6 @@ export function GhostCraftPage() {
     setSpiciness(3);
     setSaltiness(3);
     setPortionSize('medium');
-    setCookingMethod('');
     setSpecialInstructions('');
     setShowPreview(false);
     setIsEditing(false);
@@ -166,9 +163,6 @@ export function GhostCraftPage() {
     parts.push(`Spice Level: ${spiciness}/5`);
     parts.push(`Salt Level: ${saltiness}/5`);
     parts.push(`Portion: ${portionOptions.find(p => p.value === portionSize)?.label}`);
-    if (cookingMethod) {
-      parts.push(`Cooking: ${cookingMethod}`);
-    }
     if (specialInstructions) {
       parts.push(`Notes: ${specialInstructions}`);
     }
@@ -320,23 +314,6 @@ export function GhostCraftPage() {
               </div>
             </Card>
 
-            {/* Cooking Method */}
-            <Card className="p-6">
-              <h3 className="text-gray-900 mb-4">Cooking Method</h3>
-              <Select value={cookingMethod} onValueChange={setCookingMethod}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select cooking method (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cookingMethods.map((method) => (
-                    <SelectItem key={method} value={method}>
-                      {method}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Card>
-
             {/* Special Instructions */}
             <Card className="p-6">
               <h3 className="text-gray-900 mb-4">Special Instructions</h3>
@@ -430,13 +407,6 @@ export function GhostCraftPage() {
                     {portionOptions.find(p => p.value === portionSize)?.label}
                   </div>
                 </div>
-
-                {cookingMethod && (
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Cooking Method</div>
-                    <div className="text-gray-900">{cookingMethod}</div>
-                  </div>
-                )}
 
                 {specialInstructions && (
                   <div>

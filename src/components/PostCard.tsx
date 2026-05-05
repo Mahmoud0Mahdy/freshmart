@@ -1,5 +1,4 @@
 import { ArrowUp, ArrowDown, MessageCircle, Bookmark } from 'lucide-react';
-import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
 
@@ -17,34 +16,18 @@ export interface Post {
   comments: number;
   timestamp: string;
   isSaved: boolean;
+  currentUserVote?: number;
 }
 
 interface PostCardProps {
   post: Post;
   onPostClick?: (postId: string) => void;
+  onVote?: (postId: string, voteType: 1 | -1) => void | Promise<void>;
+  onSave?: (postId: string) => void | Promise<void>;
+  onCommentsClick?: (postId: string) => void;
 }
 
-export function PostCard({ post, onPostClick }: PostCardProps) {
-  const [votes, setVotes] = useState(post.upvotes);
-  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
-  const [isSaved, setIsSaved] = useState(post.isSaved);
-
-  const handleVote = (type: 'up' | 'down') => {
-    if (userVote === type) {
-      // Remove vote
-      setVotes(votes + (type === 'up' ? -1 : 1));
-      setUserVote(null);
-    } else if (userVote === null) {
-      // Add new vote
-      setVotes(votes + (type === 'up' ? 1 : -1));
-      setUserVote(type);
-    } else {
-      // Change vote
-      setVotes(votes + (type === 'up' ? 2 : -2));
-      setUserVote(type);
-    }
-  };
-
+export function PostCard({ post, onPostClick, onVote, onSave, onCommentsClick }: PostCardProps) {
   const tagColors: { [key: string]: string } = {
     'Recipes': 'bg-green-100 text-green-700 hover:bg-green-200',
     'Tips': 'bg-blue-100 text-blue-700 hover:bg-blue-200',
@@ -59,22 +42,22 @@ export function PostCard({ post, onPostClick }: PostCardProps) {
         {/* Vote section */}
         <div className="flex flex-col items-center gap-1 p-4 bg-gray-50">
           <button
-            onClick={() => handleVote('up')}
+            onClick={() => onVote?.(post.id, 1)}
             className={`p-1 rounded hover:bg-gray-200 transition-colors ${
-              userVote === 'up' ? 'text-orange-500' : 'text-gray-400'
+              post.currentUserVote === 1 ? 'text-orange-500' : 'text-gray-400'
             }`}
           >
             <ArrowUp size={20} />
           </button>
           <span className={`text-sm ${
-            votes > 0 ? 'text-orange-600' : votes < 0 ? 'text-gray-400' : 'text-gray-600'
+            post.upvotes > 0 ? 'text-orange-600' : post.upvotes < 0 ? 'text-gray-400' : 'text-gray-600'
           }`}>
-            {votes}
+            {post.upvotes}
           </span>
           <button
-            onClick={() => handleVote('down')}
+            onClick={() => onVote?.(post.id, -1)}
             className={`p-1 rounded hover:bg-gray-200 transition-colors ${
-              userVote === 'down' ? 'text-blue-500' : 'text-gray-400'
+              post.currentUserVote === -1 ? 'text-blue-500' : 'text-gray-400'
             }`}
           >
             <ArrowDown size={20} />
@@ -135,18 +118,21 @@ export function PostCard({ post, onPostClick }: PostCardProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
-            <button className="flex items-center gap-1 text-gray-600 hover:text-green-600 transition-colors">
+            <button
+              onClick={() => onCommentsClick?.(post.id)}
+              className="flex items-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+            >
               <MessageCircle size={18} />
               <span className="text-sm">{post.comments} comments</span>
             </button>
             <button
-              onClick={() => setIsSaved(!isSaved)}
+              onClick={() => onSave?.(post.id)}
               className={`flex items-center gap-1 transition-colors ${
-                isSaved ? 'text-orange-500' : 'text-gray-600 hover:text-orange-500'
+                post.isSaved ? 'text-orange-500' : 'text-gray-600 hover:text-orange-500'
               }`}
             >
-              <Bookmark size={18} fill={isSaved ? 'currentColor' : 'none'} />
-              <span className="text-sm">{isSaved ? 'Saved' : 'Save'}</span>
+              <Bookmark size={18} fill={post.isSaved ? 'currentColor' : 'none'} />
+              <span className="text-sm">{post.isSaved ? 'Saved' : 'Save'}</span>
             </button>
           </div>
         </div>

@@ -1,38 +1,42 @@
 import { useState } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { toast } from 'sonner@2.0.3';
+import { createPost } from '../api/communityApi';
 
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPostCreated: () => Promise<void> | void;
 }
 
-export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
+const tagOptions = [
+  { id: 1, name: "Recipes" },
+  { id: 2, name: "Kitchen Tips" },
+  { id: 3, name: "Product Reviews" },
+  { id: 4, name: "Questions" },
+  { id: 5, name: "Budget Meals" },
+];
+
+export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostModalProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [selectedTag, setSelectedTag] = useState<number | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
 
   if (!isOpen) return null;
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const resetForm = () => {
+    setTitle('');
+    setContent('');
+    setSelectedTag(null);
+    setImageUrl('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
@@ -50,24 +54,26 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
       return;
     }
 
-    // Simulate post creation
-    toast.success('Post created successfully!');
-    
-    // Reset form
-    setTitle('');
-    setContent('');
-    setSelectedTag('');
-    setImageFile(null);
-    setImagePreview('');
-    onClose();
+    const payload = {
+      title,
+      content,
+      tagIds: [selectedTag],
+      imageUrl: imageUrl || "",
+    };
+
+    try {
+      await createPost(payload);
+      toast.success('Post created successfully!');
+      resetForm();
+      onClose();
+      await onPostCreated();
+    } catch (error) {
+      toast.error('Failed to create post. Please try again.');
+    }
   };
 
   const handleClose = () => {
-    setTitle('');
-    setContent('');
-    setSelectedTag('');
-    setImageFile(null);
-    setImagePreview('');
+    resetForm();
     onClose();
   };
 
@@ -121,67 +127,44 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
             <label htmlFor="tag" className="block mb-2 text-gray-700">
               Tag
             </label>
-            <Select value={selectedTag} onValueChange={setSelectedTag}>
+            <Select
+              value={selectedTag ? String(selectedTag) : ''}
+              onValueChange={(value) => setSelectedTag(Number(value))}
+            >
               <SelectTrigger className="rounded-lg">
                 <SelectValue placeholder="Select a tag" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Recipes">Recipes</SelectItem>
-                <SelectItem value="Tips">Kitchen Tips</SelectItem>
-                <SelectItem value="Products">Product Reviews</SelectItem>
-                <SelectItem value="Questions">Questions</SelectItem>
-                <SelectItem value="Budget Meals">Budget Meals</SelectItem>
+                {tagOptions.map((tag) => (
+                  <SelectItem key={tag.id} value={String(tag.id)}>
+                    {tag.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Image Upload */}
+          {/* Image URL */}
           <div>
-            <label className="block mb-2 text-gray-700">
-              Image (optional)
+            <label htmlFor="imageUrl" className="block mb-2 text-gray-700">
+              Image URL (optional)
             </label>
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 hover:border-green-300 transition-colors">
-              <input
-                type="file"
-                id="image-upload"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              <label
-                htmlFor="image-upload"
-                className="flex flex-col items-center gap-2 cursor-pointer"
-              >
-                {imagePreview ? (
-                  <div className="relative w-full">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setImageFile(null);
-                        setImagePreview('');
-                      }}
-                      className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-md hover:bg-gray-100"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="text-gray-400" size={32} />
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600">Click to upload an image</p>
-                      <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
-                    </div>
-                  </>
-                )}
-              </label>
-            </div>
+            <Input
+              id="imageUrl"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              className="rounded-lg"
+            />
+            {imageUrl && (
+              <div className="mt-3 rounded-lg overflow-hidden border border-gray-200">
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+            )}
           </div>
 
           {/* Actions */}

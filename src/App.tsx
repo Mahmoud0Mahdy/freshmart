@@ -22,6 +22,8 @@ import { CommunityPage } from './pages/CommunityPage';
 import { GhostCraftPage } from './pages/GhostCraftPage';
 import { SavedRecipesPage } from './pages/SavedRecipesPage';
 import { SavedProductsPage } from './pages/SavedProductsPage';
+import { SavedPostsPage } from './pages/SavedPostsPage';
+import { PostDetailsPage } from './pages/PostDetailsPage';
 
 // 🔐 Admin Pages
 import { DashboardPage } from './admin/dashboard/DashboardPage';
@@ -62,7 +64,9 @@ export default function App() {
             <Route path="profile" element={<ProfilePage />} />
             <Route path="saved-recipes" element={<SavedRecipesPage />} />
             <Route path="saved-products" element={<SavedProductsPage />} />
+            <Route path="saved-posts" element={<SavedPostsPage />} />
             <Route path="community" element={<CommunityPage />} />
+            <Route path="posts/:id" element={<PostDetailsPage />} />
             <Route path="ghost-craft" element={<GhostCraftPage />} />
           </Route>
 
