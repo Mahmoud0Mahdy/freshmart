@@ -6,12 +6,31 @@ export interface GhostCraftRequest {
   dietaryPreferences: string[];
   spicinessLevel: number;
   saltinessLevel: number;
-  portionSize: string;
+  portionSize: "Small" | "Medium" | "Large" | "Family";
   specialInstructions: string;
 }
 
-export const createGhostCraftOrder = async (
-  data: GhostCraftRequest
+export interface GhostCraftOrder {
+  id?: number | string;
+  dishDescription: string;
+  allergies: string[];
+  dietaryPreferences: string[];
+  spicinessLevel: number;
+  saltinessLevel: number;
+  portionSize: string;
+  specialInstructions?: string;
+  price: number;
+}
+
+export const createGhostCraftOrder = async (data: GhostCraftRequest) => {
+  const response = await axiosInstance.post("/GhostCraft", data);
+  return response.data;
+};
+
+export const updateGhostCraftOrder = async (
+  id: number | string,
+  data: GhostCraftRequest,
 ) => {
-  await axiosInstance.post("/GhostCraft", data);
+  const response = await axiosInstance.put(`/GhostCraft/${id}`, data);
+  return response.data;
 };

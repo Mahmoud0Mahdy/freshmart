@@ -20,6 +20,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import ProfilePage from "./pages/profile/ProfilePage";
 import { CommunityPage } from './pages/CommunityPage';
 import { GhostCraftPage } from './pages/GhostCraftPage';
+import { GhostCraftSummaryPage } from './pages/GhostCraftSummaryPage';
 import { SavedRecipesPage } from './pages/SavedRecipesPage';
 import { SavedProductsPage } from './pages/SavedProductsPage';
 import { SavedPostsPage } from './pages/SavedPostsPage';
@@ -68,6 +69,8 @@ export default function App() {
             <Route path="community" element={<CommunityPage />} />
             <Route path="posts/:id" element={<PostDetailsPage />} />
             <Route path="ghost-craft" element={<GhostCraftPage />} />
+            <Route path="ghostcraft" element={<GhostCraftPage />} />
+            <Route path="ghostcraft-summary" element={<GhostCraftSummaryPage />} />
           </Route>
 
           {/* 🔐 Admin Protected */}
