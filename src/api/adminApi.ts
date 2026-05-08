@@ -55,3 +55,43 @@ export const createCategory = async (data) => {
   const res = await axiosInstance.post("/Categories", data);
   return res.data;
 };
+
+// 🔥 UPDATE CATEGORY
+// ================= Orders =================
+
+export enum OrderStatus {
+  Pending = 0,
+  Confirmed = 1,
+  Shipped = 2,
+  Delivered = 3,
+  Cancelled = 4,
+}
+
+// 🔥 GET ALL ORDERS (Admin)
+export const getAllOrders = async () => {
+  // Changed from "/orders" to "/admin/orders"
+  const res = await axiosInstance.get("/admin/orders");
+  return res.data;
+};
+
+// 🔥 GET ORDER BY ID (Admin)
+export const getOrderById = async (id: string | number) => {
+  // Changed from "/orders" to "/admin/orders"
+  const res = await axiosInstance.get(`/admin/orders/${id}`);
+  return res.data;
+};
+
+// 🔥 UPDATE ORDER STATUS (Admin)
+// 🔥 UPDATE ORDER STATUS (Admin)
+export const updateOrderStatus = async (id: string | number, status: OrderStatus) => {
+  
+  // This converts the number (e.g., 1) back into the string (e.g., "Confirmed")
+  // which exactly matches what your Swagger UI is asking for.
+  const statusString = OrderStatus[status]; 
+  
+  const res = await axiosInstance.put(`/admin/orders/${id}/status`, { 
+    status: statusString 
+  });
+  
+  return res.data;
+};
