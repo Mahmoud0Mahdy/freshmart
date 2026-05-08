@@ -32,7 +32,7 @@ import { ProductsPage } from './admin/products/ProductsPage';
 import { RecipesPage as AdminRecipesPage } from './admin/recipes/RecipesPage';
 import { UsersPage } from './admin/users/UsersPage';
 import { PostsPage } from './admin/posts/PostsPage';
-
+import { OrdersPage } from './admin/orders/OrdersPage';
 // ✅ الجديد
 import { CategoriesPage } from './admin/categories/CategoriesPage';
 
@@ -87,7 +87,7 @@ export default function App() {
             <Route path="recipes" element={<AdminRecipesPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="posts" element={<PostsPage />} />
-
+            <Route path="orders" element={<OrdersPage />} />
             {/* ✅ الجديد */}
             <Route path="categories" element={<CategoriesPage />} />
 
