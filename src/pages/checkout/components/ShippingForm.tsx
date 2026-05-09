@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -8,174 +8,185 @@ import {
 import { Button } from "../../../components/ui/button";
 import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
-import { MapPin } from "lucide-react";
+import { MapPin, ShieldCheck } from "lucide-react";
 
 import { validateField } from "../validation/shippingValidation";
 import { FormField } from "../components/form/PaymentForm";
+import { Input } from "../../../components/ui/input";
+
+interface ShippingFormData {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  deliveryMethod?: "standard" | "express";
+  [key: string]: any;
+}
+
+interface ShippingFormProps {
+  formData: ShippingFormData;
+  handleInputChange: (field: string, value: string) => void;
+  nextStep: () => void;
+  subtotal: number;
+}
 
 export function ShippingForm({
   formData,
   handleInputChange,
   nextStep,
   subtotal,
-}: any) {
+}: ShippingFormProps) {
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const [errors, setErrors] = useState<any>({});
-  const [touched, setTouched] = useState<any>({});
-
-  // ✅ عدلنا هنا
-  const requiredFields = [
-    "fullName",
-    "email",
-    "address",
-    "city",
-    "state",
-    "zipCode",
-  ];
-
-  const handleChange = (field: string, value: string) => {
-
-    // ✅ fullName validation
-    if (field === "fullName") {
-      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
-    }
-
-    if (field === "city" || field === "state") {
-      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
-    }
-
-    if (field === "phone") {
-      value = value.replace(/[^\d+()\-\s]/g, "").slice(0, 20);
-    }
-
-    if (field === "zipCode") {
-      value = value.replace(/\D/g, "").slice(0, 10);
-    }
-
-    if (field === "address") {
-      value = value.slice(0, 100);
-    }
-
-    handleInputChange(field, value);
-
-    if (touched[field]) {
-      const valid = validateField(field, value);
-
-      setErrors((prev: any) => ({
-        ...prev,
-        [field]: !valid,
-      }));
-    }
-  };
-
-  const handleBlur = (field: string) => {
-
-    setTouched((p: any) => ({ ...p, [field]: true }));
-
-    const valid = validateField(field, formData[field] || "");
-
-    setErrors((prev: any) => ({
-      ...prev,
-      [field]: !valid,
-    }));
-  };
-
-  const fieldError = (f: string) => touched[f] && errors[f];
-  const fieldValid = (f: string) => touched[f] && !errors[f] && formData[f];
-
-  const inputStyle = (f: string) => {
-    if (fieldError(f)) return "border-red-500 focus-visible:ring-red-500";
-    return "focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500";
-  };
-
-  const disableContinue = requiredFields.some(
-    (field) => !formData[field] || errors[field],
+  const requiredFields = useMemo(
+    () => ["fullName", "email", "address", "city", "state", "zipCode"],
+    []
   );
 
+  const handleChange = useCallback(
+    (field: string, rawValue: string) => {
+      let value = rawValue;
+
+      switch (field) {
+        case "fullName":
+        case "city":
+        case "state":
+          value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
+          break;
+        case "phone":
+          value = value.replace(/[^\d+()\-\s]/g, "").slice(0, 20);
+          break;
+        case "zipCode":
+          value = value.replace(/\D/g, "").slice(0, 10);
+          break;
+        case "address":
+          value = value.slice(0, 100);
+          break;
+      }
+
+      handleInputChange(field, value);
+
+      if (touched[field]) {
+        const valid = validateField(field, value);
+        setErrors((prev) => ({
+          ...prev,
+          [field]: !valid,
+        }));
+      }
+    },
+    [handleInputChange, touched]
+  );
+
+  const handleBlur = useCallback(
+    (field: string) => {
+      setTouched((prev) => ({ ...prev, [field]: true }));
+      const valid = validateField(field, formData[field] || "");
+      setErrors((prev) => ({ ...prev, [field]: !valid }));
+    },
+    [formData]
+  );
+
+  const fieldError = useCallback(
+    (f: string) => touched[f] && errors[f],
+    [touched, errors]
+  );
+
+  const fieldValid = useCallback(
+    (f: string) => touched[f] && !errors[f] && !!formData[f],
+    [touched, errors, formData]
+  );
+
+  // 🔥 BUG FIX 1: Added `!rounded-lg` and `!border` to aggressively prevent elements from merging visually
+  const inputStyle = useCallback(
+    (f: string) => {
+      const baseClasses = "h-12 w-full !rounded-lg bg-gray-50 !border text-gray-600 font-medium transition-colors";
+      if (fieldError(f)) {
+        return `${baseClasses} !border-red-500 focus-visible:ring-red-500`;
+      }
+      return `${baseClasses} !border-gray-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500`;
+    },
+    [fieldError]
+  );
+
+  const disableContinue = useMemo(() => {
+    return requiredFields.some((field) => !formData[field] || errors[field]);
+  }, [requiredFields, formData, errors]);
+
+  const handleContinue = useCallback(() => {
+    const fullAddress = `${formData.address || ""}, ${formData.city || ""}, ${
+      formData.state || ""
+    }`;
+
+    handleInputChange("fullAddress", fullAddress);
+    nextStep();
+  }, [formData, handleInputChange, nextStep]);
+
   return (
-
-    <Card className="shadow-sm border border-gray-200">
-
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-lg font-semibold">
-          <MapPin size={18} className="mr-2 text-gray-500" />
+    <Card className="shadow-md border border-gray-200">
+      <CardHeader className="pb-4 border-b border-gray-100 mb-4">
+        <CardTitle className="flex items-center text-xl font-bold text-gray-800">
+          <MapPin size={22} className="mr-2 text-green-600" />
           Shipping Information
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
+        {/* SECTION: PERSONAL INFO */}
+        <div className="space-y-5">
+          <div>
+            <Label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              Full Name
+            </Label>
+            <Input
+              value={formData?.fullName || ""}
+              disabled
+              className="h-12 w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-medium"
+            />
+          </div>
 
-        {/* 🔥 FULL NAME بدل first/last */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <Label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+                Email
+              </Label>
+              <Input
+                value={formData?.email || ""}
+                disabled
+                className="h-12 w-full bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-lg"
+              />
+            </div>
 
-        <FormField
-          label="Full Name"
-          name="fullName"
-          value={formData.fullName}
-          placeholder="John Doe"
-          error="Enter valid name"
-          handleChange={handleChange}
-          handleBlur={handleBlur}
-          inputStyle={inputStyle}
-          fieldError={fieldError}
-          fieldValid={fieldValid}
-        />
-
-        {/* EMAIL / PHONE */}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <FormField
-            label="Email"
-            name="email"
-            value={formData.email}
-            placeholder="john@example.com"
-            error="Enter a valid email"
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            inputStyle={inputStyle}
-            fieldError={fieldError}
-            fieldValid={fieldValid}
-          />
-
-          <FormField
-            label="Phone"
-            name="phone"
-            value={formData.phone}
-            placeholder="+20 100 123 4567"
-            error="Invalid phone number"
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            inputStyle={inputStyle}
-            fieldError={fieldError}
-            fieldValid={fieldValid}
-          />
-
+            <FormField
+              label="Phone"
+              name="phone"
+              value={formData.phone || ""}
+              placeholder="+20 100 123 4567"
+              error="Invalid phone number"
+              handleChange={handleChange}
+              handleBlur={handleBlur}
+              inputStyle={inputStyle}
+              fieldError={fieldError}
+              fieldValid={fieldValid}
+            />
+          </div>
         </div>
 
-        {/* ADDRESS */}
-
-        <FormField
-          label="Address"
-          name="address"
-          value={formData.address}
-          placeholder="123 Main Street"
-          error="Enter valid address"
-          handleChange={handleChange}
-          handleBlur={handleBlur}
-          inputStyle={inputStyle}
-          fieldError={fieldError}
-          fieldValid={fieldValid}
-        />
-
-        {/* CITY STATE ZIP */}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* SECTION: ADDRESS */}
+        <div className="space-y-5 pt-4 border-t border-gray-100">
+          <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+            Address Details
+          </h3>
 
           <FormField
-            label="City"
-            name="city"
-            value={formData.city}
-            error="Invalid city"
+            label="Address"
+            name="address"
+            value={formData.address || ""}
+            placeholder="123 Main Street, Apartment 4B"
+            error="Enter valid address"
             handleChange={handleChange}
             handleBlur={handleBlur}
             inputStyle={inputStyle}
@@ -183,77 +194,138 @@ export function ShippingForm({
             fieldValid={fieldValid}
           />
 
-          <FormField
-            label="State"
-            name="state"
-            value={formData.state}
-            error="Invalid state"
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            inputStyle={inputStyle}
-            fieldError={fieldError}
-            fieldValid={fieldValid}
-          />
+          {/* 🔥 BUG FIX 2: Wrapped in flex and individual divs to force spacing and prevent component merging */}
+          <div className="flex flex-col md:flex-row gap-5 w-full">
+            <div className="flex-1 w-full">
+              <FormField
+                label="City"
+                name="city"
+                value={formData.city || ""}
+                error="Invalid city"
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                inputStyle={inputStyle}
+                fieldError={fieldError}
+                fieldValid={fieldValid}
+              />
+            </div>
 
-          <FormField
-            label="ZIP Code"
-            name="zipCode"
-            value={formData.zipCode}
-            error="Invalid ZIP code"
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            inputStyle={inputStyle}
-            fieldError={fieldError}
-            fieldValid={fieldValid}
-          />
+            <div className="flex-1 w-full">
+              <FormField
+                label="State"
+                name="state"
+                value={formData.state || ""}
+                error="Invalid state"
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                inputStyle={inputStyle}
+                fieldError={fieldError}
+                fieldValid={fieldValid}
+              />
+            </div>
 
+            <div className="flex-1 w-full">
+              <FormField
+                label="ZIP Code"
+                name="zipCode"
+                value={formData.zipCode || ""}
+                error="Invalid ZIP code"
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                inputStyle={inputStyle}
+                fieldError={fieldError}
+                fieldValid={fieldValid}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* DELIVERY */}
-
-        <div className="space-y-3">
-
-          <Label className="font-medium">
+        {/* SECTION: DELIVERY METHOD */}
+        <div className="space-y-4 pt-4 border-t border-gray-100">
+          <Label className="text-sm font-bold text-gray-800 uppercase tracking-wider block mb-3">
             Delivery Method
           </Label>
 
           <RadioGroup
-            value={formData.deliveryMethod}
+            value={formData.deliveryMethod || "standard"}
             onValueChange={(v) => handleInputChange("deliveryMethod", v)}
-            className="space-y-2"
+            className="grid gap-4"
           >
-
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="standard" id="standard" />
-              <Label htmlFor="standard" className="text-sm">
-                Standard Delivery (3-5 days) — {subtotal > 50 ? "Free" : "$5.99"}
+            <div
+              onClick={() => handleInputChange("deliveryMethod", "standard")}
+              className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                (formData.deliveryMethod || "standard") === "standard"
+                  ? "border-green-600 bg-green-50/40"
+                  : "border-gray-100 hover:border-gray-200"
+              }`}
+            >
+              <RadioGroupItem
+                value="standard"
+                id="standard"
+                className="text-green-600"
+              />
+              <Label htmlFor="standard" className="flex flex-col cursor-pointer w-full flex-1">
+                <span className="font-semibold text-gray-900">
+                  Standard Delivery
+                </span>
+                <span className="text-sm text-gray-500 mt-0.5">
+                  3-5 business days —{" "}
+                  {subtotal > 50 ? (
+                    <span className="text-green-600 font-bold uppercase text-xs ml-1">
+                      Free
+                    </span>
+                  ) : (
+                    "$5.99"
+                  )}
+                </span>
               </Label>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="express" id="express" />
-              <Label htmlFor="express" className="text-sm">
-                Express Delivery (1-2 days) — $12.99
+            <div
+              onClick={() => handleInputChange("deliveryMethod", "express")}
+              className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                formData.deliveryMethod === "express"
+                  ? "border-green-600 bg-green-50/40"
+                  : "border-gray-100 hover:border-gray-200"
+              }`}
+            >
+              <RadioGroupItem
+                value="express"
+                id="express"
+                className="text-green-600"
+              />
+              <Label htmlFor="express" className="flex flex-col cursor-pointer w-full flex-1">
+                <span className="font-semibold text-gray-900">
+                  Express Delivery
+                </span>
+                <span className="text-sm text-gray-500 mt-0.5">
+                  1-2 business days —{" "}
+                  <span className="font-medium text-gray-700">$12.99</span>
+                </span>
               </Label>
             </div>
-
           </RadioGroup>
-
         </div>
 
-        {/* BUTTON */}
+        {/* SECTION: BUTTON */}
+        <div className="pt-6">
+          <Button
+            type="button"
+            disabled={disableContinue}
+            onClick={handleContinue}
+            className="w-full h-14 bg-green-600 hover:bg-green-700 text-white text-[16px] font-bold rounded-xl shadow-md transition-transform active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            Continue to Payment
+          </Button>
 
-        <Button
-          type="button"
-          disabled={disableContinue}
-          onClick={nextStep}
-          className="w-full h-11 bg-green-600 hover:bg-green-700 text-white font-semibold"
-        >
-          Continue to Payment
-        </Button>
-
+          <div className="flex items-center justify-center space-x-1.5 mt-4 text-gray-400">
+            <ShieldCheck size={16} />
+            <span className="text-xs font-medium tracking-wide">
+              Secure SSL Encrypted Connection
+            </span>
+          </div>
+        </div>
       </CardContent>
-
     </Card>
   );
 }

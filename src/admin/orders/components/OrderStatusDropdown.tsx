@@ -24,10 +24,10 @@ export function OrderStatusDropdown({ orderId, currentStatus, onStatusUpdated }:
   const handleStatusChange = async (newStatusString: string) => {
     const newStatusInt = parseInt(newStatusString, 10);
 
-    if (currentStatus === OrderStatus.Delivered) {
-      toast.error("Can't be changed, it is already delivered");
-      return;
-    }
+    // if (currentStatus === OrderStatus.Delivered) {
+    //   toast.error("Can't be changed, it is already delivered");
+    //   return;
+    // }  we done use it 
     if (currentStatus === OrderStatus.Cancelled) {
       toast.error("The order is already cancelled");
       return;
