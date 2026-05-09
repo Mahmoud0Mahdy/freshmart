@@ -205,8 +205,9 @@ useEffect(() => {
           {/* NAME + PRICE */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Product Name *</Label>
+              <Label htmlFor="productName">Product Name *</Label>
               <Input
+                id="productName"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -215,8 +216,9 @@ useEffect(() => {
             </div>
 
             <div>
-              <Label>Price *</Label>
+              <Label htmlFor="productPrice">Price *</Label>
               <Input
+                id="productPrice"
                 type="number"
                 value={formData.price}
                 onChange={(e) =>
@@ -229,10 +231,10 @@ useEffect(() => {
           {/* CATEGORY + STOCK */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Category *</Label>
+              <Label htmlFor="productCategory">Category *</Label>
 
-              {/* 🔥🔥🔥 الحل هنا */}
               <Select
+                id="productCategory"
                 value={formData.categoryId ? formData.categoryId.toString() : ""}
                 onValueChange={(value) => {
                   const selected = categories.find(
@@ -246,7 +248,7 @@ useEffect(() => {
                   });
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-label="Category">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
 
@@ -262,20 +264,23 @@ useEffect(() => {
 
             <div className="flex items-center gap-2 pt-6">
               <input
+                title="In Stock"
+                id="inStock"
                 type="checkbox"
                 checked={formData.inStock}
                 onChange={(e) =>
                   setFormData({ ...formData, inStock: e.target.checked })
                 }
               />
-              <Label>In Stock</Label>
+              <Label htmlFor="inStock">In Stock</Label>
             </div>
           </div>
 
           {/* IMAGE */}
           <div>
-            <Label>Image URL *</Label>
+            <Label htmlFor="imageUrl">Image URL *</Label>
             <Input
+              id="imageUrl"
               value={formData.image}
               onChange={(e) =>
                 setFormData({ ...formData, image: e.target.value })
@@ -284,6 +289,7 @@ useEffect(() => {
 
             {formData.image && (
               <img
+                alt="Product preview"
                 src={formData.image}
                 className="w-24 h-24 mt-3 rounded object-cover border"
               />
@@ -292,8 +298,9 @@ useEffect(() => {
 
           {/* DESCRIPTION */}
           <div>
-            <Label>Description *</Label>
+            <Label htmlFor="productDescription">Description *</Label>
             <Textarea
+              id="productDescription"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })

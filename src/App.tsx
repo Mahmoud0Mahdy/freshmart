@@ -38,31 +38,20 @@ import { ChatbotPage } from "./pages/chatbot/ChatbotPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 
 import ProfilePage from "./pages/profile/ProfilePage";
-
-import { CommunityPage } from "./pages/CommunityPage";
-
-import { GhostCraftPage } from "./pages/GhostCraftPage";
-
-import { SavedRecipesPage } from "./pages/SavedRecipesPage";
-
-import { SavedProductsPage } from "./pages/SavedProductsPage";
-
-import { OrdersPage } from "./pages/orders/OrdersPage";
-
-import { OrderDetailsPage } from "./pages/orders/OrderDetailsPage";
+import { CommunityPage } from './pages/CommunityPage';
+import { GhostCraftPage } from './pages/GhostCraftPage';
+import { SavedRecipesPage } from './pages/SavedRecipesPage';
+import { SavedProductsPage } from './pages/SavedProductsPage';
 
 // 🔐 Admin Pages
-import { DashboardPage } from "./admin/dashboard/DashboardPage";
+import { DashboardPage } from './admin/dashboard/DashboardPage';
+import { ProductsPage } from './admin/products/ProductsPage';
+import { RecipesPage as AdminRecipesPage } from './admin/recipes/RecipesPage';
+import { UsersPage } from './admin/users/UsersPage';
+import { PostsPage } from './admin/posts/PostsPage';
 
-import { ProductsPage } from "./admin/products/ProductsPage";
-
-import { RecipesPage as AdminRecipesPage } from "./admin/recipes/RecipesPage";
-
-import { UsersPage } from "./admin/users/UsersPage";
-
-import { PostsPage } from "./admin/posts/PostsPage";
-
-import { CategoriesPage } from "./admin/categories/CategoriesPage";
+// ✅ الجديد
+import { CategoriesPage } from './admin/categories/CategoriesPage';
 
 export default function App() {
   return (
@@ -96,44 +85,33 @@ export default function App() {
 
                 <Route path="login" element={<LoginPage />} />
 
-                <Route path="profile" element={<ProfilePage />} />
+            {/* 👤 User */}
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="saved-recipes" element={<SavedRecipesPage />} />
+            <Route path="saved-products" element={<SavedProductsPage />} />
+            <Route path="community" element={<CommunityPage />} />
+            <Route path="ghost-craft" element={<GhostCraftPage />} />
+          </Route>
 
-                <Route path="saved-recipes" element={<SavedRecipesPage />} />
+          {/* 🔐 Admin Protected */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="recipes" element={<AdminRecipesPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="posts" element={<PostsPage />} />
 
-                <Route path="saved-products" element={<SavedProductsPage />} />
+            {/* ✅ الجديد */}
+            <Route path="categories" element={<CategoriesPage />} />
 
-                <Route path="community" element={<CommunityPage />} />
-
-                <Route path="ghost-craft" element={<GhostCraftPage />} />
-
-                {/* 🔥 ORDERS */}
-                <Route path="orders" element={<OrdersPage />} />
-
-                {/* 🔥 ORDER DETAILS */}
-                <Route path="orders/:id" element={<OrderDetailsPage />} />
-              </Route>
-
-              {/* 🔐 ADMIN */}
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<DashboardPage />} />
-
-                <Route path="products" element={<ProductsPage />} />
-
-                <Route path="recipes" element={<AdminRecipesPage />} />
-
-                <Route path="users" element={<UsersPage />} />
-
-                <Route path="posts" element={<PostsPage />} />
-
-                <Route path="categories" element={<CategoriesPage />} />
-              </Route>
+          </Route>
 
               {/* 🔥 FALLBACK */}
               <Route path="*" element={<Navigate to="/" replace />} />

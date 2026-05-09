@@ -8,17 +8,16 @@ import {
   MessageSquare,
   Shield,
   LogOut,
-  Layers // ✅ جديد
+  Layers, // ✅ جديد
+  ShoppingCart // ✅ New Import
 } from "lucide-react";
 
 const navItems = [
   { to: "/admin", end: true, label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/orders", label: "Orders", icon: ShoppingCart }, // ✅ New Orders Link
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/recipes", label: "Recipes", icon: UtensilsCrossed },
-
-  // ✅ الجديد
   { to: "/admin/categories", label: "Categories", icon: Layers },
-
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/posts", label: "Posts", icon: MessageSquare },
 ];

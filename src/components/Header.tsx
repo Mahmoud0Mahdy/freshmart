@@ -156,6 +156,9 @@ export function Header() {
                   <DropdownMenuItem onClick={() => navigate("/saved-products")}>
                     Saved Products
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/saved-posts')}>
+                    Saved Posts
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
