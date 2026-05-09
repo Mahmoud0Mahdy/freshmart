@@ -1,212 +1,331 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Button } from '../../components/ui/button';
-import { useApp } from '../../contexts/AppContext';
-import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 
-import { CheckoutSteps } from './components/CheckoutSteps';
-import { ShippingForm } from './components/ShippingForm';
-import { PaymentForm } from './components/PaymentForm';
-import { ReviewOrder } from './components/ReviewOrder';
-import { CheckoutSummary } from './components/CheckoutSummary';
+import { Button } from "../../components/ui/button";
 
-import { getUserProfile } from '../../api/userProfileApi'; // 🔥 مهم
+import { ArrowLeft } from "lucide-react";
+
+import { toast } from "sonner";
+
+import { useCart } from "../../contexts/CartContext";
+
+import { useCheckout } from "../../contexts/CheckoutContext";
+
+import { CheckoutSteps } from "./components/CheckoutSteps";
+
+import { ShippingForm } from "./components/ShippingForm";
+
+import { PaymentMethodStep } from "./components/PaymentMethodStep";
+
+import { SavedCardsStep } from "./components/SavedCardsStep";
+
+import { PaymentForm } from "./components/PaymentForm";
+
+import { ReviewOrder } from "./components/ReviewOrder";
+
+import { CheckoutSummary } from "./components/CheckoutSummary";
+
+import { getUserProfile } from "../../api/userProfileApi";
+
+import { placeOrder as placeOrderApi } from "../../api/orderApi";
 
 export function CheckoutPage() {
-
   const navigate = useNavigate();
+
   const location = useLocation();
-  const { state, dispatch } = useApp();
+
+  const { cart } = useCart();
+
+  const { checkoutData, setCheckoutField, setCheckoutData, resetCheckout } =
+    useCheckout();
+
   const [step, setStep] = useState(1);
 
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  const [placingOrder, setPlacingOrder] = useState(false);
+
   const quickProduct = location.state?.quickProduct;
+
   const quickQuantity = location.state?.quickQuantity;
 
-  const cartItems = quickProduct
-    ? [{ product: quickProduct, quantity: quickQuantity }]
-    : state.cart;
+  // 🔥 source
+  const source = quickProduct ? "buynow" : "cart";
 
+  // 🔥 تجهيز checkout draft
+  useEffect(() => {
+    setCheckoutData({
+      source,
+
+      productId: quickProduct?.id ? Number(quickProduct.id) : undefined,
+
+      quantity: quickQuantity,
+
+      requestId: crypto.randomUUID(),
+    });
+  }, []);
+
+  // 🔥 cart items
+  const cartItems = quickProduct
+    ? [
+        {
+          product: quickProduct,
+          quantity: quickQuantity,
+        },
+      ]
+    : cart || [];
+
+  // 🔥 form state
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardName: '',
+    fullName: "",
+    email: "",
+    phone: "",
+
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardName: "",
+
     saveInfo: false,
     sameAddress: true,
-    deliveryMethod: 'standard'
+
+    deliveryMethod: "standard",
   });
 
-  // 🔥 Prefill من Profile
+  // 🔥 prefill profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const data = await getUserProfile();
 
-        setFormData(prev => ({
-          ...prev,
-          fullName: data.fullName || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          address: data.address || '',
-          city: data.city || '',
-          state: data.state || '',
-          zipCode: data.zipCode || '',
-        }));
+        const updated = {
+          fullName: data.fullName || "",
 
+          email: data.email || "",
+
+          phone: data.phone || "",
+
+          address: data.address || "",
+
+          city: data.city || "",
+
+          state: data.state || "",
+
+          zipCode: data.zipCode || "",
+
+          cardNumber: "",
+          expiryDate: "",
+          cvv: "",
+          cardName: "",
+
+          saveInfo: false,
+          sameAddress: true,
+
+          deliveryMethod: "standard",
+        };
+
+        setFormData(updated);
+
+        setCheckoutData({
+          ...checkoutData,
+          ...updated,
+        });
       } catch {
         console.log("Failed to load profile");
+      } finally {
+        setLoadingProfile(false);
       }
     };
 
     fetchProfile();
   }, []);
 
-  const subtotal = cartItems.reduce(
-    (total,item)=> total + (item.product.price * item.quantity),0
+  // 🔥 totals
+  const subtotal = (cartItems || []).reduce(
+    (total, item) => total + item.product.price * item.quantity,
+    0,
   );
 
   const tax = subtotal * 0.08;
 
   const shipping =
-    formData.deliveryMethod === 'express'
-      ? 12.99
-      : subtotal > 50
-      ? 0
-      : 5.99;
+    formData.deliveryMethod === "express" ? 12.99 : subtotal > 50 ? 0 : 5.99;
 
   const total = subtotal + tax + shipping;
 
-  // 🔥 مهم: نخزن في Context
-  const handleInputChange = (field:string,value:any)=>{
-    setFormData(prev=>{
-      const updated = {...prev,[field]:value};
+  // 🔥 update form + context
+  const handleInputChange = (field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
 
-      dispatch({
-        type:'SET_CHECKOUT_DATA',
-        data: updated
-      });
-
-      return updated;
-    });
+    setCheckoutField(field, value);
   };
 
-  const validateStep = (stepNumber:number)=>{
-
-    if(stepNumber===1){
-      return formData.fullName && formData.email &&
-      formData.address && formData.city && formData.state && formData.zipCode;
-    }
-
-    if(stepNumber===2){
-      return formData.cardNumber && formData.expiryDate &&
-      formData.cvv && formData.cardName;
-    }
-
-    return true;
+  // 🔥 shipping validation
+  const validateShippingStep = () => {
+    return (
+      formData.fullName &&
+      formData.email &&
+      formData.address &&
+      formData.city &&
+      formData.state &&
+      formData.zipCode
+    );
   };
 
-  const nextStep = ()=>{
-    if(validateStep(step)){
-      setStep(step+1);
-    }else{
-      toast.error('Please fill in all required fields');
-    }
+  // 🔥 payment validation
+  const validatePaymentStep = () => {
+    return (
+      formData.cardNumber &&
+      formData.expiryDate &&
+      formData.cvv &&
+      formData.cardName
+    );
   };
 
-  const placeOrder = ()=>{
-    if(validateStep(2)){
-
-      console.log("ORDER DATA:", state.checkoutData); 
-
-      if(!quickProduct){
-        dispatch({type:'CLEAR_CART'});
-      }
-
-      toast.success('Order placed successfully!');
-      navigate('/');
-    }else{
-      toast.error('Please fill in all required fields');
+  // 🔥 STEP 1 -> STEP 2
+  const nextShippingStep = () => {
+    if (validateShippingStep()) {
+      setStep(2);
+    } else {
+      toast.error("Please fill in all required fields");
     }
   };
 
-  if(!quickProduct && state.cart.length === 0){
+  // 🔥 CASH PLACE ORDER
+  const placeOrder = async () => {
+    try {
+      setPlacingOrder(true);
+
+      const payload = {
+        address: `${formData.address}, ${formData.city}, ${formData.state}, ${formData.zipCode}`,
+
+        source: checkoutData.source || source,
+
+        productId: checkoutData.productId || 0,
+
+        quantity: checkoutData.quantity || 1,
+
+        paymentMethodId: checkoutData.paymentMethodId || 2,
+
+        requestId: checkoutData.requestId || "",
+      };
+
+      console.log("PLACE ORDER PAYLOAD:", payload);
+
+      await placeOrderApi(payload);
+
+      toast.success("Order placed successfully!");
+
+      resetCheckout();
+
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+
+      toast.error("Failed to place order");
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
+
+  // 🔥 protection
+  if (!quickProduct && (!cart || cart.length === 0)) {
     return <Navigate to="/cart" replace />;
   }
 
-  return(
+  // 🔥 loading
+  if (loadingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading checkout...
+      </div>
+    );
+  }
 
+  return (
     <div className="min-h-screen bg-gray-50">
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
+        {/* BACK */}
         <Button
           variant="ghost"
-          onClick={()=>navigate('/cart')}
+          onClick={() => navigate("/cart")}
           className="mb-6"
         >
-          <ArrowLeft className="mr-2" size={16}/>
+          <ArrowLeft className="mr-2" size={16} />
           Back to Cart
         </Button>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Checkout
-        </h1>
+        {/* TITLE */}
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
 
-        <CheckoutSteps step={step}/>
+        {/* STEPS */}
+        <CheckoutSteps step={step} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
           <div className="lg:col-span-2">
-
+            {/* STEP 1 */}
             {step === 1 && (
               <ShippingForm
                 formData={formData}
                 handleInputChange={handleInputChange}
-                nextStep={nextStep}
+                nextStep={nextShippingStep}
                 subtotal={subtotal}
               />
             )}
 
+            {/* STEP 2 */}
             {step === 2 && (
+              <PaymentMethodStep setStep={setStep} formData={formData} />
+            )}
+
+            {/* STEP 3 */}
+            {step === 3 && <SavedCardsStep setStep={setStep} />}
+
+            {/* STEP 4 */}
+            {step === 4 && (
               <PaymentForm
                 formData={formData}
                 handleInputChange={handleInputChange}
-                nextStep={nextStep}
+                nextStep={() => {
+                  if (validatePaymentStep()) {
+                    setStep(5);
+                  } else {
+                    toast.error("Please fill in all required fields");
+                  }
+                }}
                 setStep={setStep}
               />
             )}
 
-            {step === 3 && (
+            {/* STEP 5 */}
+            {step === 5 && (
               <ReviewOrder
                 formData={formData}
                 cart={cartItems}
                 setStep={setStep}
                 placeOrder={placeOrder}
+                placingOrder={placingOrder}
               />
             )}
-
           </div>
 
+          {/* SUMMARY */}
           <CheckoutSummary
             subtotal={subtotal}
             tax={tax}
             shipping={shipping}
             total={total}
           />
-
         </div>
-
       </div>
-
     </div>
-
   );
 }

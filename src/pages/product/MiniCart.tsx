@@ -1,86 +1,166 @@
 import { useNavigate } from "react-router-dom";
 import { X, Plus, Minus } from "lucide-react";
-import { useApp } from "../../contexts/AppContext";
+import { useCart } from "../../contexts/CartContext";
+import { useCheckout } from "../../contexts/CheckoutContext"; // 🔥 جديد
+import { useState } from "react";
 
-export default function MiniCart({ isOpen = true, onClose }: any) {
-  const { state, dispatch } = useApp();
+export default function MiniCart({
+  isOpen = true,
+  onClose,
+}: any) {
+
+  const {
+    cart,
+    updateItem,
+    removeItem,
+  } = useCart();
+
+  // 🔥 جديد
+  const {
+    resetCheckout,
+    setCheckoutData,
+  } = useCheckout();
+
   const navigate = useNavigate();
 
-  const subtotal = state.cart.reduce(
+  const [loadingId, setLoadingId] =
+    useState<string | null>(null);
+
+  // 🔥 حماية
+  const items = cart || [];
+
+  const subtotal = items.reduce(
     (total: number, item: any) =>
-      total + item.product.price * item.quantity,
-    0,
+      total +
+      item.product.price * item.quantity,
+    0
   );
 
-  const increaseQty = (item: any) => {
-    dispatch({
-      type: "UPDATE_QUANTITY",
-      productId: item.product.id,
-      quantity: item.quantity + 1,
-    });
+  const increaseQty = async (
+    item: any
+  ) => {
+
+    try {
+
+      setLoadingId(item.product.id);
+
+      await updateItem(
+        item.cartItemId,
+        item.quantity + 1
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+    } finally {
+
+      setLoadingId(null);
+    }
   };
 
-  const decreaseQty = (item: any) => {
-    if (item.quantity === 1) {
-      const wasLastItem = state.cart.length === 1;
+  const decreaseQty = async (
+    item: any
+  ) => {
 
-      dispatch({
-        type: "REMOVE_FROM_CART",
-        productId: item.product.id,
-      });
+    try {
 
-      if (wasLastItem) {
-        onClose();
+      setLoadingId(item.product.id);
+
+      if (item.quantity === 1) {
+
+        await removeItem(
+          item.cartItemId
+        );
+
+        if (items.length === 1) {
+          onClose();
+        }
+
+        return;
       }
 
-      return;
-    }
+      await updateItem(
+        item.cartItemId,
+        item.quantity - 1
+      );
 
-    dispatch({
-      type: "UPDATE_QUANTITY",
-      productId: item.product.id,
-      quantity: item.quantity - 1,
+    } catch (err) {
+
+      console.error(err);
+
+    } finally {
+
+      setLoadingId(null);
+    }
+  };
+
+  // 🔥 تجهيز checkout draft
+  const handleCheckout = () => {
+
+    resetCheckout();
+
+    setCheckoutData({
+      source: "cart",
+      requestId: crypto.randomUUID(),
     });
+
+    navigate("/checkout");
+
+    onClose();
   };
 
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
+        <div
+          className="fixed inset-0 bg-black/30 z-40"
+          onClick={onClose}
+        />
       )}
 
       <div
         className={`fixed right-0 w-[420px] bg-white z-[100000] flex flex-col shadow-2xl transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isOpen
+            ? "translate-x-0"
+            : "translate-x-full"
         }`}
-        style={{ height: "calc(-64px + 100vh)", top: "64px" }}
+        style={{
+          height: "calc(-64px + 100vh)",
+          top: "64px",
+        }}
       >
+
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white z-10">
+
           <h2 className="font-semibold text-lg">
-            Your Cart ({state.cart.length})
+            Your Cart ({items.length})
           </h2>
 
-          <button onClick={onClose} className="cursor-pointer">
+          <button onClick={onClose}>
             <X size={20} />
           </button>
+
         </div>
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {state.cart.map((item: any) => (
+
+          {items.map((item: any) => (
+
             <div
-              key={item.product.id}
+              key={item.cartItemId}
               className="border rounded-lg p-3 flex gap-4"
             >
-              {/* صورة المنتج */}
+
               <img
                 src={item.product.imageUrl}
                 className="w-20 h-20 rounded object-cover"
               />
 
-              {/* المعلومات */}
               <div className="flex flex-col justify-center flex-1">
+
                 <h3 className="text-sm font-medium">
                   {item.product.name}
                 </h3>
@@ -90,9 +170,16 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
                 </span>
 
                 <div className="flex items-center border rounded mt-2 w-fit">
+
                   <button
                     className="px-3 py-1"
-                    onClick={() => decreaseQty(item)}
+                    onClick={() =>
+                      decreaseQty(item)
+                    }
+                    disabled={
+                      loadingId ===
+                      item.product.id
+                    }
                   >
                     <Minus size={16} />
                   </button>
@@ -103,36 +190,50 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
 
                   <button
                     className="px-3 py-1"
-                    onClick={() => increaseQty(item)}
+                    onClick={() =>
+                      increaseQty(item)
+                    }
+                    disabled={
+                      loadingId ===
+                      item.product.id
+                    }
                   >
                     <Plus size={16} />
                   </button>
+
                 </div>
+
               </div>
+
             </div>
           ))}
+
         </div>
 
         {/* Footer */}
         <div className="border-t p-4 space-y-4">
+
           <div className="flex justify-between font-semibold text-lg">
+
             <span>Total</span>
-            <span>${subtotal.toFixed(2)}</span>
+
+            <span>
+              ${subtotal.toFixed(2)}
+            </span>
+
           </div>
 
           <div className="flex gap-3">
+
             <button
-              className="flex-1 bg-green-600 text-white py-3 rounded hover:bg-green-700 cursor-pointer"
-              onClick={() => {
-                navigate("/checkout");
-                onClose();
-              }}
+              className="flex-1 bg-green-600 text-white py-3 rounded hover:bg-green-700"
+              onClick={handleCheckout}
             >
               Checkout
             </button>
 
             <button
-              className="flex-1 bg-gray-200 py-3 rounded cursor-pointer"
+              className="flex-1 bg-gray-200 py-3 rounded"
               onClick={() => {
                 navigate("/cart");
                 onClose();
@@ -140,8 +241,11 @@ export default function MiniCart({ isOpen = true, onClose }: any) {
             >
               View Cart
             </button>
+
           </div>
+
         </div>
+
       </div>
     </>
   );

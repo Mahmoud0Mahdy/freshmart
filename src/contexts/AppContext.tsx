@@ -36,11 +36,6 @@ export interface Product {
   inStock: boolean;
 }
 
-export interface CartItem {
-  product: Product;
-  quantity: number;
-}
-
 export interface Recipe {
   id: string;
   title: string;
@@ -79,25 +74,9 @@ export interface Category {
   type: "product" | "recipe";
 }
 
-export interface CheckoutData {
-  fullName?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  cardNumber?: string;
-  expiryDate?: string;
-  cvv?: string;
-  cardName?: string;
-  deliveryMethod?: string;
-}
-
 // ================= STATE =================
 
 interface AppState {
-  cart: CartItem[];
   user: User | null;
   isAuthenticated: boolean;
 
@@ -108,8 +87,6 @@ interface AppState {
 
   categories: Category[];
 
-  checkoutData: CheckoutData;
-
   favoriteProducts: string[];
   favoriteRecipes: string[];
 }
@@ -117,27 +94,16 @@ interface AppState {
 // ================= ACTIONS =================
 
 type AppAction =
-  | { type: "ADD_TO_CART"; product: Product; quantity: number }
-  | { type: "REMOVE_FROM_CART"; productId: string }
-  | { type: "UPDATE_QUANTITY"; productId: string; quantity: number }
-  | { type: "CLEAR_CART" }
   | { type: "LOGIN"; user: User }
   | { type: "LOGOUT" }
-  | { type: "SET_CHECKOUT_DATA"; data: CheckoutData }
-
-  // 🔥 PRODUCTS CRUD (رجعتهم)
   | { type: "ADD_PRODUCT"; product: Product }
   | { type: "UPDATE_PRODUCT"; product: Product }
   | { type: "DELETE_PRODUCT"; productId: string }
   | { type: "SET_PRODUCTS"; products: Product[] }
-
-  // 🔥 RECIPES CRUD (رجعتهم)
   | { type: "SET_RECIPES"; recipes: Recipe[] }
   | { type: "ADD_RECIPE"; recipe: Recipe }
   | { type: "UPDATE_RECIPE"; recipe: Recipe }
   | { type: "DELETE_RECIPE"; recipeId: string }
-
-  // 🔥 FAVORITES
   | { type: "SET_FAVORITE_PRODUCTS"; productIds: string[] }
   | { type: "SET_FAVORITE_RECIPES"; recipeIds: string[] }
   | { type: "TOGGLE_PRODUCT_FAVORITE"; productId: string }
@@ -149,7 +115,6 @@ const savedUser = localStorage.getItem("user");
 const parsedUser: User | null = savedUser ? JSON.parse(savedUser) : null;
 
 const initialState: AppState = {
-  cart: [],
   user: parsedUser,
   isAuthenticated: !!parsedUser,
 
@@ -158,7 +123,6 @@ const initialState: AppState = {
   users: [],
   communityPosts: [],
   categories: [],
-  checkoutData: {},
 
   favoriteProducts: [],
   favoriteRecipes: [],
@@ -168,7 +132,6 @@ const initialState: AppState = {
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
-    // 🔥 PRODUCTS
     case "SET_PRODUCTS":
       return { ...state, products: action.products };
 
@@ -189,7 +152,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         products: state.products.filter((p) => p.id !== action.productId),
       };
 
-    // 🔥 RECIPES
     case "SET_RECIPES":
       return { ...state, recipes: action.recipes };
 
@@ -210,7 +172,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         recipes: state.recipes.filter((r) => r.id !== action.recipeId),
       };
 
-    // 🔥 FAVORITES
     case "SET_FAVORITE_PRODUCTS":
       return { ...state, favoriteProducts: action.productIds };
 
@@ -243,7 +204,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case "LOGOUT":
       localStorage.clear();
-      return { ...state, user: null, isAuthenticated: false };
+      return {
+        ...state,
+        user: null,
+        isAuthenticated: false,
+      };
 
     default:
       return state;
@@ -292,7 +257,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addRecipe = async (data: any) => {
     await createRecipe(data);
-
     await fetchRecipes();
   };
 

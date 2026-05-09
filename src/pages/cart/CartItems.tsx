@@ -1,89 +1,165 @@
-import { Link } from 'react-router-dom';
-import { Card, CardContent } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { Plus, Minus, Trash2 } from 'lucide-react';
+import { memo, useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { Plus, Minus, Trash2 } from "lucide-react";
+
+// ================= TYPES =================
+
+interface CartItemType {
+  cartItemId: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    imageUrl: string;
+  };
+  quantity: number;
+}
 
 interface Props {
-  cart: any[];
-  updateQuantity: (id: string, q: number) => void;
-  removeFromCart: (id: string) => void;
+  cart: CartItemType[];
+  updateQuantity: (id: number, q: number) => void;
+  removeFromCart: (id: number) => void;
 }
 
-export function CartItems({ cart, updateQuantity, removeFromCart }: Props) {
+// ================= SINGLE ITEM =================
+
+const CartItem = memo(function CartItem({
+  item,
+  onIncrease,
+  onDecrease,
+  onRemove,
+}: {
+  item: CartItemType;
+  onIncrease: (item: CartItemType) => void;
+  onDecrease: (item: CartItemType) => void;
+  onRemove: (item: CartItemType) => void;
+}) {
+  const price = Number(item.product.price) || 0;
+  const quantity = Number(item.quantity) || 0;
+
   return (
-    <div className="lg:col-span-2 space-y-4">
-      {cart.map((item) => (
-        <Card key={item.product.id} className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              
-              {/* Wrapped Image and Details in a Link */}
-              <Link 
-                to={`/product/${item.product.id}`} 
-                className="flex items-center space-x-4 flex-1 group cursor-pointer"
-              >
-                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                  <ImageWithFallback
-                    src={item.product.image}
-                    alt={item.product.name}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
+    <Card className="border-0 shadow-md">
+      <CardContent className="p-4 flex items-center gap-4">
 
-                <div>
-                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {item.product.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    {item.product.description}
-                  </p>
-                  <p className="text-green-600 font-bold mt-1">
-                    ${item.product.price.toFixed(2)}
-                  </p>
-                </div>
-              </Link>
+        <Link
+          to={`/product/${item.product.id}`}
+          className="flex items-center gap-4 flex-1"
+        >
+          <div className="w-20 h-20 rounded overflow-hidden">
+            <ImageWithFallback
+              src={item.product.imageUrl || "/placeholder.png"}
+              alt={item.product.name || "product"}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-              {/* Quantity Controls */}
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                >
-                  <Minus size={16} />
-                </Button>
-                <span className="w-12 text-center">
-                  {item.quantity}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                >
-                  <Plus size={16} />
-                </Button>
-              </div>
+          <div>
+            <h3 className="font-semibold">
+              {item.product.name || "Unknown Product"}
+            </h3>
 
-              {/* Total Price & Delete */}
-              <div className="text-right">
-                <p className="font-bold text-gray-900">
-                  ${(item.product.price * item.quantity).toFixed(2)}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFromCart(item.product.id)}
-                  className="text-red-500 hover:text-red-700 mt-1"
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </div>
+            <p className="text-green-600 font-bold">
+              ${price.toFixed(2)}
+            </p>
+          </div>
+        </Link>
 
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onDecrease(item)}
+            disabled={quantity <= 1}
+          >
+            <Minus size={14} />
+          </Button>
+
+          <span className="min-w-[20px] text-center">
+            {quantity}
+          </span>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onIncrease(item)}
+          >
+            <Plus size={14} />
+          </Button>
+        </div>
+
+        <div className="text-right">
+          <p className="font-bold">
+            ${(price * quantity).toFixed(2)}
+          </p>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onRemove(item)}
+            className="text-red-500"
+          >
+            <Trash2 size={14} />
+          </Button>
+        </div>
+
+      </CardContent>
+    </Card>
+  );
+},
+(prevProps, nextProps) => {
+  return (
+    prevProps.item.cartItemId === nextProps.item.cartItemId &&
+    prevProps.item.quantity === nextProps.item.quantity &&
+    prevProps.item.product.id === nextProps.item.product.id &&
+    prevProps.item.product.price === nextProps.item.product.price &&
+    prevProps.item.product.name === nextProps.item.product.name &&
+    prevProps.item.product.imageUrl === nextProps.item.product.imageUrl
   );
 }
+);
+
+// ================= MAIN =================
+
+export const CartItems = memo(function CartItems({
+  cart,
+  updateQuantity,
+  removeFromCart,
+}: Props) {
+
+  const handleIncrease = useCallback((item: CartItemType) => {
+    updateQuantity(item.cartItemId, item.quantity + 1);
+  }, [updateQuantity]);
+
+  const handleDecrease = useCallback((item: CartItemType) => {
+    if (item.quantity <= 1) return;
+    updateQuantity(item.cartItemId, item.quantity - 1);
+  }, [updateQuantity]);
+
+  const handleRemove = useCallback((item: CartItemType) => {
+    removeFromCart(item.cartItemId);
+  }, [removeFromCart]);
+
+  // 🔥 تثبيت العناصر
+  const renderedItems = useMemo(() => {
+    return cart.map((item) => (
+      <CartItem
+        key={item.cartItemId}
+        item={item}
+        onIncrease={handleIncrease}
+        onDecrease={handleDecrease}
+        onRemove={handleRemove}
+      />
+    ));
+  }, [cart, handleIncrease, handleDecrease, handleRemove]);
+
+  if (!cart || cart.length === 0) return null;
+
+  return (
+    <div className="lg:col-span-2 space-y-4">
+      {renderedItems}
+    </div>
+  );
+});

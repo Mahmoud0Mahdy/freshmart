@@ -14,6 +14,10 @@ import { validateField } from "../validation/shippingValidation";
 import { FormField } from "../components/form/PaymentForm";
 import { Input } from "../../../components/ui/input";
 
+<<<<<<< HEAD
+=======
+// 1. Defined strict TypeScript interfaces to replace `any`
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
 interface ShippingFormData {
   fullName?: string;
   email?: string;
@@ -42,11 +46,19 @@ export function ShippingForm({
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+<<<<<<< HEAD
+=======
+  // 2. Memoized required fields to avoid recreating the array on every render
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
   const requiredFields = useMemo(
     () => ["fullName", "email", "address", "city", "state", "zipCode"],
     []
   );
 
+<<<<<<< HEAD
+=======
+  // 3. Consolidated formatting into a clean switch statement and added useCallback
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
   const handleChange = useCallback(
     (field: string, rawValue: string) => {
       let value = rawValue;
@@ -100,6 +112,7 @@ export function ShippingForm({
     [touched, errors, formData]
   );
 
+<<<<<<< HEAD
   // 🔥 BUG FIX 1: Added `!rounded-lg` and `!border` to aggressively prevent elements from merging visually
   const inputStyle = useCallback(
     (f: string) => {
@@ -108,15 +121,31 @@ export function ShippingForm({
         return `${baseClasses} !border-red-500 focus-visible:ring-red-500`;
       }
       return `${baseClasses} !border-gray-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500`;
+=======
+  const inputStyle = useCallback(
+    (f: string) => {
+      if (fieldError(f)) {
+        return "border-red-500 focus-visible:ring-red-500";
+      }
+      return "focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500";
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
     },
     [fieldError]
   );
 
+<<<<<<< HEAD
+=======
+  // 4. Memoized to prevent calculating this on every single render
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
   const disableContinue = useMemo(() => {
     return requiredFields.some((field) => !formData[field] || errors[field]);
   }, [requiredFields, formData, errors]);
 
   const handleContinue = useCallback(() => {
+<<<<<<< HEAD
+=======
+    // Added fallbacks to prevent "undefined" showing up in the full string
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
     const fullAddress = `${formData.address || ""}, ${formData.city || ""}, ${
       formData.state || ""
     }`;
@@ -144,7 +173,11 @@ export function ShippingForm({
             <Input
               value={formData?.fullName || ""}
               disabled
+<<<<<<< HEAD
               className="h-12 w-full border border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-medium"
+=======
+              className="h-12 border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-medium"
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
             />
           </div>
 
@@ -156,7 +189,11 @@ export function ShippingForm({
               <Input
                 value={formData?.email || ""}
                 disabled
+<<<<<<< HEAD
                 className="h-12 w-full bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-lg"
+=======
+                className="h-12 bg-gray-50 border border-gray-200 text-gray-600 font-medium"
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
               />
             </div>
 
@@ -194,6 +231,7 @@ export function ShippingForm({
             fieldValid={fieldValid}
           />
 
+<<<<<<< HEAD
           {/* 🔥 BUG FIX 2: Wrapped in flex and individual divs to force spacing and prevent component merging */}
           <div className="flex flex-col md:flex-row gap-5 w-full">
             <div className="flex-1 w-full">
@@ -237,6 +275,44 @@ export function ShippingForm({
                 fieldValid={fieldValid}
               />
             </div>
+=======
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <FormField
+              label="City"
+              name="city"
+              value={formData.city || ""}
+              error="Invalid city"
+              handleChange={handleChange}
+              handleBlur={handleBlur}
+              inputStyle={inputStyle}
+              fieldError={fieldError}
+              fieldValid={fieldValid}
+            />
+
+            <FormField
+              label="State"
+              name="state"
+              value={formData.state || ""}
+              error="Invalid state"
+              handleChange={handleChange}
+              handleBlur={handleBlur}
+              inputStyle={inputStyle}
+              fieldError={fieldError}
+              fieldValid={fieldValid}
+            />
+
+            <FormField
+              label="ZIP Code"
+              name="zipCode"
+              value={formData.zipCode || ""}
+              error="Invalid ZIP code"
+              handleChange={handleChange}
+              handleBlur={handleBlur}
+              inputStyle={inputStyle}
+              fieldError={fieldError}
+              fieldValid={fieldValid}
+            />
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
           </div>
         </div>
 
@@ -251,8 +327,14 @@ export function ShippingForm({
             onValueChange={(v) => handleInputChange("deliveryMethod", v)}
             className="grid gap-4"
           >
+<<<<<<< HEAD
             <div
               onClick={() => handleInputChange("deliveryMethod", "standard")}
+=======
+            {/* 🔥 BUG FIX: Changed wrapper from div to label and matched htmlFor. Entire block is now clickable. */}
+            <label
+              htmlFor="standard"
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
               className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 (formData.deliveryMethod || "standard") === "standard"
                   ? "border-green-600 bg-green-50/40"
@@ -264,7 +346,11 @@ export function ShippingForm({
                 id="standard"
                 className="text-green-600"
               />
+<<<<<<< HEAD
               <Label htmlFor="standard" className="flex flex-col cursor-pointer w-full flex-1">
+=======
+              <div className="flex flex-col w-full flex-1">
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
                 <span className="font-semibold text-gray-900">
                   Standard Delivery
                 </span>
@@ -278,11 +364,20 @@ export function ShippingForm({
                     "$5.99"
                   )}
                 </span>
+<<<<<<< HEAD
               </Label>
             </div>
 
             <div
               onClick={() => handleInputChange("deliveryMethod", "express")}
+=======
+              </div>
+            </label>
+
+            {/* Express Option */}
+            <label
+              htmlFor="express"
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
               className={`flex items-center space-x-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 formData.deliveryMethod === "express"
                   ? "border-green-600 bg-green-50/40"
@@ -294,7 +389,11 @@ export function ShippingForm({
                 id="express"
                 className="text-green-600"
               />
+<<<<<<< HEAD
               <Label htmlFor="express" className="flex flex-col cursor-pointer w-full flex-1">
+=======
+              <div className="flex flex-col w-full flex-1">
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
                 <span className="font-semibold text-gray-900">
                   Express Delivery
                 </span>
@@ -302,8 +401,13 @@ export function ShippingForm({
                   1-2 business days —{" "}
                   <span className="font-medium text-gray-700">$12.99</span>
                 </span>
+<<<<<<< HEAD
               </Label>
             </div>
+=======
+              </div>
+            </label>
+>>>>>>> 22e48acd3337c7cee2d9af0b9c55264f2b7da5b3
           </RadioGroup>
         </div>
 
