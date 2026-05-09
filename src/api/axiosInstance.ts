@@ -25,7 +25,8 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/Auth/refresh")
+      !originalRequest.url.includes("/Auth/refresh") &&
+      !originalRequest.url.includes("/Auth/logout") // 👈 مهم جدًا
     ) {
       originalRequest._retry = true;
 
@@ -67,5 +68,24 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// ================= LOGOUT FUNCTION =================
+export const logoutApi = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  try {
+    if (refreshToken) {
+      await axiosInstance.post("/Auth/logout", {
+        refreshToken,
+      });
+    }
+  } catch (err) {
+    console.error("Logout API failed", err);
+  } finally {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+  }
+};
 
 export default axiosInstance;

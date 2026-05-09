@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useApp } from "../../contexts/AppContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getProductById } from "../../api/productApi";
 
 import ProductGallery from "./ProductGallery";
@@ -16,6 +16,8 @@ export function ProductDetailPage() {
   const { state } = useApp();
 
   const [product, setProduct] = useState<any>(null);
+
+  const products = useMemo(() => state.products || [], [state.products]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -58,7 +60,7 @@ export function ProductDetailPage() {
 
         <NutritionFacts nutrition={product.nutritionFact} />
 
-        <RelatedProducts products={state.products} product={product} />
+        <RelatedProducts products={products} product={product} />
       </div>
     </div>
   );

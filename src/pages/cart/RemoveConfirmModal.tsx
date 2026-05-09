@@ -1,3 +1,4 @@
+import { memo, useEffect, useRef } from "react";
 import { Button } from "../../components/ui/button";
 
 interface Props {
@@ -6,15 +7,50 @@ interface Props {
   onCancel: () => void;
 }
 
-export function RemoveConfirmModal({ open, onConfirm, onCancel }: Props) {
+export const RemoveConfirmModal = memo(function RemoveConfirmModal({
+  open,
+  onConfirm,
+  onCancel,
+}: Props) {
+
+  // 🔥 تثبيت onCancel
+  const onCancelRef = useRef(onCancel);
+
+  useEffect(() => {
+    onCancelRef.current = onCancel;
+  }, [onCancel]);
+
+  // 🔥 ESC handler + lock scroll
+  useEffect(() => {
+    if (!open) return;
+
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancelRef.current();
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.body.style.overflow = "auto";
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [open]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
 
-      <div className="bg-white rounded-lg p-6 w-[350px] shadow-lg">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onCancel}
+      />
 
+      <div
+        className="relative bg-white rounded-xl p-6 w-[350px] shadow-xl animate-in fade-in zoom-in duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-bold mb-4">
           Remove Item
         </h2>
@@ -23,7 +59,7 @@ export function RemoveConfirmModal({ open, onConfirm, onCancel }: Props) {
           Are you sure you want to remove this item from your cart?
         </p>
 
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end gap-3">
 
           <Button
             variant="outline"
@@ -40,9 +76,7 @@ export function RemoveConfirmModal({ open, onConfirm, onCancel }: Props) {
           </Button>
 
         </div>
-
       </div>
-
     </div>
   );
-}
+});
