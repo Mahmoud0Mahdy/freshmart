@@ -38,26 +38,36 @@ import { ChatbotPage } from "./pages/chatbot/ChatbotPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 
 import ProfilePage from "./pages/profile/ProfilePage";
-import { CommunityPage } from './pages/CommunityPage';
-import { GhostCraftPage } from './pages/GhostCraftPage';
-import { SavedRecipesPage } from './pages/SavedRecipesPage';
-import { SavedProductsPage } from './pages/SavedProductsPage';
+
+import { CommunityPage } from "./pages/CommunityPage";
+
+import { GhostCraftPage } from "./pages/GhostCraftPage";
+
+import { SavedRecipesPage } from "./pages/SavedRecipesPage";
+
+import { SavedProductsPage } from "./pages/SavedProductsPage";
+
+import { OrdersPage } from "./pages/orders/OrdersPage";
+
+import { OrderDetailsPage } from "./pages/orders/OrderDetailsPage";
 
 // 🔐 Admin Pages
-import { DashboardPage } from './admin/dashboard/DashboardPage';
-import { ProductsPage } from './admin/products/ProductsPage';
-import { RecipesPage as AdminRecipesPage } from './admin/recipes/RecipesPage';
-import { UsersPage } from './admin/users/UsersPage';
-import { PostsPage } from './admin/posts/PostsPage';
+import { DashboardPage } from "./admin/dashboard/DashboardPage";
 
-// ✅ الجديد
-import { CategoriesPage } from './admin/categories/CategoriesPage';
+import { ProductsPage } from "./admin/products/ProductsPage";
+
+import { RecipesPage as AdminRecipesPage } from "./admin/recipes/RecipesPage";
+
+import { UsersPage } from "./admin/users/UsersPage";
+
+import { PostsPage } from "./admin/posts/PostsPage";
+
+import { CategoriesPage } from "./admin/categories/CategoriesPage";
 
 export default function App() {
   return (
     <AppProvider>
       <CartProvider>
-        {/* 🔥 Checkout Context */}
         <CheckoutProvider>
           <ChatbotProvider>
             <AdminInitializer />
@@ -85,33 +95,44 @@ export default function App() {
 
                 <Route path="login" element={<LoginPage />} />
 
-            {/* 👤 User */}
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="saved-recipes" element={<SavedRecipesPage />} />
-            <Route path="saved-products" element={<SavedProductsPage />} />
-            <Route path="community" element={<CommunityPage />} />
-            <Route path="ghost-craft" element={<GhostCraftPage />} />
-          </Route>
+                {/* 👤 USER */}
+                <Route path="profile" element={<ProfilePage />} />
 
-          {/* 🔐 Admin Protected */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<DashboardPage />} />
-            <Route path="products" element={<ProductsPage />} />
-            <Route path="recipes" element={<AdminRecipesPage />} />
-            <Route path="users" element={<UsersPage />} />
-            <Route path="posts" element={<PostsPage />} />
+                <Route path="saved-recipes" element={<SavedRecipesPage />} />
 
-            {/* ✅ الجديد */}
-            <Route path="categories" element={<CategoriesPage />} />
+                <Route path="saved-products" element={<SavedProductsPage />} />
 
-          </Route>
+                <Route path="community" element={<CommunityPage />} />
+
+                <Route path="ghost-craft" element={<GhostCraftPage />} />
+
+                {/* 📦 ORDERS */}
+                <Route path="orders" element={<OrdersPage />} />
+
+                <Route path="orders/:id" element={<OrderDetailsPage />} />
+              </Route>
+
+              {/* 🔐 ADMIN */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardPage />} />
+
+                <Route path="products" element={<ProductsPage />} />
+
+                <Route path="recipes" element={<AdminRecipesPage />} />
+
+                <Route path="users" element={<UsersPage />} />
+
+                <Route path="posts" element={<PostsPage />} />
+
+                <Route path="categories" element={<CategoriesPage />} />
+              </Route>
 
               {/* 🔥 FALLBACK */}
               <Route path="*" element={<Navigate to="/" replace />} />
