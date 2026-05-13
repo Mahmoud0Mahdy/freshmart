@@ -12,7 +12,7 @@ import { CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 import { validatePaymentField } from "../validation/paymentValidation";
-import { FormField } from "../components/form/PaymentForm"; // Make sure this component accepts standard classNames now
+import { FormField } from "./form/PaymentFormField"; // Make sure this component accepts standard classNames now
 import { useCheckout } from "../../../contexts/CheckoutContext";
 import { confirmPayment } from "../../../api/paymentApi";
 

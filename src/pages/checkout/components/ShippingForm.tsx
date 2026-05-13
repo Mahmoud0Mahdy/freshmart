@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import { MapPin, ShieldCheck } from "lucide-react";
 
 import { validateField } from "../validation/shippingValidation";
-import { FormField } from "../components/form/PaymentForm";
+import { FormField } from "./form/PaymentFormField";
 import { Input } from "../../../components/ui/input";
 import "./components_css/ShippingForm.css"; // <-- Import the new CSS file
 
