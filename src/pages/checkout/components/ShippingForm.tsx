@@ -13,7 +13,7 @@ import { MapPin, ShieldCheck } from "lucide-react";
 import { validateField } from "../validation/shippingValidation";
 import { FormField } from "../components/form/PaymentForm";
 import { Input } from "../../../components/ui/input";
-import "./components_css/PaymentForm.css"; // <-- Import the new CSS file
+import "./components_css/ShippingForm.css"; // <-- Import the new CSS file
 
 interface ShippingFormData {
   fullName?: string;
