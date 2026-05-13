@@ -1,11 +1,8 @@
-export type OrderSource =
-  | "cart"
-  | "buynow";
+export type OrderSource = "cart" | "buynow";
 
 // ================= PAYMENT =================
 
 export enum PaymentMethod {
-
   Card = 1,
 
   Cash = 2,
@@ -13,15 +10,11 @@ export enum PaymentMethod {
 
 // ================= ORDER STATUS =================
 
-export type OrderStatus =
-  | "Pending"
-  | "Confirmed"
-  | "Cancelled";
+export type OrderStatus = "Pending" | "Confirmed" | "Cancelled";
 
 // ================= PLACE ORDER =================
 
 export interface PlaceOrderPayload {
-
   address: string;
 
   source: OrderSource;
@@ -38,18 +31,26 @@ export interface PlaceOrderPayload {
 // ================= ORDER ITEM =================
 
 export interface OrderItem {
+  // 🔥 normal product
+  productId?: number | null;
+
+  // 🔥 ghost craft
+  ghostCraftOrderId?: number | null;
 
   name: string;
 
   quantity: number;
 
   price: number;
+
+  total?: number;
+
+  imageUrl?: string | null;
 }
 
 // ================= ORDER =================
 
 export interface Order {
-
   id: number;
 
   totalPrice: number;
@@ -68,7 +69,6 @@ export interface Order {
 // ================= ORDER DETAILS =================
 
 export interface OrderDetails {
-
   id: number;
 
   totalPrice: number;

@@ -1,16 +1,18 @@
 export const buildOrderAddress = (
   address?: string,
   city?: string,
-  state?: string
+  state?: string,
+  zipCode?: string
 ) => {
 
   return [
-    address,
-    city,
-    state
+    address?.trim(),
+    city?.trim(),
+    state?.trim(),
+    zipCode?.trim(),
   ]
-    .filter(Boolean)
-    .join(" ");
+    .filter((item) => item && item.length > 0)
+    .join(", ");
 };
 
 export const generateRequestId = () => {

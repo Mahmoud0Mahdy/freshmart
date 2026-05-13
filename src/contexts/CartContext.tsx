@@ -18,9 +18,22 @@ import {
 // ================= TYPES =================
 
 export interface CartItem {
-
   cartItemId: number;
 
+  // 🔥 NEW API FIELDS
+  productId?: number | null;
+
+  ghostCraftOrderId?: number | null;
+
+  name?: string;
+
+  imageUrl?: string | null;
+
+  price?: number;
+
+  total?: number;
+
+  // 🔥 OLD PRODUCT FORMAT
   product?: {
     id: string;
     name: string;
@@ -28,13 +41,10 @@ export interface CartItem {
     imageUrl: string;
   };
 
-  ghostCraftOrderId?: number;
-
   quantity: number;
 }
 
 interface CartState {
-
   cart: CartItem[];
 
   cartSummary: any;
@@ -43,28 +53,23 @@ interface CartState {
 // ================= ACTIONS =================
 
 type CartAction =
-
   | {
       type: "SET_CART";
       cart: CartItem[];
     }
-
   | {
       type: "SET_SUMMARY";
       summary: any;
     }
-
   | {
       type: "UPDATE_ITEM";
       itemId: number;
       quantity: number;
     }
-
   | {
       type: "REMOVE_ITEM";
       itemId: number;
     }
-
   | {
       type: "ADD_ITEM";
       item: CartItem;
@@ -73,7 +78,6 @@ type CartAction =
 // ================= INIT =================
 
 const initialState: CartState = {
-
   cart: [],
 
   cartSummary: null,
@@ -81,17 +85,11 @@ const initialState: CartState = {
 
 // ================= REDUCER =================
 
-function cartReducer(
-  state: CartState,
-  action: CartAction
-): CartState {
-
+function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
-
     // ================= SET CART =================
 
     case "SET_CART":
-
       return {
         ...state,
         cart: action.cart,
@@ -100,7 +98,6 @@ function cartReducer(
     // ================= SUMMARY =================
 
     case "SET_SUMMARY":
-
       return {
         ...state,
         cartSummary: action.summary,
@@ -109,50 +106,35 @@ function cartReducer(
     // ================= UPDATE =================
 
     case "UPDATE_ITEM":
-
       return {
-
         ...state,
 
         cart: state.cart.map((item) =>
-
           item.cartItemId === action.itemId
-
             ? {
                 ...item,
                 quantity: action.quantity,
               }
-
-            : item
+            : item,
         ),
       };
 
     // ================= REMOVE =================
 
     case "REMOVE_ITEM":
-
       return {
-
         ...state,
 
-        cart: state.cart.filter(
-          (item) =>
-            item.cartItemId !== action.itemId
-        ),
+        cart: state.cart.filter((item) => item.cartItemId !== action.itemId),
       };
 
     // ================= ADD =================
 
     case "ADD_ITEM":
-
       return {
-
         ...state,
 
-        cart: [
-          action.item,
-          ...state.cart,
-        ],
+        cart: [action.item, ...state.cart],
       };
 
     default:
@@ -162,115 +144,81 @@ function cartReducer(
 
 // ================= CONTEXT =================
 
-const CartContext =
-  createContext<any>(null);
+const CartContext = createContext<any>(null);
 
 // ================= PROVIDER =================
 
-export function CartProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-
-  const [state, dispatch] =
-    useReducer(
-      cartReducer,
-      initialState
-    );
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
   // ================= FETCH CART =================
 
-  const fetchCart =
-    useCallback(async () => {
+  const fetchCart = useCallback(async () => {
+    try {
+      const data = await getCart();
 
-      try {
+      const mapped = data.items.map((item: any) => ({
+        cartItemId: item.cartItemId,
 
-        const data =
-          await getCart();
+        quantity: item.quantity,
 
-        const mapped =
-          data.items.map(
-            (item: any) => ({
+        // 🔥 IMPORTANT
+        productId: item.productId,
 
-              cartItemId:
-                item.cartItemId,
+        ghostCraftOrderId: item.ghostCraftOrderId,
 
-              quantity:
-                item.quantity,
+        name: item.name,
 
-              // 🔥 NORMAL PRODUCT
-              product:
-                item.productId
-                  ? {
-                      id: String(
-                        item.productId
-                      ),
+        imageUrl: item.imageUrl,
 
-                      name:
-                        item.name,
+        price: item.price,
 
-                      price:
-                        item.price,
+        total: item.total,
 
-                      imageUrl:
-                        item.imageUrl,
-                    }
-                  : undefined,
+        // 🔥 KEEP OLD FORMAT FOR NORMAL PRODUCTS
+        product: item.productId
+          ? {
+              id: String(item.productId),
 
-              // 🔥 GHOST CRAFT
-              ghostCraftOrderId:
-                item.ghostCraftOrderId ||
-                undefined,
-            })
-          );
+              name: item.name,
 
-        dispatch({
-          type: "SET_CART",
-          cart: mapped,
-        });
+              price: item.price,
 
-      } catch (err) {
+              imageUrl: item.imageUrl,
+            }
+          : undefined,
+      }));
 
-        console.error(err);
-      }
-
-    }, []);
+      dispatch({
+        type: "SET_CART",
+        cart: mapped,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   // ================= FETCH SUMMARY =================
 
-  const fetchSummary =
-    useCallback(async () => {
+  const fetchSummary = useCallback(async () => {
+    try {
+      const data = await getCartSummary();
 
-      try {
-
-        const data =
-          await getCartSummary();
-
-        dispatch({
-          type: "SET_SUMMARY",
-          summary: data,
-        });
-
-      } catch (err) {
-
-        console.error(err);
-      }
-
-    }, []);
+      dispatch({
+        type: "SET_SUMMARY",
+        summary: data,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
   // ================= ADD PRODUCT =================
 
-  const addToCart =
-    useCallback(async (
-      product: any,
-      quantity = 1
-    ) => {
-
+  const addToCart = useCallback(
+    async (product: any, quantity = 1) => {
       const tempItem: CartItem = {
-
-        cartItemId:
-          Date.now(),
+        cartItemId: Date.now(),
 
         product,
 
@@ -284,39 +232,27 @@ export function CartProvider({
       });
 
       try {
-
         await addCartItem({
-
-          productId:
-            Number(product.id),
+          productId: Number(product.id),
 
           quantity,
         });
 
         await fetchCart();
         await fetchSummary();
-
       } catch (err) {
-
         console.error(err);
       }
-
-    }, [
-      fetchCart,
-      fetchSummary,
-    ]);
+    },
+    [fetchCart, fetchSummary],
+  );
 
   // ================= ADD GHOST CRAFT =================
 
-  const addGhostCraftToCart =
-    useCallback(async (
-      ghostCraftOrderId: number
-    ) => {
-
+  const addGhostCraftToCart = useCallback(
+    async (ghostCraftOrderId: number) => {
       try {
-
         await addCartItem({
-
           ghostCraftOrderId,
 
           quantity: 1,
@@ -324,28 +260,19 @@ export function CartProvider({
 
         await fetchCart();
         await fetchSummary();
-
       } catch (err) {
-
         console.error(err);
       }
-
-    }, [
-      fetchCart,
-      fetchSummary,
-    ]);
+    },
+    [fetchCart, fetchSummary],
+  );
 
   // ================= UPDATE =================
 
-  const updateItem =
-    useCallback(async (
-      itemId: number,
-      quantity: number
-    ) => {
-
+  const updateItem = useCallback(
+    async (itemId: number, quantity: number) => {
       // 🔥 optimistic update
       dispatch({
-
         type: "UPDATE_ITEM",
 
         itemId,
@@ -354,85 +281,57 @@ export function CartProvider({
       });
 
       try {
-
-        await updateCartItem(
-          itemId,
-          quantity
-        );
+        await updateCartItem(itemId, quantity);
 
         await fetchSummary();
-
       } catch (err) {
-
         console.error(err);
 
         // rollback
         await fetchCart();
       }
-
-    }, [
-      fetchCart,
-      fetchSummary,
-    ]);
+    },
+    [fetchCart, fetchSummary],
+  );
 
   // ================= REMOVE =================
 
-  const removeItem =
-    useCallback(async (
-      itemId: number
-    ) => {
-
+  const removeItem = useCallback(
+    async (itemId: number) => {
       // 🔥 optimistic update
       dispatch({
-
         type: "REMOVE_ITEM",
 
         itemId,
       });
 
       try {
-
-        await deleteCartItem(
-          itemId
-        );
+        await deleteCartItem(itemId);
 
         await fetchSummary();
-
       } catch (err) {
-
         console.error(err);
 
         // rollback
         await fetchCart();
       }
-
-    }, [
-      fetchCart,
-      fetchSummary,
-    ]);
+    },
+    [fetchCart, fetchSummary],
+  );
 
   // ================= INIT =================
 
   useEffect(() => {
-
     fetchCart();
     fetchSummary();
-
-  }, [
-    fetchCart,
-    fetchSummary,
-  ]);
+  }, [fetchCart, fetchSummary]);
 
   return (
-
     <CartContext.Provider
       value={{
+        cart: state.cart,
 
-        cart:
-          state.cart,
-
-        cartSummary:
-          state.cartSummary,
+        cartSummary: state.cartSummary,
 
         addToCart,
 
@@ -447,9 +346,7 @@ export function CartProvider({
         fetchSummary,
       }}
     >
-
       {children}
-
     </CartContext.Provider>
   );
 }
@@ -457,15 +354,10 @@ export function CartProvider({
 // ================= HOOK =================
 
 export function useCart() {
-
-  const context =
-    useContext(CartContext);
+  const context = useContext(CartContext);
 
   if (!context) {
-
-    throw new Error(
-      "useCart must be used within CartProvider"
-    );
+    throw new Error("useCart must be used within CartProvider");
   }
 
   return context;

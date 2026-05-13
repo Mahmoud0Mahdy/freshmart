@@ -31,90 +31,48 @@ export function PaymentForm({
   nextStep,
   setStep,
 }: any) {
+  const [errors, setErrors] = useState<any>({});
 
-  const [errors, setErrors] =
-    useState<any>({});
+  const [touched, setTouched] = useState<any>({});
 
-  const [touched, setTouched] =
-    useState<any>({});
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
+  const { checkoutData, setCheckoutField } = useCheckout();
 
-  const {
-    checkoutData,
-    setCheckoutField,
-  } = useCheckout();
+  const requiredFields = ["cardNumber", "expiryDate", "cvv", "cardName"];
 
-  const requiredFields = [
-    "cardNumber",
-    "expiryDate",
-    "cvv",
-    "cardName",
-  ];
-
-  const handleChange = (
-    field: string,
-    value: string
-  ) => {
-
+  const handleChange = (field: string, value: string) => {
     // 🔥 CARD NUMBER
     if (field === "cardNumber") {
+      value = value.replace(/\D/g, "").slice(0, 16);
 
-      value = value
-        .replace(/\D/g, "")
-        .slice(0, 16);
-
-      value = value
-        .replace(/(.{4})/g, "$1 ")
-        .trim();
+      value = value.replace(/(.{4})/g, "$1 ").trim();
     }
 
     // 🔥 CVV
     if (field === "cvv") {
-
-      value = value
-        .replace(/\D/g, "")
-        .slice(0, 4);
+      value = value.replace(/\D/g, "").slice(0, 4);
     }
 
     // 🔥 EXPIRY
     if (field === "expiryDate") {
-
-      value = value
-        .replace(/[^\d]/g, "")
-        .slice(0, 4);
+      value = value.replace(/[^\d]/g, "").slice(0, 4);
 
       if (value.length >= 3) {
-
-        value =
-          value.slice(0, 2) +
-          "/" +
-          value.slice(2);
+        value = value.slice(0, 2) + "/" + value.slice(2);
       }
     }
 
     // 🔥 CARD HOLDER
     if (field === "cardName") {
-
-      value = value
-        .replace(/[^A-Za-z\s]/g, "")
-        .slice(0, 50);
+      value = value.replace(/[^A-Za-z\s]/g, "").slice(0, 50);
     }
 
-    handleInputChange(
-      field,
-      value
-    );
+    handleInputChange(field, value);
 
     // 🔥 live validation
     if (touched[field]) {
-
-      const valid =
-        validatePaymentField(
-          field,
-          value
-        );
+      const valid = validatePaymentField(field, value);
 
       setErrors((prev: any) => ({
         ...prev,
@@ -123,20 +81,13 @@ export function PaymentForm({
     }
   };
 
-  const handleBlur = (
-    field: string
-  ) => {
-
+  const handleBlur = (field: string) => {
     setTouched((prev: any) => ({
       ...prev,
       [field]: true,
     }));
 
-    const valid =
-      validatePaymentField(
-        field,
-        formData[field] || ""
-      );
+    const valid = validatePaymentField(field, formData[field] || "");
 
     setErrors((prev: any) => ({
       ...prev,
@@ -144,123 +95,73 @@ export function PaymentForm({
     }));
   };
 
-  const fieldError = (
-    field: string
-  ) =>
-    touched[field] &&
-    errors[field];
+  const fieldError = (field: string) => touched[field] && errors[field];
 
-  const fieldValid = (
-    field: string
-  ) =>
-    touched[field] &&
-    !errors[field] &&
-    formData[field];
+  const fieldValid = (field: string) =>
+    touched[field] && !errors[field] && formData[field];
 
-  const inputStyle = (
-    field: string
-  ) => {
-
+  const inputStyle = (field: string) => {
     if (fieldError(field)) {
-
       return "border-red-500 focus-visible:ring-red-500";
     }
 
     return "focus-visible:ring-emerald-500/20 focus-visible:border-emerald-500";
   };
 
-  const disableContinue =
-    requiredFields.some(
-      (field) =>
-        !formData[field] ||
-        errors[field]
-    );
+  const disableContinue = requiredFields.some(
+    (field) => !formData[field] || errors[field],
+  );
 
   const handleContinue = async () => {
-
     try {
-
       setLoading(true);
 
       // 🔥 save payment method
-      setCheckoutField(
-        "paymentMethodId",
-        1
-      );
+      setCheckoutField("paymentMethodId", 1);
 
-      const [month, year] =
-        formData.expiryDate.split("/");
+      const [month, year] = formData.expiryDate.split("/");
 
       const payload = {
-
         paymentMethodId: 1,
 
-        savePayment:
-          formData.saveInfo,
+        savePayment: formData.saveInfo,
 
-        cardNumber:
-          formData.cardNumber.replace(/\s/g, ""),
+        cardNumber: formData.cardNumber.replace(/\s/g, ""),
 
-        expiryMonth:
-          Number(month),
+        expiryMonth: Number(month),
 
-        expiryYear:
-          Number(`20${year}`),
+        expiryYear: Number(`20${year}`),
 
-        cvv:
-          formData.cvv,
+        cvv: formData.cvv,
       };
 
-      console.log(
-        "CONFIRM PAYMENT:",
-        payload
-      );
+      console.log("CONFIRM PAYMENT:", payload);
 
       // 🔥 confirm payment
-      await confirmPayment(
-        checkoutData.orderId,
-        payload
-      );
+      await confirmPayment(checkoutData.orderId, payload);
 
-      toast.success(
-        "Payment confirmed successfully"
-      );
+      toast.success("Payment confirmed successfully");
 
       nextStep();
-
     } catch (err) {
-
       console.error(err);
 
-      toast.error(
-        "Failed to confirm payment"
-      );
-
+      toast.error("Failed to confirm payment");
     } finally {
-
       setLoading(false);
     }
   };
 
   return (
-
     <Card className="border-0 shadow-md">
-
       <CardHeader>
-
         <CardTitle className="flex items-center">
-          <CreditCard
-            className="mr-2"
-            size={20}
-          />
-
+          <CreditCard className="mr-2" size={20} />
           Payment Information
         </CardTitle>
-
       </CardHeader>
 
       <CardContent className="space-y-4">
-
         {/* CARD NUMBER */}
         <FormField
           label="Card Number"
@@ -277,7 +178,6 @@ export function PaymentForm({
 
         {/* EXPIRY + CVV */}
         <div className="grid grid-cols-2 gap-4">
-
           <FormField
             label="Expiry Date"
             name="expiryDate"
@@ -303,7 +203,6 @@ export function PaymentForm({
             fieldError={fieldError}
             fieldValid={fieldValid}
           />
-
         </div>
 
         {/* CARD NAME */}
@@ -322,28 +221,21 @@ export function PaymentForm({
 
         {/* SAVE CARD */}
         <div className="flex items-center space-x-2">
-
           <Checkbox
             id="saveInfo"
             checked={formData.saveInfo}
             onCheckedChange={(checked) =>
-              handleInputChange(
-                "saveInfo",
-                checked as boolean
-              )
+              handleInputChange("saveInfo", checked as boolean)
             }
           />
 
           <Label htmlFor="saveInfo">
-            Save payment information
-            for future orders
+            Save payment information for future orders
           </Label>
-
         </div>
 
         {/* ACTIONS */}
         <div className="flex space-x-4">
-
           <Button
             variant="outline"
             onClick={() => setStep(3)}
@@ -353,22 +245,14 @@ export function PaymentForm({
           </Button>
 
           <Button
-            disabled={
-              disableContinue ||
-              loading
-            }
+            disabled={disableContinue || loading}
             onClick={handleContinue}
             className="flex-1 bg-green-600 hover:bg-green-700"
           >
-            {loading
-              ? "Processing..."
-              : "Review Order"}
+            {loading ? "Processing..." : "Review Order"}
           </Button>
-
         </div>
-
       </CardContent>
-
     </Card>
   );
 }

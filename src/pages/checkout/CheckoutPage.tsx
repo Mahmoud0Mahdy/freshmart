@@ -34,7 +34,7 @@ export function CheckoutPage() {
 
   const location = useLocation();
 
-  const { cart } = useCart();
+  const { cart, fetchCart, fetchSummary } = useCart();
 
   const { checkoutData, setCheckoutField, setCheckoutData, resetCheckout } =
     useCheckout();
@@ -146,10 +146,11 @@ export function CheckoutPage() {
   }, []);
 
   // 🔥 totals
-  const subtotal = (cartItems || []).reduce(
-    (total, item) => total + item.product.price * item.quantity,
-    0,
-  );
+  const subtotal = (cartItems || []).reduce((total, item: any) => {
+    const price = Number(item.product?.price ?? item.price ?? 0);
+
+    return total + price * item.quantity;
+  }, 0);
 
   const tax = subtotal * 0.08;
 
@@ -199,7 +200,7 @@ export function CheckoutPage() {
     }
   };
 
-  // 🔥 CASH PLACE ORDER
+  // 🔥 PLACE ORDER
   const placeOrder = async () => {
     try {
       setPlacingOrder(true);
@@ -221,6 +222,11 @@ export function CheckoutPage() {
       console.log("PLACE ORDER PAYLOAD:", payload);
 
       await placeOrderApi(payload);
+
+      // 🔥 refresh cart instantly
+      await fetchCart();
+
+      await fetchSummary();
 
       toast.success("Order placed successfully!");
 

@@ -32,7 +32,7 @@ export default function MiniCart({
   const subtotal = items.reduce(
     (total: number, item: any) =>
       total +
-      item.product.price * item.quantity,
+      (item.product?.price ?? item.price ?? 0) * item.quantity,
     0
   );
 
@@ -42,7 +42,7 @@ export default function MiniCart({
 
     try {
 
-      setLoadingId(item.product.id);
+      setLoadingId(item.product?.id || item.productId);
 
       await updateItem(
         item.cartItemId,
@@ -65,7 +65,7 @@ export default function MiniCart({
 
     try {
 
-      setLoadingId(item.product.id);
+      setLoadingId(item.product?.id || item.productId);
 
       if (item.quantity === 1) {
 
@@ -155,18 +155,18 @@ export default function MiniCart({
             >
 
               <img
-                src={item.product.imageUrl}
+                src={item.product?.imageUrl || item.imageUrl}
                 className="w-20 h-20 rounded object-cover"
               />
 
               <div className="flex flex-col justify-center flex-1">
 
                 <h3 className="text-sm font-medium">
-                  {item.product.name}
+                  {item.product?.name || item.name}
                 </h3>
 
                 <span className="text-green-600 font-semibold text-base mt-1">
-                  ${item.product.price}
+                  ${item.product?.price ?? item.price ?? 0}
                 </span>
 
                 <div className="flex items-center border rounded mt-2 w-fit">
@@ -178,7 +178,7 @@ export default function MiniCart({
                     }
                     disabled={
                       loadingId ===
-                      item.product.id
+                      item.product?.id || item.productId
                     }
                   >
                     <Minus size={16} />
@@ -195,7 +195,7 @@ export default function MiniCart({
                     }
                     disabled={
                       loadingId ===
-                      item.product.id
+                      item.product?.id || item.productId
                     }
                   >
                     <Plus size={16} />

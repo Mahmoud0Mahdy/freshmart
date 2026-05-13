@@ -143,15 +143,21 @@ export function OrderDetailsPage() {
                 Order #{order.id}
               </h1>
 
-              <div className="flex items-center gap-2 text-gray-500 mt-3">
+              <div className="flex items-center gap-2 text-gray-500 mt-2">
                 <CalendarDays size={16} />
 
-                <span>{new Date(order.createdAt).toLocaleString()}</span>
+                <span>
+                  {new Date(order.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
               </div>
             </div>
 
             <span
-              className={`inline-flex items-center px-5 py-3 rounded-full text-sm font-semibold w-fit ${getStatusStyle(order.orderStatus)}`}
+              className={`inline-flex items-center px-6 py-3.5 rounded-full text-base font-semibold w-fit ${getStatusStyle(order.orderStatus)}`}
             >
               {order.orderStatus}
             </span>
@@ -169,37 +175,61 @@ export function OrderDetailsPage() {
                 </h2>
               </div>
 
-              <CardContent className="p-6 space-y-4 bg-gray-50/40">
-                {(order.items || []).map((item: any, index: number) => (
-                  <div
-                    key={index}
-                    className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center justify-between hover:shadow-sm transition"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center">
-                        <Package size={24} className="text-green-600" />
+              <CardContent className="space-y-4 bg-gray-50/40">
+                {(order.items || []).map((item: any, index: number) => {
+                  // 🔥 detect ghost craft
+                  const isGhostCraft = !!item.ghostCraftOrderId;
+
+                  // 🔥 better fallback
+                  const itemName =
+                    item.name?.trim() ||
+                    (isGhostCraft ? "Ghost Craft Meal" : "Unknown Product");
+
+                  const itemPrice = Number(item.price || 0);
+
+                  const quantity = Number(item.quantity || 0);
+
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center justify-between hover:shadow-sm transition"
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* ICON */}
+                        <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center">
+                          <Package size={24} className="text-green-600" />
+                        </div>
+
+                        {/* INFO */}
+                        <div>
+                          {/* 🔥 ghost craft badge */}
+                          {isGhostCraft && (
+                            <div className="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold mb-2">
+                              Ghost Craft
+                            </div>
+                          )}
+
+                          <h3 className="font-bold text-gray-900 text-lg">
+                            {itemName}
+                          </h3>
+
+                          <p className="text-sm text-gray-500 mt-1">
+                            Quantity: {quantity}
+                          </p>
+                        </div>
                       </div>
 
-                      <div>
-                        <h3 className="font-bold text-gray-900 text-lg">
-                          {item.name}
-                        </h3>
+                      {/* PRICE */}
+                      <div className="text-right mr-2">
+                        <p className="text-sm text-gray-500 mb-1 ">Total</p>
 
-                        <p className="text-sm text-gray-500 mt-1">
-                          Quantity: {item.quantity}
+                        <p className="font-bold text-lg text-gray-900">
+                          ${(itemPrice * quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>
-
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500 mb-1">Total</p>
-
-                      <p className="font-bold text-lg text-gray-900">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
           </div>
@@ -212,7 +242,7 @@ export function OrderDetailsPage() {
                 <h2 className="text-2xl font-bold text-gray-900">Summary</h2>
               </div>
 
-              <CardContent className="p-6 space-y-5">
+              <CardContent className="space-y-2">
                 {/* PAYMENT */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-gray-500">
@@ -235,18 +265,18 @@ export function OrderDetailsPage() {
                   </div>
 
                   <span className="font-semibold text-gray-900">
-                    {order.paymentStatus}
+                    {order.paymentStatus || "Pending"}
                   </span>
                 </div>
 
                 {/* TOTAL */}
-                <div className="border-t pt-5 flex items-center justify-between">
+                <div className="border-t pt-4 flex items-center justify-between">
                   <span className="text-lg font-semibold text-gray-700">
                     Total
                   </span>
 
                   <span className="text-3xl font-bold text-gray-900">
-                    ${order.totalPrice.toFixed(2)}
+                    ${Number(order.totalPrice || 0).toFixed(2)}
                   </span>
                 </div>
               </CardContent>
