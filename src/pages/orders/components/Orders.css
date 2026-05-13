@@ -318,3 +318,94 @@
 }
 .summary-total-label { font-size: 1.125rem; font-weight: 600; color: var(--color-gray-700); }
 .summary-total-value { font-size: 1.875rem; font-weight: 700; color: var(--color-gray-900); }
+
+/* ================= FILTER SECTION ================= */
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.filter-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-500);
+  background-color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-gray-200);
+}
+
+.filter-scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.filter-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.filter-btn {
+  white-space: nowrap;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid var(--color-gray-200);
+  background-color: white;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+}
+
+.filter-btn.active {
+  background-color: var(--color-green-600);
+  color: white;
+  border-color: var(--color-green-600);
+}
+
+/* Empty Filter State */
+.empty-filter-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  background-color: white;
+  border-radius: 1rem;
+  border: 1px dashed var(--color-gray-300);
+  text-align: center;
+}
+
+.empty-filter-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: 0.5rem;
+}
+
+.empty-filter-subtitle {
+  color: var(--color-gray-500);
+  font-size: 0.95rem;
+}
+
+.mt-4 { margin-top: 1rem; }
+
+/* Status Shipped Add-on */
+.status-shipped { 
+  background-color: var(--color-purple-100); 
+  color: var(--color-purple-700); 
+  border-color: transparent; 
+}
