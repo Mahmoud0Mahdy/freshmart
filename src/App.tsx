@@ -35,8 +35,8 @@ import { SavedProductsPage } from "./pages/SavedProductsPage";
 import { SavedPostsPage } from "./pages/SavedPostsPage";
 
 // 📦 User Orders Pages
-import { OrdersPage } from "./pages/orders/OrdersPage";
-import { OrderDetailsPage } from "./pages/orders/OrderDetailsPage";
+import { OrdersPage } from "./pages/orders/components/OrdersPage";
+import { OrderDetailsPage } from "./pages/orders/components/OrderDetailsPage";
 
 // 🔐 Admin Pages
 import { DashboardPage } from "./admin/dashboard/DashboardPage";
