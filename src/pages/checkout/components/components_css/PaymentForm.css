@@ -1,0 +1,133 @@
+:root {
+  --color-green-600: #16a34a;
+  --color-green-700: #15803d;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-red-500: #ef4444;
+}
+
+/* Card Basics */
+.payment-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none; /* Replaces border-0 */
+  border-radius: 0.75rem;
+  background-color: white;
+}
+
+.payment-card-header {
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+}
+
+.payment-card-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+}
+
+.icon-accent {
+  margin-right: 0.5rem;
+}
+
+.payment-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Replaces space-y-4 */
+  padding: 1.5rem;
+}
+
+/* Grid Layout */
+.grid-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-layout.cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Input Styles (Matching standard inputs) */
+.form-input {
+  width: 100%;
+  height: 2.5rem;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-input.error {
+  border-color: var(--color-red-500);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.form-input.valid:focus {
+  border-color: var(--color-green-600);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+}
+
+/* Checkbox Section */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Replaces space-x-2 */
+  margin-top: 0.5rem;
+}
+
+.checkbox-label {
+  font-size: 0.875rem;
+  color: var(--color-gray-700);
+  cursor: pointer;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 1rem; /* Replaces space-x-4 */
+  margin-top: 1rem;
+}
+
+.btn {
+  flex: 1;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.outline-btn {
+  background-color: transparent;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-700);
+}
+
+.outline-btn:hover:not(:disabled) {
+  background-color: #f9fafb;
+}
+
+.submit-btn {
+  background-color: var(--color-green-600);
+  color: white;
+  border: none;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--color-green-700);
+}
