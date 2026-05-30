@@ -16,6 +16,10 @@
   --color-yellow-200: #fef08a;
   --color-yellow-700: #a16207;
 
+  /* 🔥 Added Purple colors for Shipped status */
+  --color-purple-100: #f3e8ff;
+  --color-purple-700: #7e22ce;
+
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
   --color-gray-200: #e5e7eb;
@@ -112,6 +116,7 @@
 .status-cancelled { background-color: var(--color-red-100); color: var(--color-red-700); border-color: var(--color-red-200); }
 .status-delivered { background-color: var(--color-blue-100); color: var(--color-blue-700); }
 .status-pending { background-color: var(--color-yellow-100); color: var(--color-yellow-700); border-color: var(--color-yellow-200); }
+.status-shipped { background-color: var(--color-purple-100); color: var(--color-purple-700); border-color: transparent; }
 
 /* Loaders & Empty States */
 .loader-container {
@@ -133,15 +138,18 @@
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
+/* 🔥 Fixed Empty State */
 .empty-state {
-  min-height: 100vh;
+  min-height: 60vh;
   background-color: var(--color-gray-50);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 1rem;
+  padding: 4rem 1rem;
   text-align: center;
+  border-radius: 1rem;
+  margin-top: 2rem;
 }
 .empty-icon-wrapper {
   width: 6rem;
@@ -152,9 +160,21 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
+  flex: 0 0 auto;
 }
 .empty-title { font-size: 1.875rem; font-weight: 700; color: var(--color-gray-900); margin-bottom: 0.5rem; }
 .empty-subtitle { color: var(--color-gray-500); max-width: 24rem; margin-bottom: 1.75rem; }
+
+/* 🔥 Giant Button Fix */
+.empty-state .btn-lg {
+  height: 3rem;
+  max-height: 3rem;
+  flex: 0 0 auto;
+  padding: 0 2rem;
+  font-size: 1rem;
+  border-radius: 0.75rem;
+  width: fit-content;
+}
 
 /* ================= ORDERS PAGE ================= */
 .orders-header { padding-top: 2rem; margin-bottom: 2rem; }
@@ -345,11 +365,11 @@
   align-items: center;
   gap: 0.5rem;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .filter-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .filter-btn {
@@ -402,10 +422,3 @@
 }
 
 .mt-4 { margin-top: 1rem; }
-
-/* Status Shipped Add-on */
-.status-shipped { 
-  background-color: var(--color-purple-100); 
-  color: var(--color-purple-700); 
-  border-color: transparent; 
-}
