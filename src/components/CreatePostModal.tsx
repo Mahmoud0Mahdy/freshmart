@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { createPost } from '../api/communityApi';
 
 interface CreatePostModalProps {
@@ -85,6 +85,7 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
           <h2 className="text-gray-900">Create a Post</h2>
           <button
             onClick={handleClose}
+            title="Close modal"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <X size={20} className="text-gray-600" />
