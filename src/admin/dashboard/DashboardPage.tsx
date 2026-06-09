@@ -2,34 +2,56 @@ import { useEffect, useState } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { DashboardStats } from './components/DashboardStats';
 import { DashboardDetails } from './components/DashboardDetails';
-import { getAllUsers, getAllCategories } from '../../api/adminApi'; // 🔥 ضفنا categories
+
+// 🔥 جلب كل APIs المطلوبة
+import { getAllUsers, getAllCategories } from '../../api/adminApi'; 
+import { getAllPosts } from '../../api/communityApi';
+import { getAllRecipes } from '../../api/recipeApi';
+import axiosInstance from '../../api/axiosInstance';
+
+import "..//dashboard/components/Dashboard-admin.css"; // مسار الـ css
 
 export function DashboardPage() {
-  const { state, dispatch } = useApp();
+  const { dispatch } = useApp();
 
-  // ✅ users من API
-  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  
+  // 🔥 State لعدد العناصر اللي مكنتش بتقرا صح
+  const [counts, setCounts] = useState({ products: 0, recipes: 0, posts: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        // 🔥 parallel requests
-        const [usersData, categoriesData] = await Promise.all([
-          getAllUsers(),
-          getAllCategories(),
+        // 🔥 جلب كل الداتا بالتوازي عشان نضمن إن الأرقام حقيقية 100%
+        const [usersData, catsData, postsData, recipesData, productsRes] = await Promise.all([
+          getAllUsers().catch(() => []),
+          getAllCategories().catch(() => []),
+          getAllPosts().catch(() => []),
+          getAllRecipes().catch(() => []),
+          axiosInstance.get("/Products").catch(() => ({ data: [] }))
         ]);
 
-        // ✅ users local (زي ما انت عامل)
-        setUsers(usersData);
+        setUsers(usersData || []);
+        setCategories(catsData || []);
+        dispatch({ type: "SET_CATEGORIES", categories: catsData || [] });
 
-        // ✅ categories في context
-        dispatch({
-          type: "SET_CATEGORIES",
-          categories: categoriesData,
+        // تظبيط شكل البوستات سواء كانت راجعة array مباشر أو جوه object
+        const pData = Array.isArray(postsData) ? postsData : (postsData?.data || []);
+        
+        // حفظ الأعداد
+        setCounts({
+          products: productsRes.data?.length || 0,
+          recipes: recipesData?.length || 0,
+          posts: pData.length || 0,
         });
 
       } catch (err) {
-        console.log("failed to load dashboard data", err);
+        console.error("Failed to load dashboard data", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -45,15 +67,15 @@ export function DashboardPage() {
           Admin Dashboard
         </h1>
         <p className="text-gray-600">
-          Here's what's happening in your store today.
+          Overview of your system's statistics and data.
         </p>
       </div>
 
       {/* Stats */}
-      <DashboardStats state={state} users={users} />
+      <DashboardStats usersCount={users.length} counts={counts} loading={loading} />
 
       {/* Details */}
-      <DashboardDetails state={state} users={users} />
+      <DashboardDetails users={users} categories={categories} counts={counts} loading={loading} />
 
     </div>
   );

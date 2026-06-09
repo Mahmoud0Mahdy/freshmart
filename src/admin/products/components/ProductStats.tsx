@@ -1,5 +1,8 @@
 import { Card } from '../../../components/ui/card';
 import type { Product } from '../../../contexts/AppContext';
+import { Package, CheckCircle2, XCircle } from "lucide-react";
+// ✅ تأكد إن المسار مظبوط حسب مكان ملف الـ CSS
+import "../components/products-admin.css"; 
 
 interface ProductStatsProps {
   products: Product[];
@@ -10,19 +13,39 @@ export function ProductStats({ products }: ProductStatsProps) {
   const outOfStockCount = products.filter((p) => !p.inStock).length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <Card className="p-4">
-        <p className="text-gray-600 text-sm mb-1">Total Products</p>
-        <p className="text-2xl">{products.length}</p>
+    <div className="prod-stats-wrapper">
+      
+      {/* ── Top: Total Products ── */}
+      <Card className="prod-total-card">
+        <div className="prod-total-icon">
+          <Package size={22} />
+        </div>
+        <p className="prod-total-label">TOTAL PRODUCTS</p>
+        <p className="prod-total-value">{products.length}</p>
       </Card>
-      <Card className="p-4">
-        <p className="text-gray-600 text-sm mb-1">In Stock</p>
-        <p className="text-2xl text-green-600">{inStockCount}</p>
-      </Card>
-      <Card className="p-4">
-        <p className="text-gray-600 text-sm mb-1">Out of Stock</p>
-        <p className="text-2xl text-red-600">{outOfStockCount}</p>
-      </Card>
+
+      {/* ── Bottom: 2 Statuses ── */}
+      <div className="prod-mini-grid">
+        
+        {/* In Stock */}
+        <Card className="prod-mini-card">
+          <div className="prod-mini-icon prod-mini-icon--green">
+            <CheckCircle2 size={18} />
+          </div>
+          <p className="prod-mini-value prod-mini-value--green">{inStockCount}</p>
+          <p className="prod-mini-label">IN STOCK</p>
+        </Card>
+
+        {/* Out of Stock */}
+        <Card className="prod-mini-card">
+          <div className="prod-mini-icon prod-mini-icon--red">
+            <XCircle size={18} />
+          </div>
+          <p className="prod-mini-value prod-mini-value--red">{outOfStockCount}</p>
+          <p className="prod-mini-label">OUT OF STOCK</p>
+        </Card>
+
+      </div>
     </div>
   );
 }

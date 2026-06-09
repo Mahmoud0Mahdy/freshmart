@@ -1,11 +1,10 @@
-import { Card } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { Shield, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "../../../contexts/AppContext";
-
 import { updateUserStatus } from "../../../api/adminApi";
+import "../components/users-admin.css"; // ✅ تأكد من المسار حسب مشروعك
 
 export function UserTable({ users, onRefresh }) {
   const { state } = useApp();
@@ -18,86 +17,77 @@ export function UserTable({ users, onRefresh }) {
 
     try {
       await updateUserStatus(userId, !currentStatus);
-
       toast.success(`User is now ${!currentStatus ? "Active" : "Inactive"}`);
-
-      onRefresh(); // 🔥 نعمل reload للداتا
+      onRefresh(); // 🔥 Reload data
     } catch {
       toast.error("Failed to update user status");
     }
   };
 
   return (
-    <Card className="overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b">
+    <div className="ua-table-wrap">
+      <div style={{ overflowX: "auto" }}>
+        <table className="ua-table">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">
-                User
-              </th>
-              <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs text-gray-500 uppercase">
-                Status
-              </th>
-              <th className="px-6 py-3 text-right text-xs text-gray-500 uppercase">
-                Actions
-              </th>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th style={{ textAlign: "center" }}>Status</th>
+              <th style={{ textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
 
-          <tbody className="bg-white divide-y">
+          <tbody>
             {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                      <span className="text-green-600 font-medium">
-                        {user.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()}
-                      </span>
+              <tr key={user.id}>
+                {/* User Info & Avatar */}
+                <td>
+                  <div className="ua-user">
+                    <div className="ua-avatar">
+                      {user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)}
                     </div>
-                    <div className="ml-4 font-medium text-gray-900">
+                    <div className="ua-user-name">
                       {user.name}
                     </div>
                   </div>
                 </td>
 
-                <td className="px-6 py-4">{user.email}</td>
+                {/* Email */}
+                <td className="ua-email">{user.email}</td>
 
-                <td className="px-6 py-4">
-                  <Badge
-                    variant={user.role === "admin" ? "default" : "secondary"}
-                  >
+                {/* Role */}
+                <td>
+                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
                     {user.role}
                   </Badge>
                 </td>
 
-                <td className="px-6 py-4">
+                {/* Status */}
+                <td style={{ textAlign: "center" }}>
                   <Badge variant={user.isActive ? "default" : "destructive"}>
                     {user.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </td>
 
-                <td className="px-6 py-4 text-right">
+                {/* Actions */}
+                <td style={{ textAlign: "right" }}>
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="h-8 px-2"
                     onClick={() => handleToggleStatus(user.id, user.isActive)}
                     disabled={user.id === state.user?.id}
                   >
                     {user.isActive ? (
-                      <ShieldOff className="w-4 h-4 text-orange-500" />
+                      <ShieldOff className="w-4 h-4 text-red-500 hover:text-red-600" />
                     ) : (
-                      <Shield className="w-4 h-4 text-green-500" />
+                      <Shield className="w-4 h-4 text-green-500 hover:text-green-600" />
                     )}
                   </Button>
                 </td>
@@ -106,6 +96,6 @@ export function UserTable({ users, onRefresh }) {
           </tbody>
         </table>
       </div>
-    </Card>
+    </div>
   );
 }

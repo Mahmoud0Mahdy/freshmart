@@ -1,52 +1,36 @@
 import { Card } from '../../../components/ui/card';
-import { Users, Package, UtensilsCrossed, MessageSquare, TrendingUp } from 'lucide-react';
+import { Users, Package, UtensilsCrossed, MessageSquare } from 'lucide-react';
 
-interface DashboardStatsProps {
-  state: any;
-  users: any[]; // 👈 جديد
-}
-
-export function DashboardStats({ state, users }: DashboardStatsProps) {
-
-  const isLoading = users.length === 0;
+export function DashboardStats({ usersCount, counts, loading }: any) {
 
   const stats = [
-    { title: 'Total Users', value: users.length, icon: Users, color: 'bg-blue-500', change: '+12%' }, // ✅ هنا
-    { title: 'Total Products', value: state?.products?.length || 0, icon: Package, color: 'bg-green-500', change: '+8%' },
-    { title: 'Total Recipes', value: state?.recipes?.length || 0, icon: UtensilsCrossed, color: 'bg-orange-500', change: '+15%' },
-    { title: 'Community Posts', value: state?.communityPosts?.length || 0, icon: MessageSquare, color: 'bg-purple-500', change: '+23%' },
+    { title: 'Total Users', value: usersCount, icon: Users, colorClass: 'da-icon--blue' },
+    { title: 'Total Products', value: counts.products, icon: Package, colorClass: 'da-icon--green' },
+    { title: 'Total Recipes', value: counts.recipes, icon: UtensilsCrossed, colorClass: 'da-icon--orange' },
+    { title: 'Community Posts', value: counts.posts, icon: MessageSquare, colorClass: 'da-icon--purple' },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div className="da-stats-grid">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.title} className="p-6 transition-all hover:shadow-md">
-
-            {isLoading ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
-                <div className="h-4 w-24 bg-gray-200 rounded"></div>
-                <div className="h-6 w-16 bg-gray-300 rounded"></div>
+          <Card key={stat.title} className="da-stat-card">
+            {loading ? (
+              <div className="animate-pulse flex flex-col items-center gap-3 w-full">
+                <div className="w-12 h-12 bg-gray-100 rounded-full"></div>
+                <div className="h-8 w-16 bg-gray-100 rounded"></div>
+                <div className="h-3 w-24 bg-gray-100 rounded"></div>
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`${stat.color} p-3 rounded-lg`}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-sm text-green-600 flex items-center gap-1 font-medium bg-green-50 px-2 py-1 rounded-full">
-                    <TrendingUp className="w-4 h-4" />
-                    {stat.change}
-                  </span>
+                <div className={`da-stat-icon ${stat.colorClass}`}>
+                  <Icon size={22} />
                 </div>
-
-                <h3 className="text-gray-500 font-medium text-sm mb-1">{stat.title}</h3>
-                <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
+                <p className="da-stat-value">{stat.value}</p>
+                <p className="da-stat-title">{stat.title}</p>
               </>
             )}
-
           </Card>
         );
       })}

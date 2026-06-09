@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 
-// ✅ استورد deleteComment من communityApi بعد ما تضيفه فيه
 import { deletePost, getAllPosts, deleteComment } from "../../api/communityApi";
 
 import { PostStats } from "./components/PostStats";
@@ -47,7 +46,7 @@ export function PostsPage() {
       const n = parseInt(raw, 10);
       if (!isNaN(n)) return n as PostStatus;
     }
-    return PostStatus.Pending;
+    return PostStatus.Pending; // 1
   };
 
   const fetchPosts = async () => {
@@ -75,7 +74,6 @@ export function PostsPage() {
 
   const handleDelete = async (postId: number | string) => {
     try {
-      // ✅ DELETE /api/Posts/{id}
       await deletePost(postId);
       setPosts((prev) => prev.filter((p) => p.id !== postId));
       toast.success("Post deleted");
@@ -100,7 +98,6 @@ export function PostsPage() {
   };
 
   const handleDeleteComment = async (postId: number | string, commentId: number | string) => {
-    // ✅ DELETE /api/posts/{postId}/comments/{commentId}
     await deleteComment(postId, commentId);
   };
 
@@ -123,12 +120,12 @@ export function PostsPage() {
     );
   }
 
+  // 🔥 التعديل هنا: ظبطنا الـ map عشان يقرا كلمة Approved صح
   if (statusFilter !== "All") {
     const statusMap: Record<string, PostStatus> = {
       Pending: PostStatus.Pending,
-      Accepted: PostStatus.Accepted,
+      Approved: PostStatus.Approved,
       Rejected: PostStatus.Rejected,
-      Deleted: PostStatus.Deleted,
     };
     processed = processed.filter((p) => p.safeStatus === statusMap[statusFilter]);
   }
@@ -184,9 +181,9 @@ export function PostsPage() {
               <SelectContent>
                 <SelectItem value="All">All Statuses</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Accepted">Accepted</SelectItem>
+                {/* 🔥 التعديل هنا: غيرنا الـ value لـ Approved */}
+                <SelectItem value="Approved">Approved</SelectItem>
                 <SelectItem value="Rejected">Rejected</SelectItem>
-                <SelectItem value="Deleted">Deleted</SelectItem>
               </SelectContent>
             </Select>
 

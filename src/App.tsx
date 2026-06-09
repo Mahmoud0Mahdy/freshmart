@@ -14,7 +14,7 @@ import { AdminLayout } from "./admin/layout/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // 🌐 Public Pages
-import { HomePage } from "./pages/home/HomePage";
+import { HomePage } from "./pages/home/components/HomePage";
 import { ShopPage } from "./pages/ShopPage";
 import { ProductDetailPage } from "./pages/product/ProductDetailPage";
 import { CartPage } from "./pages/cart/CartPage";

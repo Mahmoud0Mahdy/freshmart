@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
-import { useApp } from "../contexts/AppContext";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent } from "../../../components/ui/card";
+import { useApp } from "../../../contexts/AppContext";
 
 export function CategoriesSection() {
   const navigate = useNavigate();

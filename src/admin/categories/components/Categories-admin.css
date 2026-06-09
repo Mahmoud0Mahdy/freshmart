@@ -1,0 +1,193 @@
+/* ============================================================
+   categories-admin.css
+   Styles for: CategoryStats, CategoriesPage
+   ============================================================ */
+
+/* ── Stats Wrapper ────────────────────────────────────────── */
+.ca-stats-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* ── Total Card ───────────────────────────────────────────── */
+.ca-total-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  gap: 6px;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  background: #ffffff;
+}
+
+.ca-total-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.ca-total-label {
+  color: #6b7280; 
+  font-size: 14px; 
+  font-weight: 650; 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em; 
+  margin-bottom: 4px; 
+}
+
+.ca-total-value {
+  font-size: 36px;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1;
+}
+
+/* ── Mini Cards Grid ──────────────────────────────────────── */
+.ca-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.ca-mini-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 8px;
+  gap: 8px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: box-shadow 0.18s ease;
+  background: #ffffff;
+}
+
+.ca-mini-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.09);
+}
+
+.ca-mini-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ca-mini-icon--blue  { background: #eff6ff; color: #3b82f6; }
+.ca-mini-icon--green { background: #f0fdf4; color: #16a34a; }
+
+.ca-mini-value {
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.ca-mini-value--blue  { color: #3b82f6; }
+.ca-mini-value--green { color: #16a34a; }
+
+.ca-mini-label {
+  color: #6b7280; 
+  font-size: 11px; 
+  font-weight: 700; 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em; 
+}
+
+/* ── Table ────────────────────────────────────────────────── */
+.ca-table-wrap {
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  background: #ffffff;
+}
+
+.ca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px; /* كبرنا الخط سنة */
+  text-align: left;
+}
+
+.ca-table thead {
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ca-table th {
+  padding: 16px 24px; /* مسافات أوسع */
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.ca-table tbody tr {
+  border-bottom: 1px solid #f9fafb;
+  transition: background-color 0.15s ease;
+}
+
+.ca-table tbody tr:last-child { border-bottom: none; }
+.ca-table tbody tr:hover      { background-color: rgba(249, 250, 251, 0.8); }
+
+.ca-table td {
+  padding: 16px 24px; /* مسافات أوسع */
+  vertical-align: middle;
+  color: #374151;
+}
+
+/* تنسيق مخصص للـ ID */
+.ca-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* تنسيق اسم التصنيف مع الأيقونة */
+.ca-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ca-name-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ca-name-icon--recipe {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+.ca-name-icon--product {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.ca-name-text {
+  font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+}

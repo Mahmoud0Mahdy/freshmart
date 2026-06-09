@@ -8,7 +8,7 @@ import {
 } from "../../../components/ui/dialog";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
-import { Heart, MessageCircle, Calendar, Trash2, User, ArrowUp, ArrowDown } from "lucide-react";
+import { MessageCircle, Calendar, Trash2, User, ArrowUp, ArrowDown, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { getPostComments } from "../../../api/communityApi";
 import {
@@ -24,17 +24,15 @@ import {
 } from "../../../components/ui/alert-dialog";
 
 export enum PostStatus {
-  Pending = 0,
-  Accepted = 1,
-  Rejected = 2,
-  Deleted = 3,
+  Pending = 1,
+  Approved = 2,
+  Rejected = 3,
 }
 
 interface PostDetailsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   post: any | null;
-  // ✅ postId مطلوب لـ DELETE /api/posts/{postId}/comments/{commentId}
   onDeleteComment: (postId: number | string, commentId: number | string) => Promise<void>;
 }
 
@@ -49,7 +47,6 @@ export function PostDetailsDialog({ isOpen, onClose, post, onDeleteComment }: Po
       setAvatarFailed(false);
       fetchComments();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, post?.id]);
 
   const fetchComments = async () => {
@@ -69,7 +66,6 @@ export function PostDetailsDialog({ isOpen, onClose, post, onDeleteComment }: Po
   const handleDeleteComment = async (commentId: number | string) => {
     setDeletingCommentId(commentId);
     try {
-      // ✅ DELETE /api/posts/{postId}/comments/{commentId}
       await onDeleteComment(post.id, commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       toast.success("Comment deleted");
@@ -97,19 +93,23 @@ export function PostDetailsDialog({ isOpen, onClose, post, onDeleteComment }: Po
     switch (status) {
       case PostStatus.Pending:
         return <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">Pending</Badge>;
-      case PostStatus.Accepted:
-        return <Badge className="bg-green-500">Accepted</Badge>;
+      case PostStatus.Approved:
+        return <Badge className="bg-green-500">Approved</Badge>;
       case PostStatus.Rejected:
         return <Badge className="bg-red-500">Rejected</Badge>;
-      case PostStatus.Deleted:
-        return <Badge variant="secondary" className="bg-gray-200 text-gray-600">Deleted</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
   const postImage = post.image || post.imageUrl;
-  const votes = post.votes ?? post.upvotes ?? post.voteCount ?? 0;
+  
+  const voteScore = post.votes ?? post.upvotes ?? post.voteCount ?? 0;
+  const savesCount = Array.isArray(post.saves)
+    ? post.saves.length
+    : typeof post.saves === "number"
+    ? post.saves
+    : (post.savesCount ?? post.savedCount ?? (post.isSaved ? 1 : 0));
 
   const tags = Array.isArray(post.tags)
     ? post.tags
@@ -180,25 +180,34 @@ export function PostDetailsDialog({ isOpen, onClose, post, onDeleteComment }: Po
           )}
 
           {/* Stats Row */}
-          <div className="flex gap-6 text-sm border-t border-gray-100 pt-4">
-            <div className="flex items-center gap-1.5 font-bold text-rose-500">
-              <Heart className="w-4 h-4" />
-              <span>{votes} saves</span>
+          <div className="flex flex-wrap gap-6 text-sm border-t border-gray-100 pt-4 mb-2">
+            <div className="flex items-center gap-1.5 font-bold">
+              {voteScore > 0 ? (
+                <ArrowUp className="w-4 h-4 text-orange-500" />
+              ) : voteScore < 0 ? (
+                <ArrowDown className="w-4 h-4 text-blue-500" />
+              ) : (
+                <ArrowUp className="w-4 h-4 text-gray-400" />
+              )}
+              <span className={voteScore > 0 ? "text-orange-500" : voteScore < 0 ? "text-blue-500" : "text-gray-500"}>
+                {voteScore} votes
+              </span>
             </div>
+
+            <div className="flex items-center gap-1.5 font-bold text-rose-500">
+              <Bookmark className="w-4 h-4" />
+              <span>{savesCount} saves</span>
+            </div>
+
             <div className="flex items-center gap-1.5 font-bold text-blue-500">
               <MessageCircle className="w-4 h-4" />
               <span>{comments.length} comments</span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 font-bold text-orange-500">
-              <ArrowUp className="w-4 h-4" />
-              <span>{votes}</span>
-              <ArrowDown className="w-4 h-4 text-blue-400" />
-              <span className="text-gray-500 font-medium text-xs">votes</span>
-            </div>
+
           {/* Comments Section */}
           <div>
-            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">
+            <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 mt-4">
               Comments
             </h3>
             {commentsLoading ? (
@@ -231,7 +240,6 @@ export function PostDetailsDialog({ isOpen, onClose, post, onDeleteComment }: Po
                       </div>
                     </div>
 
-                    {/* Delete Comment Button */}
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button

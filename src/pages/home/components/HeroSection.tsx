@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Button } from '../../../components/ui/button';
+import { ImageWithFallback } from '../../../components/figma/ImageWithFallback';
 import { Sparkles } from 'lucide-react';
 
 export function HeroSection() {

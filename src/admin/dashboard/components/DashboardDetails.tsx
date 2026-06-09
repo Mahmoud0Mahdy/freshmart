@@ -1,234 +1,131 @@
 import { Card } from '../../../components/ui/card';
-import { UserCheck, Layers } from 'lucide-react';
+import { UserCheck, Layers, Package } from 'lucide-react';
 
-interface DashboardDetailsProps {
-  state: any;
-  users: any[];
-}
-
-export function DashboardDetails({ state, users }: DashboardDetailsProps) {
-
-  const products = state?.products || [];
-  const recipes = state?.recipes || [];
-  const posts = state?.communityPosts || [];
-  const categories = state.categories || [];
-
-  const isLoading = users.length === 0 && categories.length === 0;
-
-  // ================= USERS =================
+export function DashboardDetails({ users, categories, counts, loading }: any) {
+  // ─── Users Logic ──────────────────────────────────────────────────────────
   const activeUsers = users.filter((u: any) => u.isActive).length;
   const inactiveUsers = users.length - activeUsers;
   const totalUsers = users.length;
+  const activePercent = totalUsers ? (activeUsers / totalUsers) * 100 : 0;
+  const inactivePercent = totalUsers ? (inactiveUsers / totalUsers) * 100 : 0;
 
-  const activePercentage =
-    totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;
+  // ─── Categories Logic ─────────────────────────────────────────────────────
+  const productCats = categories.filter((c: any) => c.type === 2).length;
+  const recipeCats = categories.filter((c: any) => c.type === 1).length;
+  const totalCats = categories.length;
+  const productPercent = totalCats ? (productCats / totalCats) * 100 : 0;
+  const recipePercent = totalCats ? (recipeCats / totalCats) * 100 : 0;
 
-  const inactivePercentage =
-    totalUsers > 0 ? (inactiveUsers / totalUsers) * 100 : 0;
-
-  // ================= CATEGORIES =================
-  const productCategories = categories.filter((c: any) => c.type === 2).length;
-  const recipeCategories = categories.filter((c: any) => c.type === 1).length;
-  const totalCategories = categories.length;
-
-  const productPercentage =
-    totalCategories > 0 ? (productCategories / totalCategories) * 100 : 0;
-
-  const recipePercentage =
-    totalCategories > 0 ? (recipeCategories / totalCategories) * 100 : 0;
+  if (loading) {
+    return (
+      <div className="da-details-grid">
+        <Card className="p-6 h-72 animate-pulse bg-gray-50 border-0"></Card>
+        <Card className="p-6 h-72 animate-pulse bg-gray-50 border-0"></Card>
+        <Card className="p-6 h-72 animate-pulse bg-gray-50 border-0"></Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+    <div className="da-details-grid">
+      
       {/* ================= USER ENGAGEMENT ================= */}
-      <Card className="p-6 lg:col-span-1 flex flex-col justify-between">
-
-        {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-gray-200 rounded w-40"></div>
-            <div className="h-3 bg-gray-200 rounded w-full"></div>
-            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+      <Card className="p-6 flex flex-col justify-between border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div>
+          <div className="da-card-header">
+            <div className="p-2 bg-green-50 rounded-lg text-green-600"><UserCheck size={20} /></div>
+            User Engagement
           </div>
-        ) : (
-          <>
-            <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
-                <UserCheck className="w-5 h-5 text-green-600" />
-                User Engagement
-              </h3>
-
-              <p className="text-sm text-gray-500 mb-6">
-                Active vs Inactive account ratio
-              </p>
-
-              <div className="space-y-6">
-
-                {/* Active */}
-                <div>
-                  <div className="flex justify-between mb-2 text-sm font-medium">
-                    <span className="text-gray-600">Active Accounts</span>
-                    <span className="text-green-600">
-                      {activePercentage.toFixed(0)}%
-                    </span>
-                  </div>
-
-                  <div className="w-full bg-gray-100 rounded-full h-3">
-                    <div
-                      className="bg-green-500 h-3 rounded-full"
-                      style={{ width: `${activePercentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Inactive 🔥 */}
-                <div>
-                  <div className="flex justify-between mb-2 text-sm font-medium">
-                    <span className="text-gray-600">Inactive Accounts</span>
-                    <span className="text-red-600">
-                      {inactivePercentage.toFixed(0)}%
-                    </span>
-                  </div>
-
-                  <div className="w-full bg-gray-100 rounded-full h-3">
-                    <div
-                      className="bg-red-500 h-3 rounded-full"
-                      style={{ width: `${inactivePercentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Numbers */}
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="bg-green-50 p-3 rounded-xl text-center">
-                    <p className="text-xs text-green-600 font-bold">Active</p>
-                    <p className="text-xl font-bold">{activeUsers}</p>
-                  </div>
-
-                  <div className="bg-red-50 p-3 rounded-xl text-center">
-                    <p className="text-xs text-red-600 font-bold">Inactive</p>
-                    <p className="text-xl font-bold">{inactiveUsers}</p>
-                  </div>
-                </div>
-
-              </div>
+          
+          <div className="da-progress-wrap">
+            <div className="da-progress-header">
+              <span className="text-gray-600">Active Accounts</span>
+              <span className="text-green-600">{activePercent.toFixed(0)}%</span>
             </div>
-
-            <div className="mt-6 pt-4 border-t">
-              <div className="flex justify-between text-sm font-bold">
-                <span>Total Registered</span>
-                <span>{totalUsers}</span>
-              </div>
+            <div className="da-progress-bar"><div className="da-progress-fill bg-green-500" style={{width: `${activePercent}%`}}></div></div>
+          </div>
+          
+          <div className="da-progress-wrap">
+            <div className="da-progress-header">
+              <span className="text-gray-600">Inactive Accounts</span>
+              <span className="text-red-600">{inactivePercent.toFixed(0)}%</span>
             </div>
-          </>
-        )}
-
+            <div className="da-progress-bar"><div className="da-progress-fill bg-red-500" style={{width: `${inactivePercent}%`}}></div></div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="bg-green-50/50 p-3 rounded-xl text-center border border-green-100">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-green-600 mb-1">Active</p>
+              <p className="text-xl font-bold text-gray-900">{activeUsers}</p>
+            </div>
+            <div className="bg-red-50/50 p-3 rounded-xl text-center border border-red-100">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-red-600 mb-1">Inactive</p>
+              <p className="text-xl font-bold text-gray-900">{inactiveUsers}</p>
+            </div>
+          </div>
+        </div>
       </Card>
 
       {/* ================= CATEGORIES OVERVIEW ================= */}
-      <Card className="p-6 lg:col-span-1">
-
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Layers className="w-5 h-5 text-blue-600" />
-          Categories Overview
-        </h3>
-
-        {isLoading ? (
-          <div className="animate-pulse space-y-3">
-            <div className="h-10 bg-gray-200 rounded"></div>
-            <div className="h-10 bg-gray-200 rounded"></div>
+      <Card className="p-6 flex flex-col justify-between border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div>
+          <div className="da-card-header">
+            <div className="p-2 bg-blue-50 rounded-lg text-blue-600"><Layers size={20} /></div>
+            Categories
           </div>
-        ) : (
-          <div className="space-y-6">
-
-            {/* Product Progress */}
-            <div>
-              <div className="flex justify-between mb-2 text-sm font-medium">
-                <span className="text-gray-600">Product Categories</span>
-                <span className="text-blue-600">
-                  {productPercentage.toFixed(0)}%
-                </span>
-              </div>
-
-              <div className="w-full bg-gray-100 rounded-full h-3">
-                <div
-                  className="bg-blue-500 h-3 rounded-full"
-                  style={{ width: `${productPercentage}%` }}
-                ></div>
-              </div>
+          
+          <div className="da-progress-wrap">
+            <div className="da-progress-header">
+              <span className="text-gray-600">Products</span>
+              <span className="text-blue-600">{productPercent.toFixed(0)}%</span>
             </div>
-
-            {/* Recipe Progress 🔥 */}
-            <div>
-              <div className="flex justify-between mb-2 text-sm font-medium">
-                <span className="text-gray-600">Recipe Categories</span>
-                <span className="text-orange-600">
-                  {recipePercentage.toFixed(0)}%
-                </span>
-              </div>
-
-              <div className="w-full bg-gray-100 rounded-full h-3">
-                <div
-                  className="bg-orange-500 h-3 rounded-full"
-                  style={{ width: `${recipePercentage}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Boxes */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-3 rounded-xl text-center">
-                <p className="text-xs text-blue-600 font-bold">Product</p>
-                <p className="text-xl font-bold">{productCategories}</p>
-              </div>
-
-              <div className="bg-orange-50 p-3 rounded-xl text-center">
-                <p className="text-xs text-orange-600 font-bold">Recipe</p>
-                <p className="text-xl font-bold">{recipeCategories}</p>
-              </div>
-            </div>
-
-            {/* Total */}
-            <div className="pt-4 border-t flex justify-between text-sm font-bold">
-              <span>Total Categories</span>
-              <span>{totalCategories}</span>
-            </div>
-
+            <div className="da-progress-bar"><div className="da-progress-fill bg-blue-500" style={{width: `${productPercent}%`}}></div></div>
           </div>
-        )}
-
+          
+          <div className="da-progress-wrap">
+            <div className="da-progress-header">
+              <span className="text-gray-600">Recipes</span>
+              <span className="text-orange-600">{recipePercent.toFixed(0)}%</span>
+            </div>
+            <div className="da-progress-bar"><div className="da-progress-fill bg-orange-500" style={{width: `${recipePercent}%`}}></div></div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="bg-blue-50/50 p-3 rounded-xl text-center border border-blue-100">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-1">Products</p>
+              <p className="text-xl font-bold text-gray-900">{productCats}</p>
+            </div>
+            <div className="bg-orange-50/50 p-3 rounded-xl text-center border border-orange-100">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-orange-600 mb-1">Recipes</p>
+              <p className="text-xl font-bold text-gray-900">{recipeCats}</p>
+            </div>
+          </div>
+        </div>
       </Card>
 
-      {/* ================= INVENTORY ================= */}
-      <Card className="p-6 lg:col-span-1">
-
-        <h3 className="text-lg font-bold mb-6">Quick Inventory</h3>
-
-        {isLoading ? (
-          <div className="animate-pulse space-y-3">
-            <div className="h-12 bg-gray-200 rounded"></div>
-            <div className="h-12 bg-gray-200 rounded"></div>
+      {/* ================= QUICK INVENTORY ================= */}
+      <Card className="p-6 flex flex-col border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="da-card-header">
+          <div className="p-2 bg-purple-50 rounded-lg text-purple-600"><Package size={20} /></div>
+          Inventory Overview
+        </div>
+        
+        <div className="space-y-3 mt-4 flex-1 flex flex-col justify-center">
+          <div className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl">
+            <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">Total Products</span>
+            <span className="text-xl font-black text-gray-900">{counts.products}</span>
           </div>
-        ) : (
-          <div className="space-y-4">
-
-            <div className="flex justify-between p-4 bg-blue-50 rounded">
-              <span>In Stock</span>
-              <span>{products.filter((p: any) => p.inStock).length}</span>
-            </div>
-
-            <div className="flex justify-between p-4 bg-orange-50 rounded">
-              <span>Recipes</span>
-              <span>{recipes.length}</span>
-            </div>
-
-            <div className="flex justify-between p-4 bg-purple-50 rounded">
-              <span>Posts</span>
-              <span>{posts.length}</span>
-            </div>
-
+          
+          <div className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl">
+            <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">Total Recipes</span>
+            <span className="text-xl font-black text-gray-900">{counts.recipes}</span>
           </div>
-        )}
-
+          
+          <div className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl">
+            <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">Total Posts</span>
+            <span className="text-xl font-black text-gray-900">{counts.posts}</span>
+          </div>
+        </div>
       </Card>
 
     </div>

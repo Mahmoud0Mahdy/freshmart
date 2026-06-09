@@ -1,15 +1,14 @@
 import { useEffect } from "react";
-import { HeroSection } from "../../components/HeroSection";
-import { CategoriesSection } from "../../components/CategoriesSection";
-import { RecipesSection } from "../../components/RecipesSection";
-import { ChatbotSection } from "../../components/ChatbotSection";
-import { GhostCraftBanner } from "../../components/GhostCraftBanner";
+import { HeroSection } from "./HeroSection";
+import { CategoriesSection } from "./CategoriesSection";
+import { RecipesSection } from "./RecipesSection";
+import { ChatbotSection } from "./ChatbotSection";
+import { GhostCraftBanner } from "./GhostCraftBanner";
 
-import FeaturedProducts from "./components/FeaturedProducts";
-import DailyOffers from "./components/DailyOffers";
+import FeaturedProducts from "./FeaturedProducts";
 
-import { useApp } from "../../contexts/AppContext";
-import { getAllProducts } from "../../api/productApi";
+import { useApp } from "../../../contexts/AppContext";
+import { getAllProducts } from "../../../api/productApi";
 
 export function HomePage() {
   const { state, dispatch } = useApp();
@@ -33,8 +32,6 @@ export function HomePage() {
       <GhostCraftBanner />
 
       <FeaturedProducts products={state.products.slice(0, 4)} />
-      <DailyOffers products={state.products.slice(0, 4)} />
-
       <CategoriesSection />
       <RecipesSection />
       <ChatbotSection />

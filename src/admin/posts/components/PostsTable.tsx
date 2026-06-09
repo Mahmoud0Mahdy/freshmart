@@ -1,6 +1,6 @@
 import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
-import { Eye, Trash2, Heart, MessageCircle } from "lucide-react";
+import { Eye, Trash2, ArrowUp, ArrowDown, MessageCircle } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -9,13 +9,12 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "../../../components/ui/select";
-import "../components/posts-admin.css"; // ✅ عدّل المسار حسب مشروعك
+import "../components/posts-admin.css"; 
 
 export enum PostStatus {
-  Pending = 0,
-  Accepted = 1,
-  Rejected = 2,
-  Deleted = 3,
+  Pending = 1,
+  Approved = 2,
+  Rejected = 3,
 }
 
 interface PostsTableProps {
@@ -29,15 +28,13 @@ export function PostsTable({ posts, onDelete, onViewDetails, onStatusChange }: P
   const getStatusBadge = (status: PostStatus) => {
     switch (status) {
       case PostStatus.Pending:
-        return <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200 text-[11px]">Pending</Badge>;
-      case PostStatus.Accepted:
-        return <Badge className="bg-green-500 hover:bg-green-600 text-[11px]">Accepted</Badge>;
+        return <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">Pending</Badge>;
+      case PostStatus.Approved:
+        return <Badge className="bg-green-500 hover:bg-green-600 text-white">Approved</Badge>;
       case PostStatus.Rejected:
-        return <Badge className="bg-red-500 hover:bg-red-600 text-[11px]">Rejected</Badge>;
-      case PostStatus.Deleted:
-        return <Badge variant="secondary" className="bg-gray-200 text-gray-600 text-[11px]">Deleted</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-600 text-white">Rejected</Badge>;
       default:
-        return <Badge variant="outline" className="text-[11px]">Unknown</Badge>;
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
@@ -51,26 +48,25 @@ export function PostsTable({ posts, onDelete, onViewDetails, onStatusChange }: P
   };
 
   return (
-    <div className="pa-table-wrap bg-white">
-      <div style={{ overflowX: "auto" }}>
+    <div className="pa-table-wrap">
+      <div className="pa-table-container">
         <table className="pa-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th style={{ width: "90px" }}>ID</th>
               <th>Author</th>
               <th>Title</th>
-              <th style={{ textAlign: "center" }}>Saves</th>
+              <th style={{ textAlign: "center" }}>Votes</th>
               <th style={{ textAlign: "center" }}>Comments</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Change</th>
+              <th style={{ textAlign: "center" }}>Status</th>
+              <th>Update Status</th>
               <th style={{ textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {posts.map((post) => {
               const safeStatus = parseStatus(post.status ?? post.postStatus ?? post.safeStatus);
-              const isTerminal = safeStatus === PostStatus.Deleted;
+              const voteScore = post.votes ?? post.upvotes ?? post.voteCount ?? 0;
 
               return (
                 <tr key={post.id}>
@@ -79,15 +75,20 @@ export function PostsTable({ posts, onDelete, onViewDetails, onStatusChange }: P
                     #{String(post.id).padStart(4, "0")}
                   </td>
 
-                  {/* Author */}
+                  {/* Author & Date */}
                   <td>
-                    <div className="pa-author">
+                    <div className="pa-author-cell">
                       <div className="pa-avatar">
                         {(post.userName || post.username || "U").charAt(0).toUpperCase()}
                       </div>
-                      <span className="pa-author-name">
-                        {post.userName || post.username || "Unknown"}
-                      </span>
+                      <div className="pa-author-info">
+                        <p className="pa-author-name">
+                          {post.userName || post.username || "Unknown"}
+                        </p>
+                        <p className="pa-post-date">
+                          {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "—"}
+                        </p>
+                      </div>
                     </div>
                   </td>
 
@@ -100,43 +101,46 @@ export function PostsTable({ posts, onDelete, onViewDetails, onStatusChange }: P
 
                   {/* Votes */}
                   <td>
-                    <div className="pa-stat-cell pa-stat-cell--saves">
-                      <Heart size={13} />
-                      {post.votes ?? post.upvotes ?? post.voteCount ?? 0}
+                    <div className="pa-stat-cell">
+                      {voteScore > 0 ? (
+                        <ArrowUp className="w-4 h-4 text-orange-500" />
+                      ) : voteScore < 0 ? (
+                        <ArrowDown className="w-4 h-4 text-blue-500" />
+                      ) : (
+                        <ArrowUp className="w-4 h-4 text-gray-400" />
+                      )}
+                      <span className={`font-bold ${voteScore > 0 ? "text-orange-500" : voteScore < 0 ? "text-blue-500" : "text-gray-500"}`}>
+                        {voteScore}
+                      </span>
                     </div>
                   </td>
 
                   {/* Comments */}
                   <td>
                     <div className="pa-stat-cell pa-stat-cell--comments">
-                      <MessageCircle size={13} />
-                      {post.commentsCount ?? post.comments ?? 0}
+                      <MessageCircle className="w-4 h-4 text-blue-500" />
+                      <span className="font-bold text-blue-500">{post.commentsCount ?? post.comments ?? 0}</span>
                     </div>
                   </td>
 
-                  {/* Date */}
-                  <td className="pa-date">
-                    {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "—"}
+                  {/* Status Badge */}
+                  <td style={{ textAlign: "center" }}>
+                    {getStatusBadge(safeStatus)}
                   </td>
 
-                  {/* Status badge */}
-                  <td>{getStatusBadge(safeStatus)}</td>
-
-                  {/* Status dropdown */}
+                  {/* Status Dropdown */}
                   <td>
                     <Select
                       value={safeStatus.toString()}
                       onValueChange={(val) => onStatusChange(post.id, parseInt(val) as PostStatus)}
-                      disabled={isTerminal}
                     >
-                      <SelectTrigger className="w-[118px] h-7 text-xs">
+                      <SelectTrigger className="w-[125px] h-9 bg-gray-50 hover:bg-gray-100 border-gray-200 transition-colors text-xs font-medium">
                         <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={PostStatus.Pending.toString()}>Pending</SelectItem>
-                        <SelectItem value={PostStatus.Accepted.toString()}>Accepted</SelectItem>
-                        <SelectItem value={PostStatus.Rejected.toString()}>Rejected</SelectItem>
-                        <SelectItem value={PostStatus.Deleted.toString()}>Deleted</SelectItem>
+                        <SelectItem value={PostStatus.Pending.toString()} className="text-xs">Pending</SelectItem>
+                        <SelectItem value={PostStatus.Approved.toString()} className="text-xs">Approved</SelectItem>
+                        <SelectItem value={PostStatus.Rejected.toString()} className="text-xs">Rejected</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>
@@ -147,20 +151,20 @@ export function PostsTable({ posts, onDelete, onViewDetails, onStatusChange }: P
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2 text-xs text-gray-500 hover:text-gray-900"
+                        className="text-gray-700 hover:text-gray-900 font-medium h-9"
                         onClick={() => onViewDetails(post)}
                       >
-                        <Eye size={13} className="mr-1" /> View
+                        <Eye className="w-4 h-4 mr-2" /> View
                       </Button>
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+                            size="icon"
+                            className="h-9 w-9 text-gray-400 hover:text-red-600 hover:bg-red-50 shrink-0"
                           >
-                            <Trash2 size={13} />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>

@@ -3,7 +3,8 @@ import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { Eye } from "lucide-react";
 import { OrderStatusDropdown } from "./OrderStatusDropdown";
-import { OrderStatus } from "../../../api/adminApi"; // ✅ Fixed import
+import { OrderStatus } from "../../../api/adminApi"; 
+import "../components/orders-admin.css"; // مسار الـ css
 
 interface OrdersTableProps {
   orders: any[];
@@ -24,54 +25,52 @@ export function OrdersTable({ orders, onRefresh, onViewDetails }: OrdersTablePro
   };
 
   return (
-    <Card className="overflow-hidden shadow-sm border-gray-100">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
+    <Card className="ot-card">
+      <div className="ot-wrapper">
+        <table className="ot-table">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-xs font-black text-gray-400 uppercase tracking-widest">Order ID</th>
-              <th className="px-6 py-3 text-xs font-black text-gray-400 uppercase tracking-widest">User</th>
-              <th className="px-6 py-3 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Total</th>
-              <th className="px-6 py-3 text-xs font-black text-gray-400 uppercase tracking-widest">Status</th>
-              <th className="px-6 py-3 text-xs font-black text-gray-400 uppercase tracking-widest">Update Status</th>
-              <th className="px-6 py-3 text-xs font-black text-gray-400 uppercase tracking-widest text-right">Details</th>
+              <th>Order ID</th>
+              <th>User</th>
+              <th style={{ textAlign: "center" }}>Total</th>
+              <th>Status</th>
+              <th>Update Status</th>
+              <th style={{ textAlign: "right" }}>Details</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-50">
+          <tbody>
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">
+              <tr key={order.id}>
+                <td className="ot-id">
                   #{order.id?.toString().padStart(5, '0') || 'N/A'}
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <span className="text-green-700 font-bold text-xs">
+                <td>
+                  <div className="ot-user-cell">
+                    <div className="ot-avatar">
+                      <span className="ot-avatar-text">
                         {order.userName?.charAt(0).toUpperCase() || "G"}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-sm text-gray-900">{order.userName || "Guest"}</p>
-                      <p className="text-xs text-gray-500">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "-"}</p>
+                      <p className="ot-user-name">{order.userName || "Guest"}</p>
+                      <p className="ot-user-date">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "-"}</p>
                     </div>
                   </div>
                 </td>
-                {/* ✅ Using safeTotal */}
-                <td className="px-6 py-4 font-bold text-gray-700 text-center">
+                <td className="ot-total">
                   ${Number(order.safeTotal || 0).toFixed(2)}
                 </td>
-                {/* ✅ Using safeStatus */}
-                <td className="px-6 py-4">
+                <td>
                   {getStatusBadge(order.safeStatus)}
                 </td>
-                <td className="px-6 py-4">
+                <td>
                   <OrderStatusDropdown 
                     orderId={order.id} 
                     currentStatus={order.safeStatus} 
                     onStatusUpdated={onRefresh} 
                   />
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="ot-actions">
                   <Button variant="ghost" size="sm" onClick={() => onViewDetails(order)}>
                     <Eye className="w-4 h-4 mr-2" /> View
                   </Button>

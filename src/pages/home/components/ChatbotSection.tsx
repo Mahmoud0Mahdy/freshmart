@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent } from '../../../components/ui/card';
 import { MessageCircle, Sparkles } from 'lucide-react';
 
 export function ChatbotSection() {

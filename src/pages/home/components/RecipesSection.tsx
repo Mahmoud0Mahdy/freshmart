@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent } from '../../../components/ui/card';
+import { ImageWithFallback } from '../../../components/figma/ImageWithFallback';
 import { Clock, Users } from 'lucide-react';
 import { useEffect } from 'react';
-import { useApp } from '../contexts/AppContext';
+import { useApp } from '../../../contexts/AppContext';
 
 export function RecipesSection() {
   const navigate = useNavigate();

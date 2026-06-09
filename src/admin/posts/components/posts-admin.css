@@ -36,24 +36,25 @@
 }
 
 .ps-total-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #6b7280;
-  text-transform: uppercase;
+  color: #6b7280; 
+  font-size: 14px; 
+  font-weight: 650; 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em; 
+  margin-bottom: 4px; 
 }
 
 .ps-total-value {
   font-size: 36px;
-  font-weight: medium;
+  font-weight: 500;
   color: #111827;
   line-height: 1;
 }
 
 /* ── Mini status cards grid (bottom row) ──────────────────── */
-.ps-mini-grid {
+  .ps-mini-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr); /* اتعدلت لـ 3 بدل 4 */
   gap: 12px;
 }
 
@@ -91,9 +92,10 @@
 .ps-mini-icon--red    { background: #fef2f2; color: #dc2626; }
 
 .ps-mini-value {
-  font-size: 26px;
-  font-weight: medium;
-  line-height: 1;
+  font-size: 24px; 
+  font-weight: 700; 
+  line-height: 1; 
+  margin-bottom: 4px; 
 }
 
 .ps-mini-value--orange { color: #ea580c; }
@@ -102,140 +104,147 @@
 .ps-mini-value--red    { color: #dc2626; }
 
 .ps-mini-label {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #9ca3af;
+  color: #6b7280; 
+  font-size: 11px; 
+  font-weight: 700; 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em; 
 }
 
 /* ══════════════════════════════════════════════════════════
-   Table
+   الجدول الجديد بالكامل بمقاسات ومساحات الـ Orders الكبيرة
    ══════════════════════════════════════════════════════════ */
 .pa-table-wrap {
+  background: #ffffff;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.pa-table-container {
+  overflow-x: auto;
 }
 
 .pa-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
   text-align: left;
 }
 
-/* Header */
+/* الـ Header الرمادي الفاتح المريح للعين */
 .pa-table thead {
-  background: #f9fafb;
+  background-color: #f9fafb;
   border-bottom: 1px solid #f3f4f6;
 }
 
 .pa-table th {
-  padding: 10px 16px;
-  font-size: 10px;
-  font-weight: 800;
+  padding: 12px 24px; /* نفس مسافات الـ Orders بالظبط px-6 py-3 */
+  font-size: 12px;
+  font-weight: 900;
+  color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #9ca3af;
   white-space: nowrap;
 }
 
-/* Body */
+/* الـ Rows والـ Body وعمل تأثير عند الـ Hover */
 .pa-table tbody tr {
-  border-bottom: 1px solid #f9fafb;
-  transition: background 0.12s ease;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s ease;
 }
 
-.pa-table tbody tr:last-child { border-bottom: none; }
-.pa-table tbody tr:hover      { background: #f9fafb; }
+.pa-table tbody tr:hover {
+  background-color: rgba(249, 250, 251, 0.6);
+}
 
 .pa-table td {
-  padding: 10px 16px;
+  padding: 16px 24px; /* مسافات عمودية وأفقية واسعة جداً ومريحة px-6 py-4 */
   vertical-align: middle;
-  color: #374151;
 }
 
-/* Cells */
+/* رقم البوست */
 .pa-post-id {
-  font-family: ui-monospace, monospace;
-  font-size: 13px;
-  font-weight: 700;
-  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
   white-space: nowrap;
 }
 
-.pa-author {
+/* دمج الكاتب مع التاريخ تحت بعض */
+.pa-author-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .pa-avatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #dcfce7;
+  background-color: #dcfce7;
   color: #15803d;
-  font-size: 12px;
   font-weight: 700;
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.pa-author-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: #111827;
-  max-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.pa-author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.pa-title {
-  font-size: 13px;
+.pa-author-name {
+  font-size: 14px;
   font-weight: 500;
   color: #111827;
-  max-width: 160px;
+  margin: 0;
+}
+
+.pa-post-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* عنوان البوست وحمايته من التمدد خارج الشاشة */
+.pa-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
 }
 
+/* خانات الإحصائيات (Saves & Comments) */
 .pa-stat-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 14px;
   font-weight: 700;
 }
 
-.pa-stat-cell--saves    { color: #f43f5e; }
-.pa-stat-cell--comments { color: #3b82f6; }
-
-.pa-date {
-  font-size: 12px;
-  color: #9ca3af;
-  white-space: nowrap;
+.pa-stat-cell--saves {
+  color: #f43f5e;
 }
 
+.pa-stat-cell--comments {
+  color: #3b82f6;
+}
+
+/* حاوية الأزرار في أقصى اليمين لتفادي الـ Scroll */
 .pa-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
-}
-
-/* ── Empty state ──────────────────────────────────────────── */
-.pa-empty {
-  padding: 48px 24px;
-  text-align: center;
-  color: #9ca3af;
-  font-size: 14px;
+  gap: 8px;
 }
