@@ -1,33 +1,81 @@
 import { Card } from "../../../components/ui/card";
+import { FileText, Clock, CheckCircle2, XCircle, Heart } from "lucide-react";
+import "../components/posts-admin.css"; // ✅ عدّل المسار حسب مشروعك
 
-// استخدمنا any هنا عشان نتفادى أي مشكلة لو نوع Post مش متعرف في AppContext
+enum PostStatus {
+  Pending = 0,
+  Accepted = 1,
+  Rejected = 2,
+  Deleted = 3,
+}
+
 interface PostStatsProps {
   posts: any[];
 }
 
 export function PostStats({ posts }: PostStatsProps) {
-  const totalVotes = posts.reduce((acc, post) => acc + (post.votes || 0), 0);
-  const totalComments = posts.reduce(
-    (acc, post) => acc + (post.commentsCount || 0),
-    0,
-  );
+  const parseStatus = (raw: any): PostStatus => {
+    if (typeof raw === "number") return raw as PostStatus;
+    if (typeof raw === "string") {
+      const n = parseInt(raw, 10);
+      if (!isNaN(n)) return n as PostStatus;
+    }
+    return PostStatus.Pending;
+  };
+
+  const totalVotes    = posts.reduce((acc, p) => acc + (p.votes ?? p.upvotes ?? p.voteCount ?? 0), 0);
+  const pendingCount  = posts.filter((p) => parseStatus(p.status ?? p.postStatus ?? p.safeStatus) === PostStatus.Pending).length;
+  const acceptedCount = posts.filter((p) => parseStatus(p.status ?? p.postStatus ?? p.safeStatus) === PostStatus.Accepted).length;
+  const rejectedCount = posts.filter((p) => parseStatus(p.status ?? p.postStatus ?? p.safeStatus) === PostStatus.Rejected).length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <Card className="p-4">
-        <p className="text-gray-600 text-sm">Total Posts</p>
-        <p className="text-2xl font-semibold">{posts.length}</p>
+    <div className="ps-stats-wrapper">
+
+      {/* ── Top: Total Posts (single wide card) ── */}
+      <Card className="ps-total-card">
+        <div className="ps-total-icon">
+          <FileText size={22} />
+        </div>
+        <p className="ps-total-label">TOTAL POSTS</p>
+        <p className="ps-total-value">{posts.length}</p>
       </Card>
 
-      <Card className="p-4">
-        <p className="text-gray-600 text-sm">Total Votes</p>
-        <p className="text-2xl text-red-600 font-semibold">{totalVotes}</p>
-      </Card>
+      {/* ── Bottom: 4 status cards ── */}
+      <div className="ps-mini-grid">
 
-      <Card className="p-4">
-        <p className="text-gray-600 text-sm">Total Comments</p>
-        <p className="text-2xl text-blue-600 font-semibold">{totalComments}</p>
-      </Card>
+        <Card className="ps-mini-card">
+          <div className="ps-mini-icon ps-mini-icon--orange">
+            <Clock size={18} />
+          </div>
+          <p className="ps-mini-value ps-mini-value--orange">{pendingCount}</p>
+          <p className="ps-mini-label">PENDING</p>
+        </Card>
+
+        <Card className="ps-mini-card">
+          <div className="ps-mini-icon ps-mini-icon--rose">
+            <Heart size={18} />
+          </div>
+          <p className="ps-mini-value ps-mini-value--rose">{totalVotes}</p>
+          <p className="ps-mini-label">TOTAL SAVES</p>
+        </Card>
+
+        <Card className="ps-mini-card">
+          <div className="ps-mini-icon ps-mini-icon--green">
+            <CheckCircle2 size={18} />
+          </div>
+          <p className="ps-mini-value ps-mini-value--green">{acceptedCount}</p>
+          <p className="ps-mini-label">ACCEPTED</p>
+        </Card>
+
+        <Card className="ps-mini-card">
+          <div className="ps-mini-icon ps-mini-icon--red">
+            <XCircle size={18} />
+          </div>
+          <p className="ps-mini-value ps-mini-value--red">{rejectedCount}</p>
+          <p className="ps-mini-label">REJECTED</p>
+        </Card>
+
+      </div>
     </div>
   );
 }

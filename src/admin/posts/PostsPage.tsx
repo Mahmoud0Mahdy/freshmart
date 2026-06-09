@@ -2,183 +2,264 @@ import { useState, useEffect } from "react";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Search, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  ArrowUpDown,
+  Filter,
+} from "lucide-react";
 import { toast } from "sonner";
-import { deletePost, getAllPosts } from "../../api/communityApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
-// استيراد المكونات
+// ✅ استورد deleteComment من communityApi بعد ما تضيفه فيه
+import { deletePost, getAllPosts, deleteComment } from "../../api/communityApi";
+
 import { PostStats } from "./components/PostStats";
-import { PostCard } from "./components/PostCard";
+import { PostsTable, PostStatus } from "./components/PostsTable";
+import { PostDetailsDialog } from "./components/PostDetailsDialog";
 
-const POSTS_PER_PAGE = 3;
-const TAG_FILTERS = [
-  "All",
-  "Recipes",
-  "Kitchen Tips",
-  "Product Reviews",
-  "Questions",
-  "Budget Meals",
-];
+const ITEMS_PER_PAGE = 7;
 
 export function PostsPage() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTag, setSelectedTag] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("newest");
+
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const parseStatus = (raw: any): PostStatus => {
+    if (typeof raw === "number") return raw as PostStatus;
+    if (typeof raw === "string") {
+      const n = parseInt(raw, 10);
+      if (!isNaN(n)) return n as PostStatus;
+    }
+    return PostStatus.Pending;
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
     try {
       const data = await getAllPosts();
-      const normalizedPosts = Array.isArray(data) ? data : (data?.data ?? []);
-      setPosts(normalizedPosts);
-    } catch (error) {
-      toast.error("Failed to load community posts");
+      const raw = Array.isArray(data) ? data : (data?.data ?? []);
+      const normalized = raw.map((p: any) => ({
+        ...p,
+        safeStatus: parseStatus(p.status ?? p.postStatus),
+      }));
+      setPosts(normalized);
+    } catch {
+      toast.error("Failed to load posts");
       setPosts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeletePost = async (postId: number | string) => {
+  useEffect(() => { fetchPosts(); }, []);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, statusFilter, sortBy]);
+
+  // ─── Handlers ─────────────────────────────────────────────────────────────
+
+  const handleDelete = async (postId: number | string) => {
     try {
+      // ✅ DELETE /api/Posts/{id}
       await deletePost(postId);
-      setPosts((prev) => prev.filter((post) => post.id !== postId));
-      toast.success("Post deleted successfully");
-    } catch (error) {
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      toast.success("Post deleted");
+    } catch {
       toast.error("Failed to delete post");
     }
   };
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  const handleStatusChange = async (postId: number | string, newStatus: PostStatus) => {
+    // ⚠️ مفيش endpoint في الـ backend دلوقتي لتغيير status الـ post
+    // بنعمل optimistic local update بس
+    // لما الـ backend يضيف الـ endpoint، استبدل السطر ده بـ API call:
+    // await updatePostStatus(postId, newStatus);
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? { ...p, safeStatus: newStatus, status: newStatus }
+          : p
+      )
+    );
+    toast.success("Status updated (local only — API not available yet)");
+  };
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedTag]);
+  const handleDeleteComment = async (postId: number | string, commentId: number | string) => {
+    // ✅ DELETE /api/posts/{postId}/comments/{commentId}
+    await deleteComment(postId, commentId);
+  };
 
-  const filteredPosts = posts.filter((post) => {
-    const normalizedQuery = searchQuery.toLowerCase();
-    const matchesSearch =
-      (post.title || "").toLowerCase().includes(normalizedQuery) ||
-      (post.content || "").toLowerCase().includes(normalizedQuery) ||
-      (post.userName || post.username || "")
-        .toLowerCase()
-        .includes(normalizedQuery);
+  const handleViewDetails = (post: any) => {
+    setSelectedPost(post);
+    setIsDialogOpen(true);
+  };
 
-    const postTags = Array.isArray(post.tags)
-      ? post.tags
-      : typeof post.tags === "string"
-        ? post.tags
-            .split(",")
-            .map((tag: string) => tag.trim())
-            .filter(Boolean)
-        : [];
-    const matchesTag = selectedTag === "All" || postTags.includes(selectedTag);
+  // ─── Processing ───────────────────────────────────────────────────────────
 
-    return matchesSearch && matchesTag;
+  let processed = [...posts];
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    processed = processed.filter(
+      (p) =>
+        p.id?.toString().includes(q) ||
+        (p.title || "").toLowerCase().includes(q) ||
+        (p.userName || p.username || "").toLowerCase().includes(q)
+    );
+  }
+
+  if (statusFilter !== "All") {
+    const statusMap: Record<string, PostStatus> = {
+      Pending: PostStatus.Pending,
+      Accepted: PostStatus.Accepted,
+      Rejected: PostStatus.Rejected,
+      Deleted: PostStatus.Deleted,
+    };
+    processed = processed.filter((p) => p.safeStatus === statusMap[statusFilter]);
+  }
+
+  processed.sort((a, b) => {
+    switch (sortBy) {
+      case "newest":       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "oldest":       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "votes_high":   return (b.votes ?? b.upvotes ?? 0) - (a.votes ?? a.upvotes ?? 0);
+      case "votes_low":    return (a.votes ?? a.upvotes ?? 0) - (b.votes ?? b.upvotes ?? 0);
+      case "comments_high":return (b.commentsCount ?? 0) - (a.commentsCount ?? 0);
+      case "id_desc":      return b.id - a.id;
+      case "id_asc":       return a.id - b.id;
+      default:             return 0;
+    }
   });
 
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const paginatedPosts = filteredPosts.slice(
-    startIndex,
-    startIndex + POSTS_PER_PAGE,
-  );
+  const totalPages = Math.ceil(processed.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentPosts = processed.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-800">
-          Community Moderation
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-800">Community Moderation</h1>
         <p className="text-gray-600">Manage and moderate community posts</p>
       </div>
 
-      {/* Search Bar */}
-      <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-3">
+      {/* Filter & Sort Bar */}
+      <Card className="p-4 border-gray-100 shadow-sm bg-white">
+        <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
             <Input
               type="text"
-              placeholder="Search posts by title, content, or author..."
+              placeholder="Search by ID, title, or author..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full"
             />
           </div>
-          <select
-            value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
-            className="h-10 px-3 border border-gray-200 rounded-md bg-white text-sm text-gray-700 md:min-w-[220px]"
-          >
-            {TAG_FILTERS.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
+
+          <div className="flex gap-3 flex-wrap">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[155px] bg-gray-50 border-gray-200">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-gray-500" />
+                  <SelectValue placeholder="Status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Accepted">Accepted</SelectItem>
+                <SelectItem value="Rejected">Rejected</SelectItem>
+                <SelectItem value="Deleted">Deleted</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[185px] bg-gray-50 border-gray-200">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-gray-500" />
+                  <SelectValue placeholder="Sort by" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="oldest">Oldest First</SelectItem>
+                <SelectItem value="votes_high">Votes: High to Low</SelectItem>
+                <SelectItem value="votes_low">Votes: Low to High</SelectItem>
+                <SelectItem value="comments_high">Most Comments</SelectItem>
+                <SelectItem value="id_desc">Post ID: Descending</SelectItem>
+                <SelectItem value="id_asc">Post ID: Ascending</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </Card>
 
-      {/* Stats Section */}
       <PostStats posts={posts} />
 
-      {/* Posts List */}
       <div className="space-y-4">
         {loading ? (
-          <Card className="p-12 text-center text-gray-500">
+          <Card className="p-12 text-center text-gray-500 border-gray-100">
             <p>Loading posts...</p>
           </Card>
-        ) : paginatedPosts.length > 0 ? (
-          paginatedPosts.map((post) => (
-            <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
-          ))
+        ) : currentPosts.length > 0 ? (
+          <PostsTable
+            posts={currentPosts}
+            onDelete={handleDelete}
+            onViewDetails={handleViewDetails}
+            onStatusChange={handleStatusChange}
+          />
         ) : (
-          <Card className="p-12 text-center text-gray-500">
-            <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p>No posts found matching your search.</p>
+          <Card className="p-12 text-center text-gray-500 border-gray-100">
+            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p>No posts found matching your criteria.</p>
           </Card>
         )}
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-3 mt-8">
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
+          <Button variant="outline" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           {Array.from({ length: totalPages }, (_, i) => (
             <Button
               key={i}
               variant={currentPage === i + 1 ? "default" : "outline"}
-              className={
-                currentPage === i + 1
-                  ? "bg-green-600 hover:bg-green-700 text-white"
-                  : ""
-              }
+              className={currentPage === i + 1 ? "bg-green-600 hover:bg-green-700 text-white" : ""}
               onClick={() => setCurrentPage(i + 1)}
             >
               {i + 1}
             </Button>
           ))}
-          <Button
-            variant="outline"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
+          <Button variant="outline" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       )}
+
+      <PostDetailsDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        post={selectedPost}
+        onDeleteComment={handleDeleteComment}
+      />
     </div>
   );
 }
