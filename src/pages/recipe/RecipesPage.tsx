@@ -14,8 +14,7 @@ import { QuickActions } from "./components/QuickActions";
 export function RecipesPage() {
   const navigate = useNavigate();
 
-  const [aiMode, setAiMode] =
-    useState(false);
+  const [aiMode, setAiMode] = useState(false);
 
   const {
     currentPage,
@@ -25,6 +24,7 @@ export function RecipesPage() {
     hasMore,
     handleNext,
     handlePrevious,
+    refreshAiRecommendations,
   } = useRecipePagination(aiMode);
 
   const {
@@ -46,6 +46,17 @@ export function RecipesPage() {
           aiMode={aiMode}
           onAiModeChange={setAiMode}
         />
+
+        {aiMode && (
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={refreshAiRecommendations}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              Update AI Recommendations
+            </button>
+          </div>
+        )}
 
         {filteredRecipes.length > 0 ? (
           <RecipesGrid

@@ -4,6 +4,9 @@ import {
   getAllRecipes,
 } from "../../../api/recipeApi";
 
+const RECOMMENDATION_STORAGE_KEY =
+  "recommendedRecipeIds";
+
 export function useRecipePagination(
   aiMode: boolean = false
 ) {
@@ -33,16 +36,35 @@ export function useRecipePagination(
       // ================= AI RECOMMENDATIONS =================
 
       if (aiMode) {
+        const storedIds = JSON.parse(
+          sessionStorage.getItem(
+            RECOMMENDATION_STORAGE_KEY
+          ) || "[]"
+        );
+
         const recipes =
-          await getAllRecipes([]);
+          await getAllRecipes(storedIds);
 
         setCurrentRecipes(
           recipes || []
         );
 
+        const newIds = (
+          recipes || []
+        ).map((r: any) =>
+          Number(r.id)
+        );
+
+        sessionStorage.setItem(
+          RECOMMENDATION_STORAGE_KEY,
+          JSON.stringify([
+            ...storedIds,
+            ...newIds,
+          ])
+        );
+
         setHasMore(
-          recipes &&
-            recipes.length > 0
+          (recipes?.length ?? 0) > 0
         );
 
         return;
@@ -81,6 +103,12 @@ export function useRecipePagination(
 
   useEffect(() => {
     setCurrentPage(1);
+
+    if (aiMode) {
+      sessionStorage.removeItem(
+        RECOMMENDATION_STORAGE_KEY
+      );
+    }
   }, [aiMode]);
 
   // ================= LOAD =================
@@ -122,6 +150,19 @@ export function useRecipePagination(
     );
   };
 
+  // ================= REFRESH AI =================
+
+  const refreshAiRecommendations =
+    async () => {
+      sessionStorage.removeItem(
+        RECOMMENDATION_STORAGE_KEY
+      );
+
+      setCurrentPage(1);
+
+      await loadRecipes(1);
+    };
+
   return {
     currentPage,
     totalPages,
@@ -131,5 +172,7 @@ export function useRecipePagination(
 
     handleNext,
     handlePrevious,
+
+    refreshAiRecommendations,
   };
 }
