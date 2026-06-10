@@ -20,7 +20,7 @@ import {
 const navItems = [
   { name: "Home", path: "/" },
 
-  { name: "Shop", path: "/shop" },
+  { name: "Products", path: "/shop" },
 
   { name: "Recipes", path: "/recipes" },
 

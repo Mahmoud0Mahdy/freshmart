@@ -15,7 +15,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // 🌐 Public Pages
 import { HomePage } from "./pages/home/components/HomePage";
-import { ShopPage } from "./pages/ShopPage";
+import { ShopPage } from "./pages/Shop/ShopPage";
 import { ProductDetailPage } from "./pages/product/ProductDetailPage";
 import { CartPage } from "./pages/cart/CartPage";
 import { CheckoutPage } from "./pages/checkout/CheckoutPage";
@@ -26,14 +26,14 @@ import { LoginPage } from "./pages/auth/LoginPage";
 
 // 👤 User / Community Pages
 import ProfilePage from "./pages/profile/ProfilePage";
-import { CommunityPage } from "./pages/CommunityPage";
-import { MyPostsPage } from "./pages/MyPostsPage";
-import { PostDetailsPage } from "./pages/PostDetailsPage";
-import { GhostCraftPage } from "./pages/GhostCraftPage";
-import { GhostCraftSummaryPage } from "./pages/GhostCraftSummaryPage";
-import { SavedRecipesPage } from "./pages/SavedRecipesPage";
-import { SavedProductsPage } from "./pages/SavedProductsPage";
-import { SavedPostsPage } from "./pages/SavedPostsPage";
+import { CommunityPage } from "./pages/community/CommunityPage";
+import { MyPostsPage } from "./pages/community/MyPostsPage";
+import { PostDetailsPage } from "./pages/community/PostDetailsPage";
+import { GhostCraftPage } from "./pages/GhostCraft/GhostCraftPage";
+import { GhostCraftSummaryPage } from "./pages/GhostCraft/GhostCraftSummaryPage";
+import { SavedRecipesPage } from "./pages/SavedItems/SavedRecipesPage";
+import { SavedProductsPage } from "./pages/SavedItems/SavedProductsPage";
+import { SavedPostsPage } from "./pages/SavedItems/SavedPostsPage";
 
 // 📦 User Orders Pages
 import { OrdersPage } from "./pages/orders/components/OrdersPage";

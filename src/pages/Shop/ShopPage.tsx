@@ -1,21 +1,21 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
+import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { useApp } from "../contexts/AppContext";
+} from "../../components/ui/select";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { useApp } from "../../contexts/AppContext";
 import { Search, Grid, List } from "lucide-react";
-import { getAllProducts } from "../api/productApi";
-import { getCategories } from "../api/adminApi";
+import { getAllProducts } from "../../api/productApi";
+import { getCategories } from "../../api/adminApi";
 
 export function ShopPage() {
   const navigate = useNavigate();

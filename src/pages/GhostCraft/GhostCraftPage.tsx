@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChefHat, Sparkles, Check } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Checkbox } from "../components/ui/checkbox";
-import { Slider } from "../components/ui/slider";
-import { Textarea } from "../components/ui/textarea";
-import { Card } from "../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Slider } from "../../components/ui/slider";
+import { Textarea } from "../../components/ui/textarea";
+import { Card } from "../../components/ui/card";
 import { toast } from "sonner@2.0.3";
 import {
   createGhostCraftOrder,
   updateGhostCraftOrder,
-} from "../api/ghostCraftApi";
+} from "../../api/ghostCraftApi";
 
 export function GhostCraftPage() {
   const navigate = useNavigate();

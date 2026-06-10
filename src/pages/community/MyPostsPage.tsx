@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PostCard, Post } from "../components/PostCard";
-import { getMyPosts, savePost, votePost } from "../api/communityApi";
+import { PostCard, Post } from "../../components/PostCard";
+import { getMyPosts, savePost, votePost } from "../../api/communityApi";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 

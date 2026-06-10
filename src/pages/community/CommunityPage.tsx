@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PostCard, Post } from "../components/PostCard";
-import { CommunitySidebar } from "../components/CommunitySidebar";
-import { CreatePostModal } from "../components/CreatePostModal";
-import { getAllPosts, savePost, votePost } from "../api/communityApi";
+import { PostCard, Post } from "../../components/PostCard";
+import { CommunitySidebar } from "../../components/CommunitySidebar";
+import { CreatePostModal } from "../../components/CreatePostModal";
+import { getAllPosts, savePost, votePost } from "../../api/communityApi";
 import { toast } from "sonner@2.0.3";
 import { formatDistanceToNow } from "date-fns";
 

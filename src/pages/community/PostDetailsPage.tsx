@@ -10,11 +10,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { Card } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import {
   createComment,
   deleteComment,
@@ -23,9 +23,9 @@ import {
   getPostComments,
   savePost,
   votePost,
-} from "../api/communityApi";
-import { Post } from "../components/PostCard";
-import { useApp } from "../contexts/AppContext";
+} from "../../api/communityApi";
+import { Post } from "../../components/PostCard";
+import { useApp } from "../../contexts/AppContext";
 
 interface CommentItem {
   id: string;

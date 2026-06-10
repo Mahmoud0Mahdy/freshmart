@@ -1,17 +1,17 @@
 import { Navigate, useNavigate } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
-import { useApp } from "../contexts/AppContext";
+import { useApp } from "../../contexts/AppContext";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+} from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
 import { toast } from "sonner";
-import { toggleProductFavorite, getFavoriteProducts } from "../api/favoriteApi";
+import { toggleProductFavorite, getFavoriteProducts } from "../../api/favoriteApi";
 import { useEffect, useState } from "react";
 
 export function SavedProductsPage() {
