@@ -4,6 +4,7 @@ import { PostCard, Post } from "../../components/PostCard";
 import { getMyPosts, savePost, votePost } from "../../api/communityApi";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import "./my-posts.css";
 
 export function MyPostsPage() {
   const navigate = useNavigate();

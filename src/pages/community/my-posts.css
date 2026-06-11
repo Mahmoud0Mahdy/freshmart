@@ -1,0 +1,147 @@
+/* ============================================================
+   my-posts.css
+   ============================================================ */
+
+/* ── Hero Section ────────────────────────────────────────── */
+.mp-hero {
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  padding: 70px 20px 110px; /* مسافة سفلية أكبر عشان التداخل */
+  text-align: center; /* توسيط النص */
+  color: white;
+}
+
+.mp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ── Stats Grid (الكروت المتداخلة) ──────────────────────── */
+.mp-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: -55px; /* السحب لفوق لعمل التداخل */
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 10;
+}
+
+@media (max-width: 1024px) {
+  .mp-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .mp-stats-grid { grid-template-columns: repeat(1, 1fr); }
+}
+
+.mp-stat-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px; /* الأيقونة بقت على الشمال */
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+  border: 1px solid #f3f4f6;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mp-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px -10px rgba(0,0,0,0.15);
+}
+
+.mp-stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* الألوان */
+.mp-icon--blue   { background: #eff6ff; color: #3b82f6; }
+.mp-icon--orange { background: #fff7ed; color: #ea580c; }
+.mp-icon--green  { background: #f0fdf4; color: #16a34a; }
+.mp-icon--red    { background: #fef2f2; color: #dc2626; }
+
+.mp-stat-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.mp-stat-value {
+  font-size: 28px;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.mp-stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Content Wrapper (منع البوست من التمدد) ────────────── */
+.mp-content-wrapper {
+  max-width: 800px; /* 🔥 ده اللي هيلم البوستات في النص ويخلي شكلها حلو */
+  margin: 0 auto;
+}
+
+/* ── Filter Pills ───────────────────────────────────────── */
+.mp-filters {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.mp-filter-btn {
+  padding: 10px 24px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #ffffff;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mp-filter-btn:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.mp-filter-btn.active {
+  background: #16a34a; /* أخضر متناسق مع هوية الموقع */
+  color: #ffffff;
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+/* ── Empty State ────────────────────────────────────────── */
+.mp-empty-state {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 60px 20px;
+  text-align: center;
+  border: 1px dashed #d1d5db;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mp-page-wrapper {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  padding-bottom: 140px; /* 🔥 بيفصل المحتوى عن الفوتر تماماً */
+}

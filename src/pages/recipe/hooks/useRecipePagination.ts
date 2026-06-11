@@ -7,6 +7,12 @@ import {
 const RECOMMENDATION_STORAGE_KEY =
   "recommendedRecipeIds";
 
+const RECIPES_PAGE_STORAGE_KEY =
+  "recipesCurrentPage";
+
+const AI_RECIPES_PAGE_STORAGE_KEY =
+  "recipesAiCurrentPage";
+
 export function useRecipePagination(
   aiMode: boolean = false
 ) {
@@ -14,7 +20,23 @@ export function useRecipePagination(
     useState<any[]>([]);
 
   const [currentPage, setCurrentPage] =
-    useState(1);
+    useState(() => {
+      const storageKey =
+        sessionStorage.getItem(
+          "recipesAiMode"
+        ) === "true"
+          ? AI_RECIPES_PAGE_STORAGE_KEY
+          : RECIPES_PAGE_STORAGE_KEY;
+
+      const savedPage =
+        sessionStorage.getItem(
+          storageKey
+        );
+
+      return savedPage
+        ? Number(savedPage)
+        : 1;
+    });
 
   const [totalPages, setTotalPages] =
     useState(1);
@@ -24,6 +46,19 @@ export function useRecipePagination(
 
   const [hasMore, setHasMore] =
     useState(true);
+
+  // ================= SAVE PAGE =================
+
+  useEffect(() => {
+    const storageKey = aiMode
+      ? AI_RECIPES_PAGE_STORAGE_KEY
+      : RECIPES_PAGE_STORAGE_KEY;
+
+    sessionStorage.setItem(
+      storageKey,
+      currentPage.toString()
+    );
+  }, [currentPage, aiMode]);
 
   // ================= LOAD RECIPES =================
 
@@ -99,16 +134,23 @@ export function useRecipePagination(
     }
   };
 
-  // ================= RESET WHEN MODE CHANGES =================
+  // ================= HANDLE MODE CHANGE =================
 
   useEffect(() => {
-    setCurrentPage(1);
+    const storageKey = aiMode
+      ? AI_RECIPES_PAGE_STORAGE_KEY
+      : RECIPES_PAGE_STORAGE_KEY;
 
-    if (aiMode) {
-      sessionStorage.removeItem(
-        RECOMMENDATION_STORAGE_KEY
+    const savedPage =
+      sessionStorage.getItem(
+        storageKey
       );
-    }
+
+    setCurrentPage(
+      savedPage
+        ? Number(savedPage)
+        : 1
+    );
   }, [aiMode]);
 
   // ================= LOAD =================
@@ -156,6 +198,11 @@ export function useRecipePagination(
     async () => {
       sessionStorage.removeItem(
         RECOMMENDATION_STORAGE_KEY
+      );
+
+      sessionStorage.setItem(
+        AI_RECIPES_PAGE_STORAGE_KEY,
+        "1"
       );
 
       setCurrentPage(1);

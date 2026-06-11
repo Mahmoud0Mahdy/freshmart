@@ -7,8 +7,8 @@ interface CategoryStatsProps {
 }
 
 export function CategoryStats({ categories }: CategoryStatsProps) {
-  const productsCount = categories.filter(c => c.type === 2).length;
-  const recipesCount = categories.filter(c => c.type === 1).length;
+  const productsCount = categories.filter(c => c.type === "Product").length;
+  const recipesCount = categories.filter(c => c.type === "Recipe").length;
 
   return (
     <div className="ca-stats-wrapper">

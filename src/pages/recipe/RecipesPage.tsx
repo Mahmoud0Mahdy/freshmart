@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useRecipes } from "./hooks/useRecipes";
@@ -14,7 +14,20 @@ import { QuickActions } from "./components/QuickActions";
 export function RecipesPage() {
   const navigate = useNavigate();
 
-  const [aiMode, setAiMode] = useState(false);
+  const [aiMode, setAiMode] = useState(() => {
+    return (
+      sessionStorage.getItem(
+        "recipesAiMode"
+      ) === "true"
+    );
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      "recipesAiMode",
+      aiMode.toString()
+    );
+  }, [aiMode]);
 
   const {
     currentPage,

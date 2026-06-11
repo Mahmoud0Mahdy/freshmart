@@ -60,12 +60,15 @@ export function ShopPage() {
   const filteredProducts = useMemo(() => {
     let filtered = state.products.filter((product) => {
       const matchesSearch =
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+        (product.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.description || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
       const matchesCategory =
         selectedCategory === "all" ||
-        product.categoryName?.toLowerCase() === selectedCategory.toLowerCase();
+        (product.categoryName || "").toLowerCase() ===
+          selectedCategory.toLowerCase();
 
       return matchesSearch && matchesCategory;
     });
@@ -73,11 +76,13 @@ export function ShopPage() {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
-          return a.price - b.price;
+          return (a.price || 0) - (b.price || 0);
+
         case "price-high":
-          return b.price - a.price;
+          return (b.price || 0) - (a.price || 0);
+
         default:
-          return a.name.localeCompare(b.name);
+          return (a.name || "").localeCompare(b.name || "");
       }
     });
 

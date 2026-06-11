@@ -26,6 +26,7 @@ import {
 } from "../../api/communityApi";
 import { Post } from "../../components/PostCard";
 import { useApp } from "../../contexts/AppContext";
+import "./post-details.css";
 
 interface CommentItem {
   id: string;

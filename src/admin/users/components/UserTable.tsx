@@ -4,21 +4,28 @@ import { Shield, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
 import { useApp } from "../../../contexts/AppContext";
 import { updateUserStatus } from "../../../api/adminApi";
-import "../components/users-admin.css"; // ✅ تأكد من المسار حسب مشروعك
+import "../components/users-admin.css";
 
 export function UserTable({ users, onRefresh }) {
   const { state } = useApp();
 
-  const handleToggleStatus = async (userId, currentStatus) => {
+  const handleToggleStatus = async (userId, currentStatus, role) => {
     if (userId === state.user?.id) {
       toast.error("Cannot modify your own account status");
       return;
     }
 
+    if (role?.toLowerCase() === "admin") {
+      toast.error("Admin accounts cannot be modified");
+      return;
+    }
+
     try {
       await updateUserStatus(userId, !currentStatus);
+
       toast.success(`User is now ${!currentStatus ? "Active" : "Inactive"}`);
-      onRefresh(); // 🔥 Reload data
+
+      onRefresh();
     } catch {
       toast.error("Failed to update user status");
     }
@@ -52,9 +59,8 @@ export function UserTable({ users, onRefresh }) {
                         .toUpperCase()
                         .slice(0, 2)}
                     </div>
-                    <div className="ua-user-name">
-                      {user.name}
-                    </div>
+
+                    <div className="ua-user-name">{user.name}</div>
                   </div>
                 </td>
 
@@ -63,26 +69,41 @@ export function UserTable({ users, onRefresh }) {
 
                 {/* Role */}
                 <td>
-                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                  <Badge
+                    variant={user.role === "admin" ? "default" : "secondary"}
+                  >
                     {user.role}
                   </Badge>
                 </td>
 
                 {/* Status */}
-                <td style={{ textAlign: "center" }}>
+                <td
+                  style={{
+                    textAlign: "center",
+                  }}
+                >
                   <Badge variant={user.isActive ? "default" : "destructive"}>
                     {user.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </td>
 
                 {/* Actions */}
-                <td style={{ textAlign: "right" }}>
+                <td
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2"
-                    onClick={() => handleToggleStatus(user.id, user.isActive)}
-                    disabled={user.id === state.user?.id}
+                    onClick={() =>
+                      handleToggleStatus(user.id, user.isActive, user.role)
+                    }
+                    disabled={
+                      user.id === state.user?.id ||
+                      user.role?.toLowerCase() === "admin"
+                    }
                   >
                     {user.isActive ? (
                       <ShieldOff className="w-4 h-4 text-red-500 hover:text-red-600" />
