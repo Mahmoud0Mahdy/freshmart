@@ -72,14 +72,17 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* LOGO */}
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            <span className="text-2xl font-bold text-green-600 tracking-tight">
-              FreshMart
-            </span>
-          </div>
+{/* LOGO */}
+<div
+  className="flex items-center cursor-pointer"
+  onClick={() => navigate("/")}
+>
+  <img
+    src="/logo/WhatsApp Image 2026-06-11 at 9.38.35 PM.jpeg"
+    alt="FreshMart Logo"
+    className="h-10 w-auto object-contain"
+  />
+</div>
 
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center space-x-8">
