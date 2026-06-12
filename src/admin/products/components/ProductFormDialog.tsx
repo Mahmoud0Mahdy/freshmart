@@ -80,16 +80,11 @@ export function ProductFormDialog({
         categoryId: editingProduct.categoryId || 0,
         image: editingProduct.image,
         description: editingProduct.description || "",
-        calories:
-          editingProduct.nutrition?.calories?.toString() || "",
-        protein:
-          editingProduct.nutrition?.protein?.replace(/[^0-9.]/g, "") || "",
-        carbs:
-          editingProduct.nutrition?.carbs?.replace(/[^0-9.]/g, "") || "",
-        fat:
-          editingProduct.nutrition?.fat?.replace(/[^0-9.]/g, "") || "",
-        fiber:
-          editingProduct.nutrition?.fiber?.replace(/[^0-9.]/g, "") || "",
+        calories: editingProduct.nutrition?.calories?.toString() || "",
+        protein: editingProduct.nutrition?.protein?.replace(/[^0-9.]/g, "") || "",
+        carbs: editingProduct.nutrition?.carbs?.replace(/[^0-9.]/g, "") || "",
+        fat: editingProduct.nutrition?.fat?.replace(/[^0-9.]/g, "") || "",
+        fiber: editingProduct.nutrition?.fiber?.replace(/[^0-9.]/g, "") || "",
         inStock: editingProduct.inStock,
       });
     } else {
@@ -97,15 +92,15 @@ export function ProductFormDialog({
     }
   }, [editingProduct, isOpen]);
 
+  useEffect(() => {
+    if (editingProduct && categories.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        categoryId: editingProduct.categoryId,
+      }));
+    }
+  }, [categories, editingProduct]);
 
-useEffect(() => {
-  if (editingProduct && categories.length > 0) {
-    setFormData((prev) => ({
-      ...prev,
-      categoryId: editingProduct.categoryId,
-    }));
-  }
-}, [categories, editingProduct]);
   // ================= SUBMIT =================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +109,40 @@ useEffect(() => {
 
     if (!formData.categoryId) {
       toast.error("Select category");
+      return;
+    }
+
+    // --- Validation for Nutrition ---
+    const nutritionFields = [
+      { name: "Calories", value: formData.calories },
+      { name: "Protein", value: formData.protein },
+      { name: "Carbs", value: formData.carbs },
+      { name: "Fat", value: formData.fat },
+      { name: "Fiber", value: formData.fiber },
+    ];
+
+    let isAnyNutritionGreaterThanZero = false;
+
+    for (const field of nutritionFields) {
+      if (field.value !== "") { 
+        const numValue = parseFloat(field.value);
+        if (numValue > 999) {
+          toast.error(`${field.name} cannot exceed 999`);
+          return;
+        }
+        if (numValue < 0) {
+          toast.error(`${field.name} cannot be less than 0`);
+          return;
+        }
+        if (numValue > 0) {
+          isAnyNutritionGreaterThanZero = true; // لقينا على الأقل قيمة واحدة أكبر من الصفر
+        }
+      }
+    }
+
+    // لو اللوب خلص ومفيش ولا قيمة أكبر من الصفر
+    if (!isAnyNutritionGreaterThanZero) {
+      toast.error("At least one nutrition value must be greater than 0");
       return;
     }
 
@@ -127,7 +156,7 @@ useEffect(() => {
       imageUrl: formData.image,
       categoryId: formData.categoryId,
       nutrition: {
-        calories: parseInt(formData.calories) || 0,
+        calories: parseFloat(formData.calories) || 0,
         protein: parseFloat(formData.protein) || 0,
         carbs: parseFloat(formData.carbs) || 0,
         fat: parseFloat(formData.fat) || 0,
@@ -201,7 +230,6 @@ useEffect(() => {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* NAME + PRICE */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -212,6 +240,7 @@ useEffect(() => {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
+                required
               />
             </div>
 
@@ -220,10 +249,13 @@ useEffect(() => {
               <Input
                 id="productPrice"
                 type="number"
+                min="0"
+                step="any"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData({ ...formData, price: e.target.value })
                 }
+                required
               />
             </div>
           </div>
@@ -232,15 +264,12 @@ useEffect(() => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="productCategory">Category *</Label>
-
               <Select
-                id="productCategory"
                 value={formData.categoryId ? formData.categoryId.toString() : ""}
                 onValueChange={(value) => {
                   const selected = categories.find(
                     (c) => c.id.toString() === value
                   );
-
                   setFormData({
                     ...formData,
                     category: selected?.name || "",
@@ -248,10 +277,9 @@ useEffect(() => {
                   });
                 }}
               >
-                <SelectTrigger aria-label="Category">
+                <SelectTrigger id="productCategory" aria-label="Category">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-
                 <SelectContent>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id.toString()}>
@@ -285,8 +313,8 @@ useEffect(() => {
               onChange={(e) =>
                 setFormData({ ...formData, image: e.target.value })
               }
+              required
             />
-
             {formData.image && (
               <img
                 alt="Product preview"
@@ -305,38 +333,91 @@ useEffect(() => {
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
+              required
             />
           </div>
 
           {/* NUTRITION */}
           <div className="border-t pt-4">
-            <h3 className="font-medium mb-3">Nutrition</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-medium">Nutrition</h3>
+              <span className="text-xs text-muted-foreground">
+                Max limit per field is 999. At least one must be {">"} 0.
+              </span>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Input type="number" placeholder="Calories" value={formData.calories}
-                onChange={(e) => setFormData({ ...formData, calories: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                max="999"
+                step="any"
+                placeholder="Calories (Max: 999)"
+                value={formData.calories}
+                onChange={(e) =>
+                  setFormData({ ...formData, calories: e.target.value })
+                }
+              />
 
-              <Input type="number" placeholder="Protein" value={formData.protein}
-                onChange={(e) => setFormData({ ...formData, protein: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                max="999"
+                step="any"
+                placeholder="Protein (Max: 999)"
+                value={formData.protein}
+                onChange={(e) =>
+                  setFormData({ ...formData, protein: e.target.value })
+                }
+              />
 
-              <Input type="number" placeholder="Carbs" value={formData.carbs}
-                onChange={(e) => setFormData({ ...formData, carbs: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                max="999"
+                step="any"
+                placeholder="Carbs (Max: 999)"
+                value={formData.carbs}
+                onChange={(e) =>
+                  setFormData({ ...formData, carbs: e.target.value })
+                }
+              />
 
-              <Input type="number" placeholder="Fat" value={formData.fat}
-                onChange={(e) => setFormData({ ...formData, fat: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                max="999"
+                step="any"
+                placeholder="Fat (Max: 999)"
+                value={formData.fat}
+                onChange={(e) =>
+                  setFormData({ ...formData, fat: e.target.value })
+                }
+              />
 
-              <Input type="number" placeholder="Fiber" value={formData.fiber}
-                onChange={(e) => setFormData({ ...formData, fiber: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                max="999"
+                step="any"
+                placeholder="Fiber (Max: 999)"
+                value={formData.fiber}
+                onChange={(e) =>
+                  setFormData({ ...formData, fiber: e.target.value })
+                }
+              />
             </div>
           </div>
 
           {/* ACTIONS */}
           <div className="flex justify-end gap-2">
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
             </DialogClose>
 
-            <Button disabled={loading}>
+            <Button type="submit" disabled={loading}>
               {loading
                 ? "Loading..."
                 : editingProduct
@@ -344,7 +425,6 @@ useEffect(() => {
                 : "Add Product"}
             </Button>
           </div>
-
         </form>
       </DialogContent>
     </Dialog>
