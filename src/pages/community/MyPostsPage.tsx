@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PostCard, Post } from "../../components/PostCard";
-import { getMyPosts, savePost, votePost } from "../../api/communityApi";
+import { Button } from "../../components/ui/button";
+import { getMyPosts, savePost } from "../../api/communityApi";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+// 🔥 رجعنا الأيقونات الأساسية اللي كانت شغالة معاك بدون مشاكل
+import { Layers, CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import "./my-posts.css";
 
 export function MyPostsPage() {
@@ -11,60 +14,54 @@ export function MyPostsPage() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  type FilterType = "All" | "Approved" | "Pending" | "Rejected";
+  const [activeFilter, setActiveFilter] = useState<FilterType>("All");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 5;
 
   const mapApiPostToPostCard = (post: any): Post => {
     const createdAtValue = post.createdAt;
-
     const timestamp = createdAtValue
-      ? formatDistanceToNow(new Date(createdAtValue), {
-          addSuffix: true,
-        })
+      ? formatDistanceToNow(new Date(createdAtValue), { addSuffix: true })
       : "Just now";
+
+    const rawStatus = post.status ? String(post.status) : "Pending";
+    const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
 
     return {
       id: String(post.id),
-
-      userId: "",
-
+      userId: post.userId || "",
       author: {
         name: "You",
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=my-posts`,
       },
-
-      title: post.title ?? "",
-
-      content: `Status: ${post.status}`,
-
+      title: post.title ?? "Untitled Post",
+      content: post.content ?? "",
       imageUrl: post.imageUrl ?? "",
-
-      tags: [post.status ?? "Pending"],
-
+      tags: [formattedStatus],
       upvotes: post.votes ?? 0,
-
       comments: post.commentsCount ?? 0,
-
       timestamp,
-
       isSaved: false,
-
       currentUserVote: 0,
     };
   };
 
   const fetchPosts = async () => {
     setLoading(true);
-
     try {
       const data = await getMyPosts();
+      const postsData = Array.isArray(data) ? data : (data?.data ?? []);
+      
+      const sortedPosts = postsData
+        .map(mapApiPostToPostCard)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-      const postsData = Array.isArray(data)
-        ? data
-        : (data?.data ?? []);
-
-      setPosts(postsData.map(mapApiPostToPostCard));
+      setPosts(sortedPosts);
     } catch (error) {
       toast.error("Failed to load your posts");
-      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -74,111 +71,151 @@ export function MyPostsPage() {
     fetchPosts();
   }, []);
 
-  const handleVote = async (
-    postId: string,
-    voteType: 1 | -1
-  ) => {
-    try {
-      await votePost(postId, voteType);
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) => {
-          if (post.id !== postId) {
-            return post;
-          }
-
-          const currentVote =
-            post.currentUserVote ?? 0;
-
-          const nextVote =
-            currentVote === voteType
-              ? 0
-              : voteType;
-
-          const votesDelta =
-            nextVote - currentVote;
-
-          return {
-            ...post,
-            currentUserVote: nextVote,
-            upvotes: post.upvotes + votesDelta,
-          };
-        })
-      );
-    } catch {
-      toast.error("Failed to submit vote");
-    }
-  };
-
-  const handleSavePost = async (
-    postId: string
-  ) => {
+  const handleSavePost = async (postId: string) => {
     try {
       await savePost(postId);
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                isSaved: !post.isSaved,
-              }
-            : post
-        )
+      setPosts((prev) =>
+        prev.map((post) => (post.id === postId ? { ...post, isSaved: !post.isSaved } : post))
       );
     } catch {
       toast.error("Failed to save post");
     }
   };
 
+  const filteredPosts = posts.filter((post) => {
+    if (activeFilter === "All") return true;
+    return post.tags.includes(activeFilter);
+  });
+
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage) || 1;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter]);
+
+  const filters = [
+    { id: "All", label: "All Posts", icon: Layers },
+    { id: "Approved", label: "Approved", icon: CheckCircle2 },
+    { id: "Pending", label: "Pending", icon: Clock },
+    { id: "Rejected", label: "Rejected", icon: XCircle },
+  ] as const;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero */}
+    <div className="mp-wrapper">
+      
+      {/* Hero Section */}
       <div className="bg-gradient-to-r from-green-500 to-green-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-white mb-2">
-            My Posts
-          </h1>
-
-          <p className="text-green-50">
-            View and track all your community
-            posts.
-          </p>
+          <h1 className="text-white mb-2 text-3xl font-bold">My Posts</h1>
+          <p className="text-green-50">View and track all your community posts.</p>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {loading ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-            <p className="text-gray-500">
-              Loading your posts...
-            </p>
+      {/* Main Layout using CSS */}
+      <div className="mp-layout">
+        
+        {/* Sidebar الفلتر على الشمال */}
+        <aside className="mp-sidebar">
+          <h3 className="mp-filter-title">Filter by Status</h3>
+          <div>
+            {filters.map((filter) => {
+              const Icon = filter.icon;
+              const isActive = activeFilter === filter.id;
+              const count = filter.id === "All" 
+                ? posts.length 
+                : posts.filter(p => p.tags.includes(filter.id)).length;
+
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`mp-filter-btn ${isActive ? 'active' : ''}`}
+                >
+                  <Icon size={18} className="mp-filter-icon" />
+                  {filter.label}
+                  <span className="mp-filter-count">{count}</span>
+                </button>
+              );
+            })}
           </div>
-        ) : posts.length > 0 ? (
-          <div className="space-y-4">
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onVote={handleVote}
-                onSave={handleSavePost}
-                onPostClick={(postId) =>
-                  navigate(`/posts/${postId}`)
-                }
-                onCommentsClick={(postId) =>
-                  navigate(`/posts/${postId}`)
-                }
-              />
-            ))}
+        </aside>
+
+        {/* Posts Feed */}
+        <main className="mp-feed">
+          
+          {/* زرار الرجوع للـ Community */}
+          <div>
+            <button onClick={() => navigate('/community')} className="mp-back-btn">
+              <ArrowLeft size={16} />
+              Back to Community
+            </button>
           </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-            <p className="text-gray-500">
-              You haven't created any posts yet.
-            </p>
-          </div>
-        )}
+
+          {loading ? (
+            <div className="bg-white rounded-xl border border-gray-100 p-12 text-center shadow-sm">
+              <p className="text-gray-500 font-medium">Loading your posts...</p>
+            </div>
+          ) : currentPosts.length > 0 ? (
+            <>
+              {currentPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  disableVotes={true}
+                  onSave={handleSavePost}
+                  onPostClick={(postId) => navigate(`/posts/${postId}`)}
+                  onCommentsClick={(postId) => navigate(`/posts/${postId}`)}
+                />
+              ))}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-between items-center bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(prev - 1, 1));
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={currentPage === 1}
+                    className="gap-2 text-gray-600 h-9"
+                  >
+                    <ChevronLeft size={16} /> Previous
+                  </Button>
+                  
+                  <span className="text-sm font-medium text-gray-500">
+                    Page {currentPage} of {totalPages}
+                  </span>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="gap-2 text-gray-600 h-9"
+                  >
+                    Next <ChevronRight size={16} />
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-100 p-16 text-center shadow-sm">
+              <div className="text-4xl mb-4">📭</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">No Posts Found</h3>
+              <p className="text-gray-500">
+                {activeFilter === "All" 
+                  ? "You haven't created any posts yet." 
+                  : `No posts found with status "${activeFilter}".`}
+              </p>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
