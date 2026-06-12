@@ -1,17 +1,14 @@
 /* ============================================================
    recipes-admin.css
-   Styles for: RecipeStats
    ============================================================ */
 
-/* ── RecipeStats wrapper ────────────────────────────────────── */
 .rs-stats-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px; /* كبرنا المسافة دي سنة عشان تدي مساحة للعين */
   margin-bottom: 16px;
 }
 
-/* ── Total Recipes card (top, full width) ───────────────────── */
 .rs-total-card {
   display: flex;
   flex-direction: column;
@@ -28,7 +25,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #dbeafe; /* أزرق فاتح */
+  background: #dbeafe;
   color: #2563eb;
   display: flex;
   align-items: center;
@@ -53,14 +50,13 @@
   text-align: center; 
 }
 
-/* ── Mini status cards grid (bottom row) ──────────────────── */
+/* ── Mini status cards grid ──────────────────── */
 .rs-mini-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); 
-  gap: 12px;
+  gap: 16px; /* مسافة متناسقة بين كل الكروت */
 }
 
-/* خليناها 2 جنب بعض في الموبايل عشان تبقى زي البوستات بالظبط */
 @media (max-width: 640px) {
   .rs-mini-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -79,7 +75,6 @@
   background: #ffffff;
 }
 
-/* نفس تأثير الـ Hover اللي في البوستات */
 .rs-mini-card:hover { 
   box-shadow: 0 4px 12px rgba(0,0,0,0.09); 
 }
@@ -93,10 +88,13 @@
   justify-content: center;
 }
 
-/* ألوان الأيقونات */
+/* ألوان الأيقونات والخلفيات */
 .rs-mini-icon--green  { background: #f0fdf4; color: #16a34a; }
+.rs-mini-icon--blue   { background: #eff6ff; color: #3b82f6; }
 .rs-mini-icon--orange { background: #fff7ed; color: #ea580c; }
+.rs-mini-icon--indigo { background: #eef2ff; color: #6366f1; }
 .rs-mini-icon--red    { background: #fef2f2; color: #dc2626; }
+.rs-mini-icon--purple { background: #faf5ff; color: #a855f7; }
 
 /* ألوان الأرقام */
 .rs-mini-value {
@@ -107,8 +105,11 @@
 }
 
 .rs-mini-value--green  { color: #16a34a; }
+.rs-mini-value--blue   { color: #3b82f6; }
 .rs-mini-value--orange { color: #ea580c; }
+.rs-mini-value--indigo { color: #6366f1; }
 .rs-mini-value--red    { color: #dc2626; }
+.rs-mini-value--purple { color: #a855f7; }
 
 .rs-mini-label {
   color: #6b7280; 
@@ -117,13 +118,3 @@
   text-transform: uppercase; 
   letter-spacing: 0.05em; 
 }
-
-/* الألوان الجديدة للمستويات الإضافية */
-.rs-mini-icon--blue   { background: #eff6ff; color: #3b82f6; }
-.rs-mini-value--blue  { color: #3b82f6; }
-
-.rs-mini-icon--indigo { background: #e0e7ff; color: #6366f1; }
-.rs-mini-value--indigo{ color: #6366f1; }
-
-.rs-mini-icon--purple { background: #faf5ff; color: #a855f7; }
-.rs-mini-value--purple{ color: #a855f7; }
