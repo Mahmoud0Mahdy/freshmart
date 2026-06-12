@@ -12,7 +12,6 @@ import {
 import { toast } from "sonner";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import {
@@ -26,6 +25,8 @@ import {
 } from "../../api/communityApi";
 import { Post } from "../../components/PostCard";
 import { useApp } from "../../contexts/AppContext";
+
+// 🔥 تأكد إن مسار ملف الـ CSS ده مظبوط عندك
 import "./post-details.css";
 
 interface CommentItem {
@@ -193,7 +194,6 @@ export function PostDetailsPage() {
 
   const handleDeletePost = async () => {
     if (!post) return;
-
     try {
       await deletePost(post.id);
       toast.success("Post deleted successfully");
@@ -228,11 +228,9 @@ export function PostDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card className="p-8 text-center">
-            <p className="text-gray-500">Loading post...</p>
-          </Card>
+      <div className="pd-wrapper">
+        <div className="pd-container" style={{ textAlign: "center", paddingTop: "100px" }}>
+          <p style={{ color: "#6b7280" }}>Loading post...</p>
         </div>
       </div>
     );
@@ -240,67 +238,63 @@ export function PostDetailsPage() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card className="p-8 text-center">
-            <p className="text-gray-500">Post not found.</p>
-          </Card>
+      <div className="pd-wrapper">
+        <div className="pd-container" style={{ textAlign: "center", paddingTop: "100px" }}>
+          <p style={{ color: "#6b7280" }}>Post not found.</p>
         </div>
       </div>
     );
   }
 
+  // 🔥 الكود ده بقى بيستخدم كلاسات الـ CSS بتاعتك
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 font-medium text-sm py-2 px-2 rounded-lg transition-colors -ml-2"
-        >
+    <div className="pd-wrapper">
+      <div className="pd-container">
+        
+        <button type="button" onClick={() => navigate(-1)} className="pd-back-btn">
           <ArrowLeft size={18} />
           Back
         </button>
 
-        <Card className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
+        {/* Post Card */}
+        <div className="pd-card">
+          <div className="pd-header">
+            <div className="pd-author">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={post.author.avatar} alt={post.author.name} />
                 <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div>
-                <p className="text-gray-900">{post.author.name}</p>
-                <p className="text-sm text-gray-500">{post.timestamp}</p>
+              <div className="pd-author-info">
+                <h3>{post.author.name}</h3>
+                <p>{post.timestamp}</p>
               </div>
             </div>
 
             {canDeletePost() && (
               <button
                 onClick={handleDeletePost}
-                className="text-red-500 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition-colors"
+                style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "4px" }}
               >
-                <Trash2 size={18} />
+                <Trash2 size={20} />
               </button>
             )}
           </div>
 
-          <h1 className="text-gray-900 mb-3">{post.title}</h1>
-          <p className="text-gray-700 mb-4 whitespace-pre-wrap">
-            {post.content}
-          </p>
+          <h1 className="pd-title">{post.title}</h1>
+          <p className="pd-content">{post.content}</p>
 
+          {/* 🔥 الصورة بحد أقصى 400px وبتظهر كاملة (object-fit: contain) جوة المربع */}
           {post.imageUrl && (
-            <div className="mb-4 rounded-lg overflow-hidden">
+            <div className="pd-image-wrapper">
               <img
                 src={post.imageUrl}
                 alt={post.title}
-                className="w-full max-h-[420px] object-cover"
+                className="pd-image"
               />
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-6">
             {post.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="rounded-full">
                 {tag}
@@ -308,61 +302,53 @@ export function PostDetailsPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-4 pt-3 border-t border-gray-100">
+          <div className="pd-actions">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleVote(1)}
                 className={`p-1 rounded hover:bg-gray-100 transition-colors ${
-                  post.currentUserVote === 1
-                    ? "text-orange-500"
-                    : "text-gray-400"
+                  post.currentUserVote === 1 ? "text-orange-500" : "text-gray-400"
                 }`}
               >
-                <ArrowUp size={18} />
+                <ArrowUp size={20} />
               </button>
-              <span
-                className={`text-sm ${post.upvotes > 0 ? "text-orange-600" : "text-gray-600"}`}
-              >
+              <span className={`text-sm font-bold ${post.upvotes > 0 ? "text-orange-600" : "text-gray-600"}`}>
                 {post.upvotes}
               </span>
               <button
                 onClick={() => handleVote(-1)}
                 className={`p-1 rounded hover:bg-gray-100 transition-colors ${
-                  post.currentUserVote === -1
-                    ? "text-blue-500"
-                    : "text-gray-400"
+                  post.currentUserVote === -1 ? "text-blue-500" : "text-gray-400"
                 }`}
               >
-                <ArrowDown size={18} />
+                <ArrowDown size={20} />
               </button>
             </div>
 
             <div className="flex items-center gap-1 text-gray-600">
-              <MessageCircle size={16} />
-              <span className="text-sm">{post.comments} comments</span>
+              <MessageCircle size={18} />
+              <span className="text-sm font-medium">{post.comments} comments</span>
             </div>
 
             <button
               onClick={handleSave}
-              className={`flex items-center gap-1 transition-colors ${
-                post.isSaved
-                  ? "text-orange-500"
-                  : "text-gray-600 hover:text-orange-500"
+              className={`flex items-center gap-1 font-medium transition-colors ${
+                post.isSaved ? "text-orange-500" : "text-gray-600 hover:text-orange-500"
               }`}
             >
-              <Bookmark
-                size={16}
-                fill={post.isSaved ? "currentColor" : "none"}
-              />
+              <Bookmark size={18} fill={post.isSaved ? "currentColor" : "none"} />
               <span className="text-sm">{post.isSaved ? "Saved" : "Save"}</span>
             </button>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-6">
-          <h2 className="text-gray-900 mb-4">Comments</h2>
+        {/* Comments Card */}
+        <div className="pd-card">
+          <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#111827", marginBottom: "20px" }}>
+            Comments
+          </h2>
 
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-8">
             <Input
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
@@ -377,51 +363,39 @@ export function PostDetailsPage() {
           <div className="space-y-4">
             {comments.length > 0 ? (
               comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="border border-gray-100 rounded-lg p-4"
-                >
+                <div key={comment.id} className="border border-gray-100 rounded-lg p-5 bg-gray-50/50">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={comment.userAvatar}
-                          alt={comment.userName}
-                        />
-                        <AvatarFallback>
-                          {comment.userName.charAt(0)}
-                        </AvatarFallback>
+                        <AvatarImage src={comment.userAvatar} alt={comment.userName} />
+                        <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-sm text-gray-900">
-                          {comment.userName}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {comment.createdAt}
-                        </p>
+                        <p className="text-sm font-bold text-gray-900">{comment.userName}</p>
+                        <p className="text-xs font-medium text-gray-500">{comment.createdAt}</p>
                       </div>
                     </div>
 
                     {canDeleteComment(comment) && (
                       <button
                         onClick={() => handleDeleteComment(comment.id)}
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50 p-1 rounded-md transition-colors"
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors"
                       >
                         <Trash2 size={16} />
                       </button>
                     )}
                   </div>
-
-                  <p className="text-gray-700 mt-3">{comment.content}</p>
+                  <p className="text-gray-700 mt-3 text-sm leading-relaxed">{comment.content}</p>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">
-                No comments yet. Be the first to comment.
+              <p className="text-gray-500 text-sm text-center py-4">
+                No comments yet. Be the first to comment!
               </p>
             )}
           </div>
-        </Card>
+        </div>
+
       </div>
     </div>
   );
