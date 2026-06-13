@@ -1,15 +1,9 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-
 import { ShoppingCart, User, Menu, X, Shield, Heart } from "lucide-react";
-
 import { Button } from "./ui/button";
-
 import { useApp } from "../contexts/AppContext";
-
 import { useCart } from "../contexts/CartContext";
-
 import { useState } from "react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,41 +11,32 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
+// 🔥 استيراد ملف الستايل الجديد
+import "./header.css";
+
 const navItems = [
   { name: "Home", path: "/" },
-
   { name: "Products", path: "/shop" },
-
   { name: "Recipes", path: "/recipes" },
-
   { name: "Ghost Craft", path: "/ghost-craft" },
-
   { name: "Community", path: "/community" },
-
-  // 🔥 NEW
   { name: "Orders", path: "/orders" },
-
   { name: "Chatbot", path: "/chatbot" },
 ];
 
 export function Header() {
   const { state } = useApp();
-
   const { cart } = useCart();
-
   const navigate = useNavigate();
-
   const location = useLocation();
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // 🔥 cart count
   const cartItemsCount = (cart || []).reduce(
     (total, item) => total + item.quantity,
     0,
   );
 
-  const isAdmin = state.user?.role === "admin";
+  const isAdmin = state.user?.role === "admin" || state.user?.role === "Admin";
 
   const favoritesCount =
     (state.user?.savedRecipes?.length || 0) +
@@ -61,57 +46,50 @@ export function Header() {
     if (path === "/") {
       return location.pathname === "/";
     }
-
     return location.pathname.startsWith(path);
   };
 
   const isAdminActive = location.pathname.startsWith("/admin");
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="header-wrapper">
+      <div className="header-container">
+        <div className="header-inner">
+          
           {/* LOGO */}
-{/* LOGO */}
-<div
-  className="flex items-center cursor-pointer"
-  onClick={() => navigate("/")}
->
-  <img
-    src="/logo/WhatsApp Image 2026-06-11 at 9.38.35 PM.jpeg"
-    alt="FreshMart Logo"
-    className="h-10 w-auto object-contain"
-  />
-</div>
+          <div
+            className="header-logo-box"
+            onClick={() => navigate("/")}
+          >
+            <img
+              src="/logo/Loqma - Concept 2.svg"
+              alt="FreshMart Logo"
+              className="header-logo"
+            />
+          </div>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={() =>
-                  `transition-colors font-medium text-sm ${
-                    isActive(item.path)
-                      ? "text-green-600 font-bold"
-                      : "text-gray-600 hover:text-green-600"
-                  }`
-                }
-              >
-                {item.name}
-              </NavLink>
-            ))}
+          <nav className="header-desktop-nav">
+            <div className="header-nav-list">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={() =>
+                    `header-nav-link ${isActive(item.path) ? "active" : ""}`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+            </div>
 
-            <div className="flex items-center space-x-2 pl-4 border-l border-gray-100">
+            <div className="header-actions">
               {/* ADMIN */}
               {isAdmin && (
                 <button
                   onClick={() => navigate("/admin")}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isAdminActive
-                      ? "text-green-600 bg-green-50"
-                      : "text-gray-500 hover:text-green-600 hover:bg-gray-50"
-                  }`}
+                  className={`header-icon-btn ${isAdminActive ? "active" : ""}`}
                   title="Admin Dashboard"
                 >
                   <Shield size={20} />
@@ -119,47 +97,45 @@ export function Header() {
               )}
 
               {/* CART */}
-              <button
-                type="button"
-                onClick={() => navigate("/cart")}
-                className="relative p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
-                title="Shopping Cart"
-              >
-                <ShoppingCart size={20} />
-
-                {cartItemsCount > 0 && (
-                  <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                    {cartItemsCount}
-                  </span>
-                )}
-              </button>
+              <div className="header-cart-wrapper">
+                <button
+                  type="button"
+                  onClick={() => navigate("/cart")}
+                  className="header-icon-btn"
+                  title="Shopping Cart"
+                >
+                  <ShoppingCart size={20} />
+                  {cartItemsCount > 0 && (
+                    <span className="header-cart-badge">
+                      {cartItemsCount}
+                    </span>
+                  )}
+                </button>
+              </div>
 
               {/* FAVORITES */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="header-icon-btn"
                     title="Favorites"
                   >
                     <Heart
                       size={20}
-                      className={
-                        favoritesCount > 0 ? "fill-red-500 text-red-500" : ""
-                      }
+                      color={favoritesCount > 0 ? "#ef4444" : "currentColor"}
+                      fill={favoritesCount > 0 ? "#ef4444" : "none"}
                     />
                   </button>
                 </DropdownMenuTrigger>
-
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate("/saved-recipes")}>
+                  <DropdownMenuItem onClick={() => navigate("/saved-recipes")} style={{ cursor: "pointer" }}>
                     Saved Recipes
                   </DropdownMenuItem>
-
-                  <DropdownMenuItem onClick={() => navigate("/saved-products")}>
+                  <DropdownMenuItem onClick={() => navigate("/saved-products")} style={{ cursor: "pointer" }}>
                     Saved Products
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/saved-posts')}>
+                  <DropdownMenuItem onClick={() => navigate('/saved-posts')} style={{ cursor: "pointer" }}>
                     Saved Posts
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -170,74 +146,64 @@ export function Header() {
                 onClick={() =>
                   navigate(state.isAuthenticated ? "/profile" : "/login")
                 }
-                className="p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
+                className="header-icon-btn"
               >
                 <User size={20} />
               </button>
             </div>
           </nav>
 
-          {/* MOBILE */}
-          <div className="md:hidden flex items-center space-x-2">
+          {/* MOBILE NAV */}
+          <div className="header-mobile-actions">
             {/* CART */}
-            <button
-              onClick={() => navigate("/cart")}
-              className="relative p-2 text-gray-600"
-            >
-              <ShoppingCart size={22} />
-
-              {cartItemsCount > 0 && (
-                <span className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                  {cartItemsCount}
-                </span>
-              )}
-            </button>
+            <div className="header-cart-wrapper">
+              <button
+                onClick={() => navigate("/cart")}
+                className="header-mobile-icon-btn"
+              >
+                <ShoppingCart size={22} />
+                {cartItemsCount > 0 && (
+                  <span className="header-cart-badge">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </button>
+            </div>
 
             {/* FAVORITES */}
             <button
               onClick={() => navigate("/saved-products")}
-              className="p-2 text-gray-600"
+              className="header-mobile-icon-btn"
             >
               <Heart
                 size={22}
-                className={
-                  favoritesCount > 0 ? "fill-red-500 text-red-500" : ""
-                }
+                color={favoritesCount > 0 ? "#ef4444" : "currentColor"}
+                fill={favoritesCount > 0 ? "#ef4444" : "none"}
               />
             </button>
 
             {/* MENU BUTTON */}
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              className="header-menu-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6 text-gray-600" />
-              ) : (
-                <Menu className="h-6 w-6 text-gray-600" />
-              )}
-            </Button>
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
 
-        {/* MOBILE MENU */}
+        {/* MOBILE MENU DROPDOWN */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white py-2 absolute w-full left-0 shadow-lg">
-            <div className="px-4 py-3 space-y-1">
+          <div className="header-mobile-menu">
+            <div className="header-mobile-menu-inner">
               {navItems.map((item) => (
                 <button
                   key={item.path}
                   onClick={() => {
                     navigate(item.path);
-
                     setMobileMenuOpen(false);
                   }}
-                  className={`block w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
-                    isActive(item.path)
-                      ? "bg-green-50 text-green-600"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                  className={`header-mobile-item ${isActive(item.path) ? "active" : ""}`}
                 >
                   {item.name}
                 </button>
@@ -248,19 +214,12 @@ export function Header() {
                 <button
                   onClick={() => {
                     navigate("/admin");
-
                     setMobileMenuOpen(false);
                   }}
-                  className={`block w-full text-left px-4 py-3 rounded-xl transition-colors font-medium mt-2 border-t border-gray-50 ${
-                    isAdminActive
-                      ? "bg-green-50 text-green-600"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                  className={`header-mobile-item header-mobile-admin-item ${isAdminActive ? "active" : ""}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Shield size={18} className="text-gray-400" />
-                    Admin Dashboard
-                  </div>
+                  <Shield size={18} />
+                  Admin Dashboard
                 </button>
               )}
             </div>
