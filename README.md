@@ -1,8 +1,6 @@
 
   # Supermarket Recipe Homepage Design
 
-  This is a code bundle for Supermarket Recipe Homepage Design. The original project is available at https://www.figma.com/design/Qd5tjWCaHNFLGUzkT5FJvm/Supermarket-Recipe-Homepage-Design.
-
   ## Running the code
 
   Run `npm i` to install the dependencies.
