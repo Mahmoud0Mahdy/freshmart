@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -18,7 +18,6 @@ export const OrderSummary = memo(function OrderSummary({
   setPromoCode,
   proceedToCheckout,
 }: Props) {
-
   const { cartSummary } = useCart();
   const navigate = useNavigate(); // 🔥
 
@@ -29,22 +28,18 @@ export const OrderSummary = memo(function OrderSummary({
 
   const handleCheckout = () => {
     if (proceedToCheckout) {
-      proceedToCheckout(); 
+      proceedToCheckout();
     } else {
-      navigate("/checkout"); 
+      navigate("/checkout");
     }
   };
 
   return (
     <Card className="border-0 shadow-md sticky top-8">
       <CardContent className="p-6">
-
-        <h2 className="text-xl font-bold mb-4">
-          Order Summary
-        </h2>
+        <h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
         <div className="space-y-3 mb-4">
-
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>${s.toFixed(2)}</span>
@@ -57,9 +52,7 @@ export const OrderSummary = memo(function OrderSummary({
 
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>
-              {sh === 0 ? "Free" : `$${sh.toFixed(2)}`}
-            </span>
+            <span>{sh === 0 ? "Free" : `$${sh.toFixed(2)}`}</span>
           </div>
 
           {sh > 0 && (
@@ -67,7 +60,6 @@ export const OrderSummary = memo(function OrderSummary({
               Free shipping on orders over $100
             </p>
           )}
-
         </div>
 
         <Separator />
@@ -75,18 +67,6 @@ export const OrderSummary = memo(function OrderSummary({
         <div className="flex justify-between text-lg font-bold my-4">
           <span>Total</span>
           <span>${tot.toFixed(2)}</span>
-        </div>
-
-        <div className="flex gap-2 mb-4">
-          <Input
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            placeholder="Promo code"
-          />
-
-          <Button variant="outline" size="sm">
-            Apply
-          </Button>
         </div>
 
         <Button
@@ -100,7 +80,6 @@ export const OrderSummary = memo(function OrderSummary({
         <p className="text-sm text-gray-500 text-center mt-4">
           Secure checkout powered by SSL encryption
         </p>
-
       </CardContent>
     </Card>
   );

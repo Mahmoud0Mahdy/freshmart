@@ -8,7 +8,6 @@ import { getProductById } from "../../api/productApi";
 import ProductGallery from "./ProductGallery";
 import ProductInfo from "./ProductInfo";
 import NutritionFacts from "./NutritionFacts";
-import RelatedProducts from "./RelatedProducts";
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +59,6 @@ export function ProductDetailPage() {
 
         <NutritionFacts nutrition={product.nutritionFact} />
 
-        <RelatedProducts products={products} product={product} />
       </div>
     </div>
   );

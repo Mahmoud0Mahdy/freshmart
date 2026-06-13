@@ -1,10 +1,23 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../../../components/ui/button';
-import { ImageWithFallback } from '../../../components/figma/ImageWithFallback';
-import { Sparkles } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { Button } from "../../../components/ui/button";
+import { ImageWithFallback } from "../../../components/figma/ImageWithFallback";
+import { Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { useApp } from "../../../contexts/AppContext";
 
 export function HeroSection() {
   const navigate = useNavigate();
+  const { state } = useApp();
+
+  const requireLogin = (path: string) => {
+    if (!state.isAuthenticated) {
+      toast.error("Please login first to use this feature");
+      navigate("/login");
+      return;
+    }
+
+    navigate(path);
+  };
 
   return (
     <section className="relative h-[500px] bg-gradient-to-r from-green-50 to-orange-50 overflow-hidden">
@@ -16,7 +29,7 @@ export function HeroSection() {
           className="w-full h-full object-cover opacity-20"
         />
       </div>
-      
+
       {/* Content */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
         <div className="max-w-2xl">
@@ -25,31 +38,39 @@ export function HeroSection() {
             <span className="text-green-600">Cook Smart.</span> <br />
             <span className="text-orange-500">Powered by AI.</span>
           </h1>
+
           <p className="text-xl text-gray-600 mb-8 max-w-lg">
-            Discover fresh ingredients and get personalized recipe recommendations powered by artificial intelligence.
+            Discover fresh ingredients and get personalized recipe
+            recommendations powered by artificial intelligence.
           </p>
+
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              size="lg" 
+            {/* SHOP */}
+            <Button
+              size="lg"
               className="bg-green-600 hover:bg-green-700 text-white px-8 py-3"
-              onClick={() => navigate('/shop')}
+              onClick={() => navigate("/shop")}
             >
               Shop Now
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+
+            {/* GHOST CRAFT */}
+            <Button
+              size="lg"
+              variant="outline"
               className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-3"
-              onClick={() => navigate('/ghost-craft')}
+              onClick={() => requireLogin("/ghost-craft")}
             >
               <Sparkles className="mr-2" size={20} />
               Ghost Craft
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+
+            {/* CHATBOT */}
+            <Button
+              size="lg"
+              variant="outline"
               className="border-orange-500 text-orange-500 hover:bg-orange-50 px-8 py-3"
-              onClick={() => navigate('/chatbot')}
+              onClick={() => requireLogin("/chatbot")}
             >
               Try Recipe Assistant
             </Button>

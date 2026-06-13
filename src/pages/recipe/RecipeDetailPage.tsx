@@ -16,10 +16,7 @@ export function RecipeDetailPage() {
   const {
     recipe,
     isFavorite,
-    matchingProducts,
     allRecipes,
-    addSingleProductToCart,
-    addAllMatchingToCart,
     toggleSaveRecipe,
   } = useRecipeDetail(id);
 
@@ -40,7 +37,7 @@ export function RecipeDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans selection:bg-green-100 selection:text-green-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        
+
         <Button
           variant="ghost"
           onClick={() => navigate("/recipes")}
@@ -50,7 +47,7 @@ export function RecipeDetailPage() {
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          
+
           {/* LEFT */}
           <div className="lg:col-span-2 space-y-8">
             <RecipeDetailHeader recipe={recipe} />
@@ -65,11 +62,9 @@ export function RecipeDetailPage() {
           <div className="lg:col-span-1">
             <IngredientsList
               ingredients={recipe.ingredients || []}
-              matchingProducts={matchingProducts || []}
-              onAddSingle={addSingleProductToCart}
-              onAddAll={addAllMatchingToCart}
             />
           </div>
+
         </div>
 
         <div className="mt-16">

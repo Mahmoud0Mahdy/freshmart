@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+import { useApp } from "../../contexts/AppContext";
 
 import { useRecipes } from "./hooks/useRecipes";
 import { useRecipePagination } from "./hooks/useRecipePagination";
@@ -14,19 +17,14 @@ import { QuickActions } from "./components/QuickActions";
 export function RecipesPage() {
   const navigate = useNavigate();
 
+  const { state } = useApp();
+
   const [aiMode, setAiMode] = useState(() => {
-    return (
-      sessionStorage.getItem(
-        "recipesAiMode"
-      ) === "true"
-    );
+    return sessionStorage.getItem("recipesAiMode") === "true";
   });
 
   useEffect(() => {
-    sessionStorage.setItem(
-      "recipesAiMode",
-      aiMode.toString()
-    );
+    sessionStorage.setItem("recipesAiMode", aiMode.toString());
   }, [aiMode]);
 
   const {
@@ -40,12 +38,44 @@ export function RecipesPage() {
     refreshAiRecommendations,
   } = useRecipePagination(aiMode);
 
-  const {
-    filters,
-    updateFilter,
-    clearFilters,
-    filteredRecipes,
-  } = useRecipes(currentRecipes);
+  const { filters, updateFilter, clearFilters, filteredRecipes } =
+    useRecipes(currentRecipes);
+
+  const handleAiModeChange = (value: boolean) => {
+    if (!state.isAuthenticated) {
+      toast.error("Please login first to use AI recommendations");
+
+      navigate("/login");
+
+      return;
+    }
+
+    setAiMode(value);
+  };
+
+  const handleChatbotNavigate = () => {
+    if (!state.isAuthenticated) {
+      toast.error("Please login first to use the AI Chef");
+
+      navigate("/login");
+
+      return;
+    }
+
+    navigate("/chatbot");
+  };
+
+  const handleRecipeClick = (id: string | number) => {
+    if (!state.isAuthenticated) {
+      toast.error("Please login first to view recipe details");
+
+      navigate("/login");
+
+      return;
+    }
+
+    navigate(`/recipe/${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -57,10 +87,10 @@ export function RecipesPage() {
           updateFilter={updateFilter}
           resultsCount={filteredRecipes.length}
           aiMode={aiMode}
-          onAiModeChange={setAiMode}
+          onAiModeChange={handleAiModeChange}
         />
 
-        {aiMode && (
+        {aiMode && state.isAuthenticated && (
           <div className="flex justify-end mb-4">
             <button
               onClick={refreshAiRecommendations}
@@ -74,14 +104,10 @@ export function RecipesPage() {
         {filteredRecipes.length > 0 ? (
           <RecipesGrid
             recipes={filteredRecipes}
-            onRecipeClick={(id) =>
-              navigate(`/recipe/${id}`)
-            }
+            onRecipeClick={handleRecipeClick}
           />
         ) : (
-          <EmptyState
-            onClear={clearFilters}
-          />
+          <EmptyState onClear={clearFilters} />
         )}
 
         <RecipesPagination
@@ -94,11 +120,7 @@ export function RecipesPage() {
           onPrevious={handlePrevious}
         />
 
-        <QuickActions
-          onNavigate={() =>
-            navigate("/chatbot")
-          }
-        />
+        <QuickActions onNavigate={handleChatbotNavigate} />
       </div>
     </div>
   );

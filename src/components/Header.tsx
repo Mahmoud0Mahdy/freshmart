@@ -1,4 +1,4 @@
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { ShoppingCart, User, Menu, X, Shield, Heart } from "lucide-react";
 
@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { toast } from "sonner";
 
 const navItems = [
   { name: "Home", path: "/" },
@@ -44,6 +45,17 @@ export function Header() {
   const location = useLocation();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const protectedRoutes = ["/ghost-craft", "/community", "/orders", "/chatbot"];
+
+  const requireLogin = (path: string) => {
+    if (!state.isAuthenticated) {
+      toast.error("Please login first to use this feature");
+      navigate("/login");
+      return;
+    }
+
+    navigate(path);
+  };
 
   // 🔥 cart count
   const cartItemsCount = (cart || []).reduce(
@@ -72,34 +84,38 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* LOGO */}
-{/* LOGO */}
-<div
-  className="flex items-center cursor-pointer"
-  onClick={() => navigate("/")}
->
-  <img
-    src="/logo/WhatsApp Image 2026-06-11 at 9.38.35 PM.jpeg"
-    alt="FreshMart Logo"
-    className="h-10 w-auto object-contain"
-  />
-</div>
+          {/* LOGO */}
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            <img
+              src="/logo/WhatsApp Image 2026-06-11 at 9.38.35 PM.jpeg"
+              alt="FreshMart Logo"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
 
           {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <NavLink
+              <button
                 key={item.path}
-                to={item.path}
-                className={() =>
-                  `transition-colors font-medium text-sm ${
-                    isActive(item.path)
-                      ? "text-green-600 font-bold"
-                      : "text-gray-600 hover:text-green-600"
-                  }`
-                }
+                onClick={() => {
+                  if (protectedRoutes.includes(item.path)) {
+                    requireLogin(item.path);
+                  } else {
+                    navigate(item.path);
+                  }
+                }}
+                className={`transition-colors font-medium text-sm ${
+                  isActive(item.path)
+                    ? "text-green-600 font-bold"
+                    : "text-gray-600 hover:text-green-600"
+                }`}
               >
                 {item.name}
-              </NavLink>
+              </button>
             ))}
 
             <div className="flex items-center space-x-2 pl-4 border-l border-gray-100">
@@ -121,7 +137,7 @@ export function Header() {
               {/* CART */}
               <button
                 type="button"
-                onClick={() => navigate("/cart")}
+                onClick={() => requireLogin("/cart")}
                 className="relative p-2 text-gray-500 hover:text-green-600 hover:bg-gray-50 rounded-lg transition-colors"
                 title="Shopping Cart"
               >
@@ -152,14 +168,20 @@ export function Header() {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate("/saved-recipes")}>
+                  <DropdownMenuItem
+                    onClick={() => requireLogin("/saved-recipes")}
+                  >
                     Saved Recipes
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={() => navigate("/saved-products")}>
+                  <DropdownMenuItem
+                    onClick={() => requireLogin("/saved-products")}
+                  >
                     Saved Products
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/saved-posts')}>
+                  <DropdownMenuItem
+                    onClick={() => requireLogin("/saved-posts")}
+                  >
                     Saved Posts
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -181,7 +203,7 @@ export function Header() {
           <div className="md:hidden flex items-center space-x-2">
             {/* CART */}
             <button
-              onClick={() => navigate("/cart")}
+              onClick={() => requireLogin("/cart")}
               className="relative p-2 text-gray-600"
             >
               <ShoppingCart size={22} />
@@ -195,7 +217,7 @@ export function Header() {
 
             {/* FAVORITES */}
             <button
-              onClick={() => navigate("/saved-products")}
+              onClick={() => requireLogin("/saved-products")}
               className="p-2 text-gray-600"
             >
               <Heart
@@ -229,7 +251,11 @@ export function Header() {
                 <button
                   key={item.path}
                   onClick={() => {
-                    navigate(item.path);
+                    if (protectedRoutes.includes(item.path)) {
+                      requireLogin(item.path);
+                    } else {
+                      navigate(item.path);
+                    }
 
                     setMobileMenuOpen(false);
                   }}

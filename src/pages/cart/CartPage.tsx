@@ -8,7 +8,16 @@ import { toast } from "sonner";
 
 import { CartItems } from "./CartItems";
 import { OrderSummary } from "./OrderSummary";
-import { RemoveConfirmModal } from "./RemoveConfirmModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
 
 export function CartPage() {
   const navigate = useNavigate();
@@ -23,26 +32,23 @@ export function CartPage() {
   // ================= UPDATE =================
   const updateQuantity = useCallback(
     (itemId: number, newQuantity: number) => {
-
       if (newQuantity <= 0) {
         setPendingRemove(itemId);
         setShowModal(true);
         return;
       }
 
-      updateItem(itemId, newQuantity)
-        .catch(() => {
-          toast.error("Failed to update");
-        });
-
+      updateItem(itemId, newQuantity).catch(() => {
+        toast.error("Failed to update");
+      });
     },
-    [updateItem]
+    [updateItem],
   );
 
   // ================= DELETE =================
+  // ================= DELETE =================
   const removeFromCart = useCallback(
     (itemId: number) => {
-
       removeItem(itemId)
         .then(() => {
           toast.success("Item removed");
@@ -50,10 +56,15 @@ export function CartPage() {
         .catch(() => {
           toast.error("Failed to remove");
         });
-
     },
-    [removeItem]
+    [removeItem],
   );
+
+  // 🔥 NEW: open confirmation modal before deleting
+  const requestRemove = useCallback((itemId: number) => {
+    setPendingRemove(itemId);
+    setShowModal(true);
+  }, []);
 
   const confirmRemove = useCallback(() => {
     if (pendingRemove !== null) {
@@ -81,7 +92,6 @@ export function CartPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 py-8">
-
           <Button
             variant="ghost"
             onClick={() => navigate("/shop")}
@@ -94,9 +104,7 @@ export function CartPage() {
           <div className="text-center py-12">
             <ShoppingBag className="mx-auto text-gray-400 mb-4" size={64} />
 
-            <h2 className="text-2xl font-bold mb-4">
-              Your cart is empty
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
 
             <Button
               onClick={() => navigate("/shop")}
@@ -105,7 +113,6 @@ export function CartPage() {
               Start Shopping
             </Button>
           </div>
-
         </div>
       </div>
     );
@@ -113,15 +120,30 @@ export function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AlertDialog open={showModal} onOpenChange={setShowModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Item</AlertDialogTitle>
 
-      <RemoveConfirmModal
-        open={showModal}
-        onConfirm={confirmRemove}
-        onCancel={cancelRemove}
-      />
+            <AlertDialogDescription>
+              Are you sure you want to remove this item from your cart?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelRemove}>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={confirmRemove}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-
         <Button
           variant="ghost"
           onClick={() => navigate("/shop")}
@@ -131,16 +153,13 @@ export function CartPage() {
           Continue Shopping
         </Button>
 
-        <h1 className="text-3xl font-bold mb-8">
-          Shopping Cart
-        </h1>
+        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
           <CartItems
             cart={cart}
             updateQuantity={updateQuantity}
-            removeFromCart={removeFromCart}
+            removeFromCart={requestRemove}
           />
 
           <OrderSummary
@@ -148,9 +167,7 @@ export function CartPage() {
             setPromoCode={setPromoCode}
             proceedToCheckout={proceedToCheckout}
           />
-
         </div>
-
       </div>
     </div>
   );

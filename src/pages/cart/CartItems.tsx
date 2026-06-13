@@ -20,7 +20,7 @@ interface CartItemType {
   imageUrl?: string | null;
 
   price?: number;
-
+ء
   quantity: number;
 
   total?: number;
