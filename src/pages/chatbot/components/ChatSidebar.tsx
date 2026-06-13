@@ -1,254 +1,101 @@
-import {
-  Plus,
-  MessageSquare,
-  Bot,
-  Trash2,
-} from "lucide-react";
-
+import { Plus, MessageSquare, Bot, Trash2 } from "lucide-react";
 import { useChatbotContext } from "../../../contexts/ChatbotContext";
-
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
 } from "../../../components/ui/alert-dialog";
 
 export function ChatSidebar() {
-  const {
-    clearChat,
-    sessions,
-    currentSessionId,
-    loadSessionMessages,
-    deleteSession,
-  } = useChatbotContext();
+  const { clearChat, sessions, currentSessionId, loadSessionMessages, deleteSession } = useChatbotContext();
+
+  // 🔥 دالة لتقصير العنوان لـ 7 كلمات كحد أقصى
+  const getDisplayTitle = (title: string) => {
+    const words = title.split(' ');
+    if (words.length > 7) {
+      return words.slice(0, 7).join(' ') + ' ...';
+    }
+    return title;
+  };
 
   return (
-    <aside
-      className="
-        h-screen
-        w-64
-        shrink-0
-        border-r
-        border-gray-200
-        bg-[#f9f9f9]
-        flex
-        flex-col
-      "
-    >
+    <aside className="cb-sidebar">
       {/* Header */}
-      <div className="p-3">
-        <div
-          className="
-            flex
-            items-center
-            gap-3
-            rounded-xl
-            px-3
-            py-3
-          "
-        >
-          <div
-            className="
-              flex
-              h-9
-              w-9
-              items-center
-              justify-center
-              rounded-lg
-              bg-green-600
-              text-white
-            "
-          >
-            <Bot size={18} />
-          </div>
-
-          <div>
-            <h2 className="text-sm font-semibold">
-              FreshMart AI
-            </h2>
-
-            <p className="text-xs text-gray-500">
-              Recipe Assistant
-            </p>
-          </div>
+      <div className="cb-sidebar-header">
+        <div className="cb-sidebar-logo">
+          <Bot size={20} />
+        </div>
+        <div className="cb-sidebar-title">
+          <h2>Loqma AI</h2>
+          <p>Recipe Assistant</p>
         </div>
       </div>
 
       {/* New Chat */}
-      <div className="px-3 pb-3">
-        <button
-          onClick={clearChat}
-          className="
-            flex
-            w-full
-            items-center
-            gap-3
-            rounded-xl
-            border
-            border-gray-200
-            bg-white
-            px-4
-            py-3
-            text-sm
-            font-medium
-            transition-all
-            hover:bg-gray-50
-            hover:shadow-sm
-          "
-        >
-          <Plus size={18} />
-          New Chat
-        </button>
-      </div>
+      <button onClick={clearChat} className="cb-new-chat-btn">
+        <Plus size={18} />
+        New Chat
+      </button>
 
       {/* History */}
-      <div className="flex-1 overflow-y-auto px-2">
-        <p
-          className="
-            px-3
-            py-2
-            text-xs
-            font-semibold
-            uppercase
-            tracking-wider
-            text-gray-400
-          "
-        >
-          Recent Chats
-        </p>
-
-        <div className="space-y-1">
-          {sessions.map((session) => (
-            <div
-              key={session.id}
-              className={`
-                group
-                flex
-                items-center
-                rounded-xl
-                transition-all
-                ${
-                  currentSessionId === session.id
-                    ? "bg-white shadow-sm"
-                    : "hover:bg-white"
-                }
-              `}
-            >
-              <button
-                onClick={() =>
-                  loadSessionMessages(session.id)
-                }
-                className="
-                  flex
-                  flex-1
-                  items-center
-                  gap-3
-                  px-3
-                  py-3
-                  text-left
-                  text-sm
-                "
-              >
-                <MessageSquare
-                  size={16}
-                  className="text-gray-500"
-                />
-
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate">
-                    {session.title}
-                  </span>
-                </div>
-              </button>
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
-                    onClick={(e) =>
-                      e.stopPropagation()
-                    }
-                    className="
-                      mr-2
-                      rounded-lg
-                      p-1.5
-                      text-gray-400
-                      opacity-0
-                      transition
-                      hover:bg-red-50
-                      hover:text-red-500
-                      group-hover:opacity-100
-                    "
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </AlertDialogTrigger>
-
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Delete Conversation
-                    </AlertDialogTitle>
-
-                    <AlertDialogDescription>
-                      Are you sure you want to
-                      delete "
-                      {session.title}"?
-                      <br />
-                      This action cannot be
-                      undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>
-                      Cancel
-                    </AlertDialogCancel>
-
-                    <AlertDialogAction
-                      onClick={() =>
-                        deleteSession(
-                          session.id
-                        )
-                      }
-                      className="
-                        bg-red-500
-                        hover:bg-red-600
-                      "
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+      <div className="cb-history-section">
+        <p className="cb-history-label">Recent Chats</p>
+        
+        {sessions.map((session) => (
+          <button
+            key={session.id}
+            onClick={() => loadSessionMessages(session.id)}
+            className={`cb-history-item ${currentSessionId === session.id ? 'active' : ''}`}
+          >
+            <div className="cb-history-item-content">
+              <MessageSquare size={16} style={{ flexShrink: 0 }} />
+              {/* 🔥 ربطنا الكلاس ده بالأنيميشن اللي في ملف الـ CSS */}
+              <span className="cb-history-title-wrap" title={session.title}>
+                {getDisplayTitle(session.title)}
+              </span>
             </div>
-          ))}
-        </div>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <div 
+                  className="cb-delete-btn" 
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Trash2 size={14} />
+                </div>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{getDisplayTitle(session.title)}"?
+                    <br />This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteSession(session.id)}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </button>
+        ))}
 
         {sessions.length === 0 && (
-          <div className="px-3 py-4 text-sm text-gray-400">
+          <div style={{ padding: '16px 8px', fontSize: '13px', color: '#94a3b8' }}>
             No conversations yet
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div
-        className="
-          border-t
-          border-gray-200
-          p-4
-          text-xs
-          text-gray-500
-        "
-      >
-        {sessions.length} conversation
-        {sessions.length !== 1 ? "s" : ""}
+      <div className="cb-sidebar-footer">
+        {sessions.length} conversation{sessions.length !== 1 ? "s" : ""}
       </div>
     </aside>
   );

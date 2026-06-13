@@ -1,5 +1,4 @@
 import "./chatbot.css";
-
 import { ChatHeader } from "./components/ChatHeader";
 import { MessageList } from "./components/MessageList";
 import { ChatInput } from "./components/ChatInput";
@@ -10,69 +9,44 @@ import { useChatbotContext } from "../../contexts/ChatbotContext";
 
 export function ChatbotPage() {
   const { messages, isLoading, sendMessage } = useChatbotContext();
-
   const scrollRef = useScrollToBottom(messages);
 
+  // 🔥 السحر هنا: بنقفل الشات لو بنحمل، أو لو آخر رسالة من اليوزر والبوت لسه مردش
+  const lastMessage = messages[messages.length - 1];
+  const isWaitingForBot = isLoading || (lastMessage?.role === "user");
+
   return (
-    <div className="chatbot-page bg-white">
-      <div className="chatbot-layout flex">
-
-        {/* Sidebar */}
-        <ChatSidebar />
-
-        {/* Chat Area */}
-        <main className="flex flex-1 flex-col overflow-hidden bg-[#fafafa]">
-
-          {/* Header */}
-          <ChatHeader />
-
-          {/* Messages */}
-          <div className="chatbot-messages">
-            <MessageList
-              messages={messages}
-              isLoading={isLoading}
-              scrollRef={scrollRef}
-            />
-          </div>
-
-          {/* Suggested Prompts */}
+    <div className="cb-wrapper">
+      <ChatSidebar />
+      
+      <main className="cb-main">
+        <ChatHeader />
+        
+        <div className="cb-messages-area">
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            scrollRef={scrollRef}
+          />
+          
           {messages.length <= 1 && (
-            <div
-              className="
-                shrink-0
-                bg-[#fafafa]
-                px-6
-                pt-3
-                relative
-                -top-20
-              "
-            >
+            <div className="cb-prompts-container">
               <SuggestedPrompts
                 onSelect={sendMessage}
-                disabled={isLoading}
+                disabled={isWaitingForBot} // 🔥 بنقفل الاقتراحات لو البوت بيفكر
               />
             </div>
           )}
+        </div>
 
-          {/* Input */}
-          <div
-            className="
-              chatbot-input-wrapper
-              shrink-0
-              bg-[#fafafa]
-              px-6
-              pt-4
-            "
-          >
-            <ChatInput
-              onSend={sendMessage}
-              disabled={isLoading}
-            />
-          </div>
-
-        </main>
-
-      </div>
+        <div className="cb-input-area">
+          <ChatInput
+            onSend={sendMessage}
+            disabled={isWaitingForBot} // 🔥 بنقفل الـ Input لو البوت بيفكر
+            isFirstMessage={messages.length === 0} 
+          />
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,0 +1,141 @@
+/* ============================================================
+   floating-chatbot.css
+   ============================================================ */
+
+/* ── Container & FAB (Floating Action Button) ──────────── */
+.fcb-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fcb-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(22, 163, 74, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fcb-fab:hover {
+  transform: scale(1.1);
+  background-color: #15803d;
+}
+
+.fcb-fab:active {
+  transform: scale(0.95);
+}
+
+/* ── Floating Window ───────────────────────────────────── */
+.fcb-window {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 750px;
+  max-height: 88vh;
+  width: 430px;
+  max-width: 95vw;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.18);
+  /* 🔥 أنيميشن الظهور السلس */
+  animation: fcb-pop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom right;
+}
+
+@keyframes fcb-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.fcb-header {
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #ffffff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fcb-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fcb-bot-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  background-color: #16a34a;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fcb-header-text h3 {
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  font-size: 15px;
+}
+
+.fcb-header-text p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.fcb-close-btn {
+  padding: 8px;
+  border-radius: 12px;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fcb-close-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ── Messages & Input Area ─────────────────────────────── */
+.fcb-messages {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #fafafa;
+  scroll-behavior: smooth;
+}
+
+.fcb-input-area {
+  background-color: #fafafa;
+  padding: 16px;
+  border-top: 1px solid #f1f5f9;
+}

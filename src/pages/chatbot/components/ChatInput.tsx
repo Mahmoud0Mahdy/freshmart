@@ -1,100 +1,81 @@
 import { useState } from 'react';
-import { Button } from '../../../components/ui/button';
-import { Loader2, SendHorizontal } from 'lucide-react';
+import { Loader2, SendHorizontal, Maximize2, Minimize2 } from 'lucide-react';
 
 interface Props {
   onSend: (message: string) => void;
   disabled: boolean;
+  isFirstMessage?: boolean;
 }
 
-export function ChatInput({
-  onSend,
-  disabled,
-}: Props) {
+export function ChatInput({ onSend, disabled, isFirstMessage = false }: Props) {
   const [inputValue, setInputValue] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const maxLimit = isFirstMessage ? 500 : 1999;
+  const isNearLimit = inputValue.length >= maxLimit * 0.9;
 
   const handleSend = () => {
     if (!inputValue.trim() || disabled) return;
+    if (inputValue.length > maxLimit) return; 
 
     onSend(inputValue.trim());
     setInputValue('');
+    setIsExpanded(false); 
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
 
-  return (
-    <div className="border-t border-gray-200 bg-white p-4">
-      <div
-        className="
-          mx-auto
-          flex
-          max-w-4xl
-          items-end
-          gap-3
-          rounded-3xl
-          border
-          border-gray-200
-          bg-white
-          px-4
-          py-3
-          shadow-sm
-          transition-all
-          focus-within:border-green-500
-          focus-within:shadow-md
-        "
-      >
-        <textarea
-          rows={1}
-          value={inputValue}
-          disabled={disabled}
-          onChange={(e) =>
-            setInputValue(e.target.value)
-          }
-          onKeyDown={handleKeyDown}
-          placeholder="Ask for recipes, ingredients, or meal ideas..."
-          className="
-            max-h-40
-            min-h-[28px]
-            flex-1
-            resize-none
-            border-none
-            bg-transparent
-            text-sm
-            outline-none
-            placeholder:text-gray-400
-          "
-        />
+  // 🔥 تحديد الرسالة اللي هتظهر جوه المربع بناءً على الحالة
+  const getPlaceholder = () => {
+    if (disabled) return "Loqma AI is typing... Please wait.";
+    if (isFirstMessage) return "Start a new recipe chat... (Max 500 chars)";
+    return "Ask for recipes, ingredients... (Max 1999 chars)";
+  };
 
-        <Button
+  return (
+    <div className="cb-input-box">
+      <textarea
+        rows={isExpanded ? 10 : 1}
+        value={inputValue}
+        disabled={disabled} // 🔥 بيقفل الكتابة تماماً هنا
+        maxLength={maxLimit} 
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={getPlaceholder()} // 🔥 بيعرض الرسالة المناسبة
+        className={`cb-textarea ${isExpanded ? 'expanded' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      />
+      
+      <div className="cb-input-actions">
+        <span className={`cb-char-counter ${isNearLimit ? 'near-limit' : ''}`}>
+          {inputValue.length} / {maxLimit}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="cb-action-btn"
+          title={isExpanded ? "Minimize" : "Expand"}
+          disabled={disabled} // بنقفل زرار التكبير برضه
+        >
+          {isExpanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+        </button>
+
+        <button
           onClick={handleSend}
-          disabled={!inputValue.trim() || disabled}
-          size="icon"
-          className="
-            h-10
-            w-10
-            rounded-full
-            bg-green-600
-            text-white
-            hover:bg-green-700
-            disabled:bg-gray-300
-          "
+          disabled={!inputValue.trim() || disabled || inputValue.length > maxLimit}
+          className="cb-send-btn"
         >
           {disabled ? (
-            <Loader2
-              size={18}
-              className="animate-spin"
-            />
+            <Loader2 size={18} className="animate-spin" />
           ) : (
             <SendHorizontal size={18} />
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );
