@@ -1,0 +1,227 @@
+/* ============================================================
+   header.css
+   ============================================================ */
+
+/* ── Wrapper & Container ───────────────────────────────── */
+.header-wrapper {
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #f3f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ── Inner Layout ──────────────────────────────────────── */
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 72px; /* الموبايل */
+}
+
+/* ── Logo (🔥 التصليح السحري لقص الخلفية البيضاء) ──────── */
+.header-logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* البوكس بياخد ارتفاع الهيدر بالظبط */
+  overflow: hidden; /* 🔥 بيقص أي حاجة تطلع بره (الخلفية البيضاء اللي فوق وتحت) */
+  cursor: pointer;
+  margin-left: -12px; /* عشان نزقه شمال شوية لو الفراغ من الجنب كبير */
+}
+
+.header-logo {
+  height: 170px; /* 🔥 كبرنا الصورة جداً عشان اللوجو الداخلي يكبر */
+  width: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply; /* 🔥 بيخلي الخلفية البيضاء شفافة وتندمج مع الهيدر */
+  transition: transform 0.2s ease;
+}
+
+.header-logo-box:hover .header-logo {
+  transform: scale(1.05); /* زوم خفيف جوا البوكس المقصوص */
+}
+
+/* ── Desktop Navigation ────────────────────────────────── */
+.header-desktop-nav {
+  display: none;
+}
+
+.header-nav-list {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.header-nav-link {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  color: #4b5563;
+  transition: color 0.2s ease;
+}
+
+.header-nav-link:hover {
+  color: #16a34a;
+}
+
+.header-nav-link.active {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+/* ── Desktop Actions (Icons) ───────────────────────────── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 20px;
+  margin-left: 12px;
+  border-left: 1px solid #e5e7eb;
+}
+
+.header-icon-btn {
+  padding: 8px;
+  border-radius: 8px;
+  color: #6b7280;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.header-icon-btn:hover {
+  color: #16a34a;
+  background-color: #f9fafb;
+}
+
+.header-icon-btn.active {
+  color: #16a34a;
+  background-color: #f0fdf4;
+}
+
+.header-cart-wrapper {
+  position: relative;
+}
+
+.header-cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(25%, -25%);
+  background-color: #f97316;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  height: 16px;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Mobile Actions ────────────────────────────────────── */
+.header-mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-mobile-icon-btn {
+  padding: 8px;
+  color: #4b5563;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.header-menu-btn {
+  padding: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+/* ── Mobile Menu Dropdown ──────────────────────────────── */
+.header-mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border-top: 1px solid #f3f4f6;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+}
+
+.header-mobile-menu-inner {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.header-mobile-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 15px;
+  border: none;
+  background-color: transparent;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.header-mobile-item:hover {
+  background-color: #f9fafb;
+}
+
+.header-mobile-item.active {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+.header-mobile-admin-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  border-top: 1px solid #f9fafb;
+}
+
+/* ── Media Queries (Desktop) ───────────────────────────── */
+@media (min-width: 768px) {
+  .header-inner {
+    height: 80px; /* الديسكتوب */
+  }
+
+  .header-logo {
+    height: 120px; /* 🔥 بنكبر الصورة جداً في الديسكتوب والبوكس هيقص الزيادات البيضاء */
+  }
+
+  .header-desktop-nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .header-mobile-actions {
+    display: none;
+  }
+}

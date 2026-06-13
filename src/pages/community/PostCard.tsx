@@ -1,6 +1,6 @@
 import { ArrowUp, ArrowDown, MessageCircle, Bookmark, ArrowRight } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Badge } from "./ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
 
 export interface Post {
   id: string;

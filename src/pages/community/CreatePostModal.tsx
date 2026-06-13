@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
+
+// Contexts & API
+import { useApp } from "../../contexts/AppContext";
+import { createPost } from "../../api/communityApi";
+
+// UI Components
+// ملاحظة: تأكد من أن مسارات المكونات أدناه تتطابق مع هيكلة مجلدات مشروعك (سواء كانت ./ui أو ../../components/ui)
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { toast } from "sonner";
-import { createPost } from "../api/communityApi";
-import { useApp } from "../contexts/AppContext";
+} from "../../components/ui/select";
 
 import "./create-post-modal.css";
 

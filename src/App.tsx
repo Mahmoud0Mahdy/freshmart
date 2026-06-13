@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-
 import { useEffect, useRef } from "react";
 import { Toaster } from "./components/ui/sonner";
 
@@ -14,6 +13,9 @@ import { AdminInitializer } from "./components/AdminInitializer";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { AdminLayout } from "./admin/layout/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+
+// 🔥 استيراد الـ ScrollToTop الجديد
+import { ScrollToTop } from "./components/ScrollToTop";
 
 // 🌐 Public Pages
 import { HomePage } from "./pages/home/components/HomePage";
@@ -49,18 +51,15 @@ import { UsersPage } from "./admin/users/UsersPage";
 import { PostsPage } from "./admin/posts/PostsPage";
 import { CategoriesPage } from "./admin/categories/CategoriesPage";
 import { OrdersPage as AdminOrdersPage } from "./admin/orders/OrdersPage";
+
 function CheckoutSessionGuard() {
   const location = useLocation();
-
   const previousPath = useRef<string>(location.pathname);
 
   useEffect(() => {
-    const wasInCheckout =
-      previousPath.current.startsWith("/checkout");
-
+    const wasInCheckout = previousPath.current.startsWith("/checkout");
     const leftCheckout =
-      wasInCheckout &&
-      !location.pathname.startsWith("/checkout");
+      wasInCheckout && !location.pathname.startsWith("/checkout");
 
     if (leftCheckout) {
       sessionStorage.removeItem("checkoutStep");
@@ -86,6 +85,9 @@ export default function App() {
             <AdminInitializer />
 
             <Toaster richColors position="top-right" />
+            
+            {/* 🔥 حطينا المكون هنا عشان يشتغل على كل الـ Routes */}
+            <ScrollToTop />
             <CheckoutSessionGuard />
 
             <Routes>

@@ -37,7 +37,7 @@ import {
   savePost,
   votePost,
 } from "../../api/communityApi";
-import { Post } from "../../components/PostCard";
+import { Post } from "./PostCard";
 import { useApp } from "../../contexts/AppContext";
 
 // ملف الـ CSS

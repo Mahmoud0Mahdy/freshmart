@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner@2.0.3';
-import { PostCard, Post } from '../../components/PostCard';
+import { PostCard, Post } from '../community/PostCard';
 import { getSavedPosts, savePost } from '../../api/communityApi';
 
 export function SavedPostsPage() {

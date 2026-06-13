@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PostCard, Post } from "../../components/PostCard";
+import { PostCard, Post } from "./PostCard";
 import { Button } from "../../components/ui/button";
 import { getMyPosts, savePost } from "../../api/communityApi";
 import { toast } from "sonner";
